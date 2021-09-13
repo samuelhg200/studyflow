@@ -1,21 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import * as eva from "@eva-design/eva";
+import {
+	ApplicationProvider,
+	IconRegistry,
+	Layout,
+	Text,
+} from "@ui-kitten/components";
+import { default as theme } from "./assets/UIkitten/custom-theme.json";
+import ReduxThunk from "redux-thunk";
+import { createStore, combineReducers, applyMiddleware } from "redux";
+import { Provider } from "react-redux";
+
+import AppNavigator from "./navigation/AppNavigator";
+import tutorialReducer from "./store/reducers/tutorial";
+
+const rootReducer = combineReducers({
+	tutorial: tutorialReducer,
+});
+
+const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+	return (
+		<Provider store={store}>
+			<ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
+				<AppNavigator />
+			</ApplicationProvider>
+		</Provider>
+	);
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
