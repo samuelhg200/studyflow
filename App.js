@@ -13,9 +13,13 @@ import { Provider } from "react-redux";
 
 import AppNavigator from "./navigation/AppNavigator";
 import tutorialReducer from "./store/reducers/tutorial";
+import subjectReducer from "./store/reducers/subject";
+import eventsReducer from "./store/reducers/events";
 
 const rootReducer = combineReducers({
 	tutorial: tutorialReducer,
+	subject: subjectReducer,
+	events: eventsReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

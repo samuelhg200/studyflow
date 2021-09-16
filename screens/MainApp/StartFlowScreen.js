@@ -32,10 +32,10 @@ export const screenOptions = (navData) => {
 		headerRight: () => (
 			<HeaderButtons HeaderButtonComponent={HeaderButton}>
 				<Item
-					title="Cart"
+					title="Profile"
 					iconName={'person-outline'}
 					onPress={() => {
-						navData.navigation.navigate("Cart");
+						navData.navigation.navigate("Profile");
 					}}
                     
 				/>
