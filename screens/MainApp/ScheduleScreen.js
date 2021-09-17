@@ -174,8 +174,9 @@ const ScheduleScreen = (props) => {
 	}, [items]);
 
 	function loadItemsMonth(day) {
+		console.log(items)
 		setTimeout(() => {
-			console.log(day);
+			//console.log(day);
 			let date;
 			if (day) {
 				date = day.timestamp;
@@ -188,13 +189,13 @@ const ScheduleScreen = (props) => {
 				date = Date.now();
 			}
 			//loading empty items 365 days prior and 365 days after(if not already)
-			for (let i = -15; i < 85; i++) {
+			for (let i = -60; i < 85; i++) {
 				let strTime;
 
 				//date = Date.now();
 				const time = date + i * 24 * 60 * 60 * 1000;
 				strTime = timeToString2(time);
-				console.log(strTime);
+				//console.log(strTime);
 
 				if (!items[strTime]) {
 					items[strTime] = [];
@@ -327,19 +328,17 @@ const ScheduleScreen = (props) => {
 			<SafeAreaView />
 			<Agenda
 				items={items}
-				// loadItemsForMonth={(day) => {
-				// 	loadItemsMonth(day);
-				// }}
-				renderEmptyDate={renderEmptyDate}
-				selected={() => {
-					getDateToday();
+				loadItemsForMonth={(day) => {
+					loadItemsMonth(day);
 				}}
+				renderEmptyDate={renderEmptyDate}
+				selected={() => getDateToday()}
 				renderItem={(item) => {
 					return renderItem(item);
 				}}
 				showClosingKnob={true}
 				//hideExtraDays={false}
-				pastScrollRange={12}
+				pastScrollRange={6}
 				//futureScrollRange={12}
 				rowHasChanged={rowHasChanged}
 				// minDate={"2021-08-10"}
