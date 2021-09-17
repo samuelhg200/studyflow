@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import LottieView from "lottie-react-native";
+import { Layout } from "@ui-kitten/components";
 
 import MetricsScreen from "../screens/MainApp/MetricsScreen";
 import ManagerScreen from "../screens/MainApp/ManagerScreen";
@@ -74,81 +77,132 @@ const ScheduleNavigator = () => {
 };
 
 const StudyFlowTabNavigator = createBottomTabNavigator();
-const StudyFlowNavigator = () => (
-	<StudyFlowTabNavigator.Navigator
-		initialRouteName="StartFlowStack"
-		screenOptions={{
-			headerShown: false,
-			tabBarShowLabel: false,
-		}}
-	>
-		<StudyFlowTabNavigator.Screen
-			name="MetricsStack"
-			component={MetricsNavigator}
-			options={{
-				tabBarIcon: ({ size, focused, color }) => {
-					return (
-						<Ionicons name="stats-chart-outline" color={color} size={size} />
-					);
+
+const StudyFlowNavigator = () => {
+	return (
+		<StudyFlowTabNavigator.Navigator
+			initialRouteName="StartFlowStack"
+			screenOptions={({ route }) => ({
+				headerShown: false,
+				tabBarShowLabel: false,
+				tabBarIcon: ({ focused, color, size }) => {
+					let filepath;
+					let style = {};
+
+					switch (route.name) {
+						case "StartFlowStack":
+							filepath = require("../assets/lottie/sand-clock.json");
+							style = { width: 60, overflow: "visible" };
+							return (
+								<View
+									style={{
+										position: "absolute",
+										bottom: 15, // space from bottombar
+										height: 58,
+										width: 58,
+										borderRadius: 58,
+										backgroundColor: "white",
+										borderColor: focused ? "black" : "#ccc",
+										borderWidth: 0.4,
+										justifyContent: "center",
+										alignItems: "center",
+									}}
+								>
+									<LottieView
+										source={filepath}
+										autoPlay={focused}
+										style={style}
+									/>
+								</View>
+							);
+						default:
+							return;
+					}
 				},
-			}}
-		/>
-		<StudyFlowTabNavigator.Screen
-			name="ManagerStack"
-			component={ManagerNavigator}
-			options={{
-				tabBarIcon: ({ size, focused, color }) => {
-					return <Ionicons name="create-outline" color={color} size={size} />;
-				},
-			}}
-		/>
-		<StudyFlowTabNavigator.Screen
-			name="StartFlowStack"
-			component={StartFlowNavigator}
-			options={{
-				tabBarIcon: ({ size, focused, color }) => {
-					return (
-						<View
-							style={{
-								position: "absolute",
-								bottom: 15, // space from bottombar
-								height: 58,
-								width: 58,
-								borderRadius: 58,
-								backgroundColor: "white",
-								borderColor: color,
-								borderWidth: 0.4,
-								justifyContent: "center",
-								alignItems: "center",
-							}}
-						>
-							<Ionicons name="hourglass-outline" color={color} size={38} />
-						</View>
-					);
-				},
-			}}
-		/>
-		<StudyFlowTabNavigator.Screen
-			name="GoalsStack"
-			component={GoalsNavigator}
-			options={{
-				tabBarIcon: ({ size, focused, color }) => {
-					return (
-						<Ionicons name="trail-sign-outline" color={color} size={size} />
-					);
-				},
-			}}
-		/>
-		<StudyFlowTabNavigator.Screen
-			name="ScheduleStack"
-			component={ScheduleNavigator}
-			options={{
-				tabBarIcon: ({ size, focused, color }) => {
-					return <Ionicons name="calendar-outline" color={color} size={size} />;
-				},
-			}}
-		/>
-	</StudyFlowTabNavigator.Navigator>
-);
+			})}
+		>
+			<StudyFlowTabNavigator.Screen
+				name="MetricsStack"
+				component={MetricsNavigator}
+				options={{
+					tabBarIcon: ({ size, focused, color }) => {
+						return (
+							<Ionicons name="stats-chart-outline" color={color} size={size} />
+						);
+					},
+				}}
+			/>
+			<StudyFlowTabNavigator.Screen
+				name="ManagerStack"
+				component={ManagerNavigator}
+				options={{
+					tabBarIcon: ({ size, focused, color }) => {
+						return <Ionicons name="create-outline" color={color} size={size} />;
+					},
+				}}
+			/>
+			<StudyFlowTabNavigator.Screen
+				name="StartFlowStack"
+				component={StartFlowNavigator}
+				// options={{
+				// 	tabBarIcon: ({ size, focused, color }) => {
+				// 		return (
+				// 			<View
+				// 				style={{
+				// 					position: "absolute",
+				// 					bottom: 15, // space from bottombar
+				// 					height: 58,
+				// 					width: 58,
+				// 					borderRadius: 58,
+				// 					backgroundColor: "white",
+				// 					borderColor: color,
+				// 					borderWidth: 0.4,
+				// 					justifyContent: "center",
+				// 					alignItems: "center",
+				// 				}}
+				// 			>
+				// 				<Ionicons name="hourglass-outline" color={color} size={38} />
+				// 			</View>
+				// 		);
+				// 	},
+				// }}
+			/>
+			<StudyFlowTabNavigator.Screen
+				name="GoalsStack"
+				component={GoalsNavigator}
+				options={{
+					tabBarIcon: ({ size, focused, color }) => {
+						return (
+							<Ionicons name="trail-sign-outline" color={color} size={size} />
+						);
+					},
+				}}
+			/>
+			<StudyFlowTabNavigator.Screen
+				name="ScheduleStack"
+				component={ScheduleNavigator}
+				options={{
+					tabBarIcon: ({ size, focused, color }) => {
+						return (
+							<Ionicons name="calendar-outline" color={color} size={size} />
+						);
+					},
+				}}
+			/>
+		</StudyFlowTabNavigator.Navigator>
+	);
+};
+
+const styles = StyleSheet.create({
+	explosionLottie: {
+		flex: 1,
+		//overflow: "visible",
+	},
+	layout: {
+		flex: 1,
+		//alignItems: "flex-start",
+		justifyContent: "flex-start",
+	},
+});
 
 export default StudyFlowNavigator;

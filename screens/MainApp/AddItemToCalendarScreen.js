@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	StyleSheet,
 	View,
@@ -41,10 +41,12 @@ const AddItemToCalendarScreen = (props) => {
 	const tags = useSelector((state) => state.subject.subjects);
 	const [selectedSubjects, setSelectedSubjects] = useState([]);
 	const [firstClear, setFirstClear] = useState(false);
-	const [date, setDate] = useState(props.route.params.day ? new Date(props.route.params.day) : new Date());
+	const [date, setDate] = useState(
+		props.route.params.day ? new Date(props.route.params.day) : new Date()
+	);
 	const [time, setTime] = useState(new Date());
 	const [duration, setDuration] = useState(new Date("12/12/2021 01:30:00"));
-	const [show, setShow] = useState(Platform.OS === 'ios')
+	const [show, setShow] = useState(Platform.OS === "ios");
 
 	const setSelectedSubjectsHandler = (selected) => {
 		setSelectedSubjects(selected);
@@ -78,15 +80,13 @@ const AddItemToCalendarScreen = (props) => {
 	}
 
 	const onChangeTime = (event, selectedTime) => {
-		setShow(Platform.OS === 'ios');
+		setShow(Platform.OS === "ios");
 		setTime(selectedTime);
 	};
 
-
-
 	const onChangeDurationHandler = (event, selectedDuration) => {
-		setDuration(selectedDuration)
-	}
+		setDuration(selectedDuration);
+	};
 
 	const [eventTitle, setEventTitle] = useState(initialTitle);
 
@@ -103,6 +103,20 @@ const AddItemToCalendarScreen = (props) => {
 		);
 		props.navigation.navigate("Schedule");
 	};
+	useEffect(() => {
+		props.navigation.setOptions({
+			headerRight: () => (
+				<HeaderButtons HeaderButtonComponent={HeaderButton}>
+					<Item
+						title="Add"
+						iconName={"add-circle-outline"}
+						onPress={handlePress}
+						
+					/>
+				</HeaderButtons>
+			),
+		});
+	}, [eventTitle, duration, date, time, selectedSubjects, type, studyFlowMode]);
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<ScrollView>
@@ -146,26 +160,26 @@ const AddItemToCalendarScreen = (props) => {
 								multiline={true}
 							/>
 							{show && (
-							<View
-								style={{
-									flex: 1,
-									marginLeft: 10,
-									flexDirection: "row",
-									alignItems: "center",
-								}}
-							>
-								<Ionicons name="timer-outline" color={"black"} size={16} />
-								<DateTimePicker
-									style={{ flex: 2, marginLeft: 6, marginRight: 2 }}
-									value={duration}
-									is24Hour={true}
-									mode="time"
-									display={Platform.OS === 'android' ? 'spinner' : 'default'}
-									onChange={onChangeDurationHandler}
-
-								/>
-								<Text>Hrs</Text>
-							</View>)}
+								<View
+									style={{
+										flex: 1,
+										marginLeft: 10,
+										flexDirection: "row",
+										alignItems: "center",
+									}}
+								>
+									<Ionicons name="timer-outline" color={"black"} size={16} />
+									<DateTimePicker
+										style={{ flex: 2, marginLeft: 6, marginRight: 2 }}
+										value={duration}
+										is24Hour={true}
+										mode="time"
+										display={Platform.OS === "android" ? "spinner" : "default"}
+										onChange={onChangeDurationHandler}
+									/>
+									<Text>Hrs</Text>
+								</View>
+							)}
 						</View>
 						<View
 							style={{
@@ -197,25 +211,26 @@ const AddItemToCalendarScreen = (props) => {
 								accessoryRight={<View></View>}
 							/>
 							{show && (
-							<View
-								style={{
-									flex: 1,
-									marginLeft: 10,
-									flexDirection: "row",
-									alignItems: "center",
-								}}
-							>
-								<Ionicons name="alarm-outline" color={"black"} size={16} />
-								<DateTimePicker
-									style={{ flex: 1, marginLeft: 6, marginRight: 2 }}
-									value={time}
-									is24Hour={true}
-									mode="time"
-									display={Platform.OS === 'android' ? 'spinner' : 'default'}
-									onChange={onChangeTime}
-								/>
-								<Text>Hrs</Text>
-							</View>)}
+								<View
+									style={{
+										flex: 1,
+										marginLeft: 10,
+										flexDirection: "row",
+										alignItems: "center",
+									}}
+								>
+									<Ionicons name="alarm-outline" color={"black"} size={16} />
+									<DateTimePicker
+										style={{ flex: 1, marginLeft: 6, marginRight: 2 }}
+										value={time}
+										is24Hour={true}
+										mode="time"
+										display={Platform.OS === "android" ? "spinner" : "default"}
+										onChange={onChangeTime}
+									/>
+									<Text>Hrs</Text>
+								</View>
+							)}
 						</View>
 
 						<View
@@ -251,20 +266,9 @@ const AddItemToCalendarScreen = (props) => {
 	);
 };
 
-export const screenOptions = (navData) => {
+export const screenOptions = () => {
 	return {
 		headerTitle: "Add event",
-		headerRight: () => (
-			<HeaderButtons HeaderButtonComponent={HeaderButton}>
-				<Item
-					title="Add"
-					iconName={"add-circle-outline"}
-					onPress={() => {
-						navData.navigation.navigate("Schedule");
-					}}
-				/>
-			</HeaderButtons>
-		),
 	};
 };
 

@@ -30,8 +30,9 @@ const WelcomeScreen = (props) => {
 
 			<LottieView
 				style={styles.guyStudyingLottie}
-				source={require("../../assets/lottie/GuyStudying.json")}
+				source={require("../../assets/lottie/GuyStudyingLowRes.json")}
 				autoPlay
+				speed={1}
 			/>
 		</Layout>
 	);

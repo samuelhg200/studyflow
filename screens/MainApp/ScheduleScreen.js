@@ -50,7 +50,11 @@ const actions = [
 
 function timeToString2(time) {
 	const date = new Date(time);
-	return date.toISOString().split("T")[0];
+	// return date.toISOString().split("T")[0];
+
+	let tzoffset = date.getTimezoneOffset() * 60000; //offset in milliseconds
+	let localISOTime = new Date(date - tzoffset).toISOString();
+	return localISOTime.split("T")[0];
 }
 
 const timeToString = (date) => {
@@ -63,7 +67,6 @@ const getDesiredDate = (date) => {
 
 const getDateToday = () => {
 	const today = new Date();
-	console.log(today)
 	return moment(today).format("YYYY-MM-DD");
 };
 
@@ -114,7 +117,7 @@ const Header = (props) => {
 				{props.item.subjects.map((subject) => {
 					return (
 						<View
-						key={subject.id}
+							key={subject.id}
 							style={{
 								padding: 2,
 								margin: 2,
@@ -137,7 +140,9 @@ const Header = (props) => {
 };
 
 function getEventTimeString(eventDate) {
-	return eventDate.toISOString().split("T")[0];
+	let tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
+	let localISOTime = new Date(eventDate - tzoffset).toISOString();
+	return localISOTime.split("T")[0];
 }
 
 function rowHasChanged(r1, r2) {
@@ -145,7 +150,6 @@ function rowHasChanged(r1, r2) {
 }
 
 const ScheduleScreen = (props) => {
-	console.log(new Date())
 	const subjects = useSelector((state) => state.subject.subjects);
 	const events = useSelector((state) => state.events.events);
 	//const [loadedEvents, setLoadedEvents] = useState([]);
@@ -170,20 +174,19 @@ const ScheduleScreen = (props) => {
 	}, [items]);
 
 	function loadItemsMonth(day) {
-		
-
 		setTimeout(() => {
+			console.log(day);
 			let date;
-		if (day) {
-			date = day.timestamp;
-			setCurrentMonth(day.timestamp);
-		} else {
-			date = currentMonth;
-		}
+			if (day) {
+				date = day.timestamp;
+				setCurrentMonth(day.timestamp);
+			} else {
+				date = currentMonth;
+			}
 
-		if (!date) {
-			date = Date.now();
-		}
+			if (!date) {
+				date = Date.now();
+			}
 			//loading empty items 365 days prior and 365 days after(if not already)
 			for (let i = -15; i < 85; i++) {
 				let strTime;
@@ -191,6 +194,7 @@ const ScheduleScreen = (props) => {
 				//date = Date.now();
 				const time = date + i * 24 * 60 * 60 * 1000;
 				strTime = timeToString2(time);
+				console.log(strTime);
 
 				if (!items[strTime]) {
 					items[strTime] = [];
@@ -273,10 +277,10 @@ const ScheduleScreen = (props) => {
 				}}
 			>
 				<Card
-				onPress={() => {
-					setDayPressed(info);
-					animation.current.animateButton();
-				}}
+					onPress={() => {
+						setDayPressed(info);
+						animation.current.animateButton();
+					}}
 					style={{
 						...styles.card,
 						height: 95,
@@ -323,11 +327,13 @@ const ScheduleScreen = (props) => {
 			<SafeAreaView />
 			<Agenda
 				items={items}
-				loadItemsForMonth={(day) => {
-					loadItemsMonth(day);
-				}}
+				// loadItemsForMonth={(day) => {
+				// 	loadItemsMonth(day);
+				// }}
 				renderEmptyDate={renderEmptyDate}
-				selected={() => {getDateToday()}}
+				selected={() => {
+					getDateToday();
+				}}
 				renderItem={(item) => {
 					return renderItem(item);
 				}}

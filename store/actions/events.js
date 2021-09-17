@@ -8,9 +8,9 @@ export const addEvent = (
 	subjects,
 	eventType,
 	studyFlowMode
-) => {console.log(date)
+) => {
+	date;
 	return {
-		
 		type: ADD_EVENT,
 		eventData: {
 			title: title,
