@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
-import { StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, Image } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LottieView from "lottie-react-native";
-import { Layout } from "@ui-kitten/components";
+import { BottomNavigation, BottomNavigationTab, Layout, Text } from '@ui-kitten/components';
 
 import MetricsScreen from "../screens/MainApp/MetricsScreen";
 import ManagerScreen from "../screens/MainApp/ManagerScreen";
@@ -11,18 +11,24 @@ import StartFlowScreen, {
 	screenOptions as startFlowScreenOptions,
 } from "../screens/MainApp/StartFlowScreen";
 import GoalsScreen from "../screens/MainApp/GoalsScreen";
-import ScheduleScreen from "../screens/MainApp/ScheduleScreen";
+import ScheduleScreen, {
+	screenOptions as scheduleScreenOptions,
+} from "../screens/MainApp/ScheduleScreen";
 import StoreScreen from "../screens/MainApp/StoreScreen";
 import ProfileScreen from "../screens/MainApp/ProfileScreen";
 import AddItemToCalendarScreen, {
 	screenOptions as AddItemToCalendarScreenOptions,
 } from "../screens/MainApp/AddItemToCalendarScreen";
-
+import ChooseEventTypeScreen from "../screens/Modals/ChooseEventType";
 import TimerScreen from "../screens/MainApp/TimerScreen";
+import EventPreviewScreen from "../screens/Modals/EventPreviewScreen";
+
+import customTheme from "../assets/UIkitten/custom-theme.json";
 
 import CustomTheme from "../assets/UIkitten/custom-theme.json";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
 
 const MetricsStackNavigator = createStackNavigator();
 const MetricsNavigator = () => (
@@ -46,6 +52,36 @@ const StartFlowNavigator = () => (
 			component={StartFlowScreen}
 			options={startFlowScreenOptions}
 		/>
+		<StartFlowStackNavigator.Screen
+			name="ChooseEventType"
+			component={ChooseEventTypeScreen}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "",
+				headerBackTitle: "Home",
+			}}
+		/>
+		<StartFlowStackNavigator.Screen
+			name="AddItemToCalendar"
+			component={AddItemToCalendarScreen}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "",
+				headerBackTitle: "Home",
+			}}
+		/>
+		<StartFlowStackNavigator.Screen
+			name="EventPreview"
+			component={EventPreviewScreen}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "Event Info",
+				headerBackTitle: "Home",
+			}}
+		/>
 		<StartFlowStackNavigator.Screen name="Timer" component={TimerScreen} />
 		<StartFlowStackNavigator.Screen name="Store" component={StoreScreen} />
 		<StartFlowStackNavigator.Screen name="Profile" component={ProfileScreen} />
@@ -66,11 +102,29 @@ const ScheduleNavigator = () => {
 			<ScheduleStackNavigator.Screen
 				name="Schedule"
 				component={ScheduleScreen}
+				options={scheduleScreenOptions}
 			/>
+			<ScheduleStackNavigator.Screen
+				name="EventPreview"
+				component={EventPreviewScreen}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Event Info",
+					headerBackTitle: "Agenda",
+				}}
+			/>
+
 			<ScheduleStackNavigator.Screen
 				name="AddItemToCalendar"
 				component={AddItemToCalendarScreen}
-				options={AddItemToCalendarScreenOptions}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "",
+					headerBackTitle: "Agenda",
+					...AddItemToCalendarScreenOptions,
+				}}
 			/>
 		</ScheduleStackNavigator.Navigator>
 	);
@@ -78,11 +132,22 @@ const ScheduleNavigator = () => {
 
 const StudyFlowTabNavigator = createBottomTabNavigator();
 
+const BottomTabBar = ({ navigation, state }) => (
+	<BottomNavigation
+	  selectedIndex={state.index}
+	  onSelect={index => navigation.navigate(state.routeNames[index])}>
+	  <BottomNavigationTab title='USERS'/>
+	  <BottomNavigationTab title='ORDERS'/>
+	</BottomNavigation>
+  );
+
 const StudyFlowNavigator = () => {
 	return (
 		<StudyFlowTabNavigator.Navigator
 			initialRouteName="StartFlowStack"
+			tabBar={props => <BottomTabBar {...props} />}
 			screenOptions={({ route }) => ({
+				tabBarActiveTintColor: customTheme['color-primary-500'],
 				headerShown: false,
 				tabBarShowLabel: false,
 				tabBarIcon: ({ focused, color, size }) => {
@@ -91,7 +156,11 @@ const StudyFlowNavigator = () => {
 
 					switch (route.name) {
 						case "StartFlowStack":
-							filepath = require("../assets/lottie/sand-clock.json");
+							if (!focused) {
+								filepath = require("../assets/lottie/sand-clock.json");
+							} else {
+								filepath = require("../assets/lottie/sandClockRed.json")
+							}
 							style = { width: 60, overflow: "visible" };
 							return (
 								<View
@@ -102,8 +171,8 @@ const StudyFlowNavigator = () => {
 										width: 58,
 										borderRadius: 58,
 										backgroundColor: "white",
-										borderColor: focused ? "black" : "#ccc",
-										borderWidth: 0.4,
+										borderColor: focused ? color : "#ccc",
+										borderWidth: 0.5,
 										justifyContent: "center",
 										alignItems: "center",
 									}}
@@ -125,6 +194,7 @@ const StudyFlowNavigator = () => {
 				name="MetricsStack"
 				component={MetricsNavigator}
 				options={{
+					tabBarActiveTintColor: customTheme["color-primary-500"],
 					tabBarIcon: ({ size, focused, color }) => {
 						return (
 							<Ionicons name="stats-chart-outline" color={color} size={size} />
@@ -136,6 +206,7 @@ const StudyFlowNavigator = () => {
 				name="ManagerStack"
 				component={ManagerNavigator}
 				options={{
+					tabBarActiveTintColor: customTheme["color-primary-500"],
 					tabBarIcon: ({ size, focused, color }) => {
 						return <Ionicons name="create-outline" color={color} size={size} />;
 					},
@@ -171,6 +242,7 @@ const StudyFlowNavigator = () => {
 				name="GoalsStack"
 				component={GoalsNavigator}
 				options={{
+					tabBarActiveTintColor: customTheme["color-primary-500"],
 					tabBarIcon: ({ size, focused, color }) => {
 						return (
 							<Ionicons name="trail-sign-outline" color={color} size={size} />
@@ -182,6 +254,7 @@ const StudyFlowNavigator = () => {
 				name="ScheduleStack"
 				component={ScheduleNavigator}
 				options={{
+					tabBarActiveTintColor: customTheme["color-primary-500"],
 					tabBarIcon: ({ size, focused, color }) => {
 						return (
 							<Ionicons name="calendar-outline" color={color} size={size} />

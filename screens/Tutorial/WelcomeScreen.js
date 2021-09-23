@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, View, SafeAreaView } from "react-native";
 import LottieView from "lottie-react-native";
 import { Layout, Text, Button } from "@ui-kitten/components";
+import CustomTheme from '../../assets/UIkitten/custom-theme.json';
 
 
 const WelcomeScreen = (props) => {
@@ -14,13 +15,13 @@ const WelcomeScreen = (props) => {
 					Welcome to StudyFlow
 				</Text>
 
-				<Layout level="4" style={{ padding: 5, borderRadius: 4 }}>
-					<Text style={{ fontSize: 16 }}>
+				<Layout level="4" style={{ padding: 5, borderRadius: 4, backgroundColor:CustomTheme['color-primary-200'] }}>
+					<Text style={{ fontSize: 16, color:'black' }}>
 						#Lets start by customizing your experience!
 					</Text>
 				</Layout>
 				<Button
-					style={{ marginTop: 150, marginBottom: 85 }}
+					style={{ marginTop: 150, marginBottom: 65 }}
 					size="giant"
 					onPress={() => props.navigation.navigate("Improvement")}
 				>
@@ -47,8 +48,8 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-start",
 	},
 	title: {
-		marginBottom: 25,
-		marginTop: 70,
+		marginBottom: 20,
+		marginTop: 65,
         textAlign: 'center'
 	},
 	contentContainer: {

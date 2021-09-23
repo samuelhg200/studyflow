@@ -1,7 +1,7 @@
 import Subject from "../models/subject";
 
 export const SUBJECTS = [
-	new Subject("s1", "Maths", "#F1ECCE", null),
+	new Subject("s1", "Maths", "#b3202f", null),
 	new Subject("s2", "Computer Science", "#1EA896", null),
 	new Subject("s3", "Biology", "#FF715B", null),
 	new Subject("s4", "History", "#1B98E0", null),

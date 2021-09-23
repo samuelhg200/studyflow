@@ -17,6 +17,8 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import customTheme from "../../assets/UIkitten/custom-theme.json";
+
 
 import HeaderButton from "../../components/HeaderButton";
 import TagsView from "../../components/TagsView";
@@ -37,7 +39,9 @@ const pencilIcon = (props) => {
 
 const AddItemToCalendarScreen = (props) => {
 	const dispatch = useDispatch();
-
+	const dispatch2 = useDispatch();
+	const dispatch3 = useDispatch();
+	const dateLoaded = useSelector((state) => state.events.dateToTravelTo);
 	const tags = useSelector((state) => state.subject.subjects);
 	const [selectedSubjects, setSelectedSubjects] = useState([]);
 	const [firstClear, setFirstClear] = useState(false);
@@ -91,17 +95,46 @@ const AddItemToCalendarScreen = (props) => {
 	const [eventTitle, setEventTitle] = useState(initialTitle);
 
 	const handlePress = () => {
+		const selectedDate = combineDateWithTime(date, time);
+		let finalTitle = 'Event'
+		if (eventTitle === ''){
+			switch (type) {
+				case 'study-session':
+					finalTitle = 'Study Session'
+					break;
+				case "assessment":
+					finalTitle = 'Assessment'
+					break;
+				case "homework":
+					finalTitle = 'Homework'
+					break;
+			}
+		} else {
+			finalTitle = eventTitle
+		}
 		dispatch(
 			eventsActions.addEvent(
-				eventTitle,
+				finalTitle,
 				duration,
-				combineDateWithTime(date, time),
+				selectedDate,
 				selectedSubjects,
 				type,
 				studyFlowMode
 			)
 		);
-		props.navigation.navigate("Schedule");
+		copyOfSelectedDate = new Date(selectedDate);
+
+		if (dateLoaded !== copyOfSelectedDate.setDate(1)) {
+			dispatch3(eventsActions.updateDateToTravelTo(copyOfSelectedDate));
+		}
+		dispatch2(eventsActions.updateDayToTravelTo(selectedDate.getDate()));
+		// props.navigation.navigate("StartFlowStack", {
+		// 	screen: 'StartFlow',
+		// });
+
+		props.navigation.goBack();
+
+		//props.navigation.replace("Schedule");
 	};
 	useEffect(() => {
 		props.navigation.setOptions({
@@ -111,7 +144,6 @@ const AddItemToCalendarScreen = (props) => {
 						title="Add"
 						iconName={"add-circle-outline"}
 						onPress={handlePress}
-						
 					/>
 				</HeaderButtons>
 			),
@@ -125,14 +157,14 @@ const AddItemToCalendarScreen = (props) => {
 						<View
 							style={{
 								marginTop: 20,
-								marginBottom: 6,
+								marginBottom: 8,
 
 								width: "100%",
 								alignItems: "flex-start",
 							}}
 						>
 							<Text style={styles.textTitle}>
-								What title and duration would you want for your {customName}?
+								Title {'&'} Duration {'>'}
 							</Text>
 						</View>
 						<Divider style={{ alignSelf: "stretch", marginBottom: 15 }} />
@@ -166,11 +198,14 @@ const AddItemToCalendarScreen = (props) => {
 										marginLeft: 10,
 										flexDirection: "row",
 										alignItems: "center",
+										borderColor: customTheme["color-primary-500"],
+										borderLeftWidth: 1,
+										paddingLeft: 4
 									}}
 								>
 									<Ionicons name="timer-outline" color={"black"} size={16} />
 									<DateTimePicker
-										style={{ flex: 2, marginLeft: 6, marginRight: 2 }}
+										style={{ flex: 2, minWidth: 65, marginLeft: 6, marginRight: 2 }}
 										value={duration}
 										is24Hour={true}
 										mode="time"
@@ -184,14 +219,14 @@ const AddItemToCalendarScreen = (props) => {
 						<View
 							style={{
 								marginTop: 20,
-								marginBottom: 6,
+								marginBottom: 8,
 
 								width: "100%",
 								alignItems: "flex-start",
 							}}
 						>
 							<Text style={styles.textTitle}>
-								When do you want to schedule it for?{" "}
+								Date {'&'} Time{" >"}
 							</Text>
 						</View>
 						<Divider style={{ alignSelf: "stretch", marginBottom: 15 }} />
@@ -209,6 +244,12 @@ const AddItemToCalendarScreen = (props) => {
 								onSelect={(nextDate) => setDate(nextDate)}
 								accessoryLeft={calendarIcon}
 								accessoryRight={<View></View>}
+								min={
+									new Date(new Date().setFullYear(new Date().getFullYear() - 2))
+								}
+								max={
+									new Date(new Date().setFullYear(new Date().getFullYear() + 2))
+								}
 							/>
 							{show && (
 								<View
@@ -217,18 +258,21 @@ const AddItemToCalendarScreen = (props) => {
 										marginLeft: 10,
 										flexDirection: "row",
 										alignItems: "center",
+										borderColor: customTheme["color-primary-500"],
+										borderLeftWidth: 1,
+										paddingLeft: 4
 									}}
 								>
 									<Ionicons name="alarm-outline" color={"black"} size={16} />
 									<DateTimePicker
-										style={{ flex: 1, marginLeft: 6, marginRight: 2 }}
+										style={{ flex: 1,minWidth: 65, marginLeft: 6, marginRight: 2 }}
 										value={time}
 										is24Hour={true}
 										mode="time"
 										display={Platform.OS === "android" ? "spinner" : "default"}
 										onChange={onChangeTime}
 									/>
-									<Text>Hrs</Text>
+									<View stle={{flex: 1}}><Text>Hrs</Text></View>
 								</View>
 							)}
 						</View>
@@ -236,13 +280,13 @@ const AddItemToCalendarScreen = (props) => {
 						<View
 							style={{
 								marginTop: 25,
-								marginBottom: 6,
+								marginBottom: 8,
 
 								width: "100%",
 								alignItems: "flex-start",
 							}}
 						>
-							<Text style={styles.textTitle}>{titleMessage} </Text>
+							<Text style={styles.textTitle}>Subjects {">"}</Text>
 						</View>
 						<Divider style={{ alignSelf: "stretch" }} />
 						<TagsView
@@ -286,8 +330,8 @@ const styles = StyleSheet.create({
 		marginBottom: 50,
 	},
 	textTitle: {
-		fontSize: 18,
-		fontWeight: "600",
+		fontSize: 16,
+		fontWeight: "500",
 	},
 });
 

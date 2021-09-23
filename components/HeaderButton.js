@@ -11,6 +11,7 @@ const CustomHeaderButton = props => {
       {...props}
       IconComponent={Ionicons}
       iconSize={27}
+      color={CustomTheme['color-primary-500']}
 
     />
   );

@@ -6,15 +6,20 @@ import {
 	TouchableOpacity,
 	TouchableNativeFeedback,
 	View,
+	FlatList,
+	ActivityIndicator,
 } from "react-native";
 import { Agenda } from "react-native-calendars";
 import { Card, Layout, Button, Text } from "@ui-kitten/components";
 import moment from "moment";
 import { FloatingAction } from "react-native-floating-action";
 import { useSelector, useDispatch } from "react-redux";
-import { getIconStringBasedInEventType } from "../../helpers/functions";
+import { getIconStringBasedOnEventType } from "../../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
 import * as eventsActions from "../../store/actions/events";
+import customTheme from "../../assets/UIkitten/custom-theme.json";
+import HeaderButton from "../../components/HeaderButton";
+import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 const actions = [
 	{
@@ -22,24 +27,32 @@ const actions = [
 		icon: require("../../assets/icons/other.png"),
 		name: "other",
 		position: 1,
+		color: customTheme["color-primary-500"],
+		iconName: "ellipsis-horizontal-outline",
 	},
 	{
 		text: "Homework",
 		icon: require("../../assets/icons/reader.png"),
 		name: "homework",
 		position: 2,
+		color: customTheme["color-primary-500"],
+		iconName: "reader-outline",
 	},
 	{
 		text: "Assessment",
 		icon: require("../../assets/icons/school.png"),
 		name: "assessment",
 		position: 3,
+		color: customTheme["color-primary-500"],
+		iconName: "school-outline",
 	},
 	{
 		text: "Study Session",
 		icon: require("../../assets/icons/glasses.png"),
 		name: "study-session",
 		position: 4,
+		color: customTheme["color-primary-500"],
+		iconName: "glasses-outline",
 	},
 ];
 
@@ -87,8 +100,46 @@ if (Platform.OS === "android") {
 	TouchableCmp = TouchableNativeFeedback;
 }
 
+function getEventTimeString(eventDate) {
+	let tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
+	let localISOTime = new Date(eventDate - tzoffset).toISOString();
+	return localISOTime.split("T")[0];
+}
+
+function addMonths(date, months) {
+	date.setMonth(date.getMonth() + months);
+	return date;
+}
+
+Date.prototype.addDays = function (days) {
+	var date = new Date(this.valueOf());
+	date.setDate(date.getDate() + days);
+	return date;
+};
+
+function getDates(startDate, stopDate) {
+	var dateArray = [];
+	var currentDate = startDate;
+	while (currentDate <= stopDate) {
+		dateArray.push(new Date(currentDate));
+		currentDate = currentDate.addDays(1);
+	}
+	return dateArray;
+}
+
 const Footer = (props) => (
 	<View {...props} style={[props.style, styles.footerContainer]}>
+		<Button
+			style={styles.footerControl}
+			onPress={() => {
+				props.previewHandler(props.item.id.toISOString());
+			}}
+			size="small"
+			status="basic"
+		>
+			<Ionicons name="eye-outline" color={"white"} size={14} />{" "}
+			<Text style={{ color: "white" }}>Preview</Text>
+		</Button>
 		<Button
 			style={styles.footerControl}
 			onPress={() => {
@@ -97,8 +148,8 @@ const Footer = (props) => (
 			size="small"
 			status="basic"
 		>
-			<Ionicons name="trash-outline" size={14} />
-			Remove
+			<Ionicons name="trash-outline" color={"white"} size={15} />
+			<Text style={{ color: "white" }}> Remove</Text>
 		</Button>
 	</View>
 );
@@ -132,233 +183,434 @@ const Header = (props) => {
 					);
 				})}
 			</View>
-			<Text category="s2" style={{ fontSize: 12 }}>
+			<Text
+				category="s2"
+				style={{ fontSize: 12, color: customTheme["color-primary-400"] }}
+			>
 				{props.item.timeRange}
 			</Text>
 		</View>
 	);
 };
 
-function getEventTimeString(eventDate) {
-	let tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
-	let localISOTime = new Date(eventDate - tzoffset).toISOString();
-	return localISOTime.split("T")[0];
+function getItems(eventsCopy, date = new Date()) {
+	let key = 0;
+	date = new Date(date);
+
+	const allItems = [];
+
+	const minMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+	const maxMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+	const allDates = getDates(minMonth, maxMonth);
+	for (let i = 0; i < allDates.length; i++) {
+		const currentItem = {};
+
+		key++;
+		const currentDate = allDates[i].setHours(0, 0, 0, 0);
+
+		const formatedCurrentDate = timeToString2(currentDate);
+
+		currentItem[formatedCurrentDate] = [];
+		currentItem["key"] = key.toString();
+		if (eventsCopy.length > 0) {
+			for (let j = 0; j < eventsCopy.length; j++) {
+				if (currentDate === new Date(eventsCopy[j].date).setHours(0, 0, 0, 0)) {
+					let range = getRange(eventsCopy[j].date, eventsCopy[j].duration);
+					eventsCopy[j]["timeRange"] = range;
+					currentItem[formatedCurrentDate].push(eventsCopy[j]);
+				}
+			}
+		}
+		allItems.push(currentItem);
+	}
+
+	return allItems;
 }
 
-function rowHasChanged(r1, r2) {
-	return !(r1.id !== r2.id);
-}
+const DayDisplayer = ({ day }) => {
+	return (
+		<View style={styles.dateDisplayer}>
+			<Text category={"h6"} style={styles.dayNumber}>
+				{moment(day).format("D")}
+			</Text>
+			<Text style={styles.writtenDay}>{moment(day).format("ddd")}</Text>
+		</View>
+	);
+};
 
 const ScheduleScreen = (props) => {
-	const subjects = useSelector((state) => state.subject.subjects);
-	const events = useSelector((state) => state.events.events);
-	//const [loadedEvents, setLoadedEvents] = useState([]);
-	const [items, setItems] = useState({});
-	const [currentMonth, setCurrentMonth] = useState();
+	// const subjects = useSelector((state) => state.subject.subjects);
+	// const events = useSelector((state) => state.events.events);
+	// //const [loadedEvents, setLoadedEvents] = useState([]);
+	// const [items, setItems] = useState({});
+	const dateToLoad = useSelector((state) => state.events.dateToTravelTo);
 	const dispatch = useDispatch();
+	const dispatch2 = useDispatch();
 	const animation = useRef(null);
+	//const [currentDay, setCurrentDay] = useState(moment());
+	const events = useSelector((state) => {
+		return state.events.events;
+	});
+	const dayToTravelTo = useSelector((state) => {
+		return state.events.dayToTravelTo;
+	});
+	const [items, setItems] = useState();
 	const [dayPressed, setDayPressed] = useState(new Date());
+	// const monthDisplayed = useRef({
+	// 	'currentMonth': new Date(),
+	// });
+	const [scrollingEnabled, setScrollingEnabled] = useState(false);
+	const [loading, setLoading] = useState(true)
+
+	//const [monthToLoad, setMonthToLoad] = useState()
+
+	const travelMonth = (int) => {
+		dispatch2(
+			eventsActions.updateDateToTravelTo(addMonths(new Date(dateToLoad), int))
+		);
+	};
+
+	const loadingHandler = (bool) => {
+		setLoading(bool)
+	}
+
+	useEffect(() => {
+		props.navigation.setOptions({
+			headerLeft: () => (
+				<HeaderButtons HeaderButtonComponent={HeaderButton}>
+					<Item
+						title="PastMonth"
+						iconName={"arrow-back-outline"}
+						onPress={() => {
+							travelMonth(-1);
+						}}
+					/>
+				</HeaderButtons>
+			),
+			headerRight: () => (
+				<HeaderButtons HeaderButtonComponent={HeaderButton}>
+					<Item
+						title="NextMonth"
+						iconName={"arrow-forward-outline"}
+						onPress={() => {
+							travelMonth(1);
+						}}
+					/>
+				</HeaderButtons>
+			),
+		});
+
+		// props.navigation.setParams({
+		// 	travelMonth: (int) => travelMonth(int),
+		// });
+	}, [dateToLoad, dispatch2]);
+
+	useEffect(() => {
+		//month to load
+		//monthToLoadRoute = props.route.params.monthToLoad ? props.route.params.monthToLoad : newDate()
+		//setMonthToLoad(monthToLoadRoute)
+		//day to skip to
+		//dayToTravelToRoute = props.route.params.dayToTravelTo ? props.route.params.dayToTravelTo : newDate().getDate()
+		//setDayToTravelTo(dayToTravelToRoute)
+	}, [props.route.params]);
 
 	const deleteEventHandler = (id) => {
 		dispatch(eventsActions.deleteEvent(id));
 	};
+	const previewEventHandler = (id) => {
+		props.navigation.navigate("EventPreview", {
+			id: id,
+		});
+	};
+
+	const flatListRef = useRef(null);
 
 	useEffect(() => {
-		setItems({});
-	}, [events]);
-
-	useEffect(() => {
-		if (Object.keys(items).length === 0) {
-			loadItemsMonth();
+		if (flatListRef.current) {
+			try {
+				setScrollingEnabled(false);
+				setTimeout(
+					() => flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+					1200
+				);
+				setScrollingEnabled(true);
+			} catch (err) {}
 		}
-	}, [items]);
+	}, [dayToTravelTo]);
 
-	function loadItemsMonth(day) {
-		console.log(items)
-		setTimeout(() => {
-			//console.log(day);
-			let date;
-			if (day) {
-				date = day.timestamp;
-				setCurrentMonth(day.timestamp);
-			} else {
-				date = currentMonth;
-			}
+	function scrollToIndexFailed(error) {
+		setScrollingEnabled(false);
+		const offset = error.averageItemLength * error.index;
+		flatListRef.current.scrollToOffset({ offset });
 
-			if (!date) {
-				date = Date.now();
-			}
-			//loading empty items 365 days prior and 365 days after(if not already)
-			for (let i = -60; i < 85; i++) {
-				let strTime;
-
-				//date = Date.now();
-				const time = date + i * 24 * 60 * 60 * 1000;
-				strTime = timeToString2(time);
-				//console.log(strTime);
-
-				if (!items[strTime]) {
-					items[strTime] = [];
-					events.map((event) => {
-						const eventTime = getEventTimeString(event.date);
-						if (eventTime === strTime) {
-							let range = getRange(event.date, event.duration);
-							items[strTime].push({
-								id: event.id,
-								title: event.title,
-								timeRange: range,
-								subjects: event.subjects,
-								type: event.type,
-								height: 200,
-							});
-						}
-					});
-					// if (items[strTime].length === 0){
-					// 	items[strTime].push({height: 200})
-					// }
-				}
-			}
-
-			// addEvent = true;
-			// for (let j = 0; j < events.lenght; j++) {
-			// 	for (let i = 0; i < loadedEvents.length; i++) {
-			// 		if (events[j].id === loadedEvents[i].id) {
-			// 			console.log(false)
-			// 			addEvent = false;
-			// 		}
-			// 	}
-			// 	if (addEvent) {
-			// 		console.log('added event')
-			// 		strTime = getEventTimeString(events[j]);
-			// 		items[strTime] = [{ title: events[i].title, height: 200 }];
-			// 		loadedEvents.push(events[i]);
-			// 	}
-			// }
-
-			// update state -> loadedEvents
-			// const newLoadedEvents = loadedEvents.slice();
-			// setLoadedEvents(newLoadedEvents);
-
-			// update state -> items
-			const newItems = {};
-			Object.keys(items).forEach((key) => {
-				newItems[key] = items[key];
-			});
-			setItems(newItems);
-		}, 500);
+		setTimeout(
+			() => flatListRef.current.scrollToIndex({ index: error.index }),
+			100
+		);
+		setScrollingEnabled(true);
 	}
 
-	const renderItem = (item) => {
-		const iconName = getIconStringBasedInEventType(item.type);
-		return (
-			<TouchableCmp>
-				<Card
-					style={styles.card}
-					footer={(props) => (
-						<Footer {...props} item={item} deleteHandler={deleteEventHandler} />
-					)}
-					header={(props) => <Header {...props} item={item} />}
-				>
-					<View style={{ flexDirection: "row" }}>
-						<Ionicons name={iconName} size={18}>
-							<Text category="h6">{" " + item.title}</Text>
-						</Ionicons>
-					</View>
-				</Card>
-			</TouchableCmp>
-		);
-	};
+	// useEffect(() => {
+	// 	props.navigation.setOptions({
+	// 		headerTitle: moment(monthDisplayed['currentMonth']).format("MMMM YYYY"),
+	// 	});
+	// }, [monthDisplayed, props.navigation]);
 
-	const renderEmptyDate = (info) => {
-		return (
-			<TouchableCmp
-				onPress={() => {
-					setDayPressed(info);
-					animation.current.animateButton();
-				}}
-			>
-				<Card
-					onPress={() => {
-						setDayPressed(info);
-						animation.current.animateButton();
-					}}
-					style={{
-						...styles.card,
-						height: 95,
-						justifyContent: "center",
-						backgroundColor: "#F0F0F2",
-						borderColor: "white",
-						borderWidth: 2,
-					}}
-				>
-					<TouchableCmp
-						onPress={() => {
-							setDayPressed(info);
-							animation.current.animateButton();
+	//console.log(monthDisplayed)
+
+	// const onViewableItemsChanged = useCallback(({ viewableItems, changed }) => {
+	// 	//console.log(viewableItems[0])
+	// 	console.log(monthDisplayed)
+	// 	const currentDateAtTop = new Date(Object.keys(viewableItems[0]["item"])[0]);
+	// 	if (
+	// 		currentDateAtTop.getMonth() !== monthDisplayed['currentMonth'].getMonth()
+	// 	) {
+	// 		//.log('not same month')
+	// 		//console.log(currentDateAtTop.getMonth())
+	// 		//console.log(monthDisplayed['currentMonth'].getMonth())
+	// 		monthDisplayed = { 'currentMonth': currentDateAtTop };
+	// 	}
+	// 	//console.log("Visible items are", viewableItems);
+	// 	//console.log("Changed in this iteration", changed);
+	// }, []);
+
+	useEffect(() => {
+	
+		setItems(getItems(events.slice(), dateToLoad));
+		//setLoading(false)
+		props.navigation.setOptions({
+			headerTitle: moment(dateToLoad).format("MMMM YYYY"),
+		});
+	}, [events, dateToLoad]);
+
+	// if(loading){
+	// 	return <ActivityIndicator
+	// 	animating={true}
+	// 	style={styles.indicator}
+	// 	size="large"
+	// 	/>
+	// }
+
+	const EventItem = (itemData) => {
+		//console.log(itemData)
+		let date = Object.keys(itemData.item)[0];
+		let currentItem = itemData.item[date];
+		if (currentItem.length === 0) {
+			return (
+				<View style={styles.dateRow}>
+					<DayDisplayer day={date} />
+					<View
+						// onPress={() => {
+						// 	setDayPressed(date);
+						// 	animation.current.animateButton();
+						// }}
+						style={{
+							flex: 1,
+							borderLeftWidth: 1,
+							borderColor: customTheme["color-primary-400"],
+							paddingLeft: 15,
 						}}
-						style={{}}
 					>
-						<View
+						<Card
+							// onPress={() => {
+							// 	setDayPressed(date);
+							// 	animation.current.animateButton();
+							// }}
+							disabled
 							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								marginRight: 3,
+								...styles.card,
+								height: 95,
+								justifyContent: "center",
+								backgroundColor: customTheme["color-primary-100"],
+								borderColor: customTheme["color-primary-400"],
+								borderWidth: 1,
 							}}
 						>
-							<Ionicons name="add-circle-outline" size={20} />
+							{/* <TouchableCmp
+								onPress={() => {
+									setDayPressed(date);
+									animation.current.animateButton();
+								}}
+								style={{}}
+							> */}
 							<View
 								style={{
-									marginLeft: 4,
-									marginBottom: 1,
+									flexDirection: "row",
 									alignItems: "center",
-									justifyContent: "center",
+									//marginRight: 3,
+									justifyContent: "space-around",
 								}}
 							>
-								<Text style={{ fontSize: 19 }}>Add event</Text>
+								{/* <Ionicons name="add-circle-outline" size={20} />
+									<View
+										style={{
+											marginLeft: 4,
+											marginBottom: 1,
+											alignItems: "center",
+											justifyContent: "center",
+										}}
+									>
+										<Text style={{ fontSize: 19, color: "black" }}>
+											Add event
+										</Text>
+									</View> */}
+								{actions
+									.slice()
+									.reverse()
+									.map((action) => {
+										return (
+											<TouchableCmp
+												key={action.name}
+												onPress={() => {
+													setDayPressed(date);
+													props.navigation.navigate("AddItemToCalendar", {
+														// screen: 'AddItemToCalendar',
+														// params: {
+														type: action.name,
+														day: timeToString2(date),
+														// }
+													});
+												}}
+												style={{
+													flex: 1,
+													alignItems: "center",
+													justifyContent: "center",
+												}}
+											>
+												<View style={{backgroundColor: customTheme["color-primary-300"], borderRadius: 10, padding: 8, alignItems: 'center', justifyContent: 'center' }}>
+												<Ionicons
+													name={action.iconName}
+													color={'white'}
+													size={20}
+												/></View>
+											</TouchableCmp>
+										);
+									})}
 							</View>
-						</View>
-					</TouchableCmp>
-				</Card>
-			</TouchableCmp>
-		);
+							{/* </TouchableCmp> */}
+						</Card>
+					</View>
+				</View>
+			);
+		} else {
+			//actual event
+			return (
+				<View style={{ flex: 1 }}>
+					<FlatList
+						keyExtractor={(item) => item.id.toISOString()}
+						style={{ width: "100%" }}
+						data={currentItem}
+						renderItem={(itemData) => {
+							const iconName = getIconStringBasedOnEventType(
+								itemData.item.type
+							);
+							return (
+								<View style={styles.dateRow}>
+									{itemData.index === 0 ? (
+										<DayDisplayer day={date} />
+									) : (
+										<View style={styles.dateDisplayer}></View>
+									)}
+									<TouchableCmp style={{ flex: 1, padding: 5 }}>
+										<Card
+											style={styles.card}
+											disabled
+											footer={(props) => (
+												<Footer
+													{...props}
+													item={itemData.item}
+													deleteHandler={deleteEventHandler}
+													previewHandler={previewEventHandler}
+												/>
+											)}
+											header={(props) => (
+												<Header {...props} item={itemData.item} />
+											)}
+										>
+											<View style={{ flexDirection: "row" }}>
+												<Ionicons
+													name={iconName}
+													color={customTheme["color-primary-600"]}
+													size={18}
+												>
+													<Text
+														category="h6"
+														style={{ color: customTheme["color-primary-600"] }}
+													>
+														{" " + itemData.item.title}
+													</Text>
+												</Ionicons>
+											</View>
+										</Card>
+									</TouchableCmp>
+								</View>
+							);
+						}}
+					/>
+				</View>
+			);
+		}
 	};
-
 	return (
-		<Layout style={{ flex: 1 }}>
+		<Layout level={"2"} style={{ flex: 1 }}>
 			<SafeAreaView />
-			<Agenda
-				items={items}
-				loadItemsForMonth={(day) => {
-					loadItemsMonth(day);
-				}}
-				renderEmptyDate={renderEmptyDate}
-				selected={() => getDateToday()}
-				renderItem={(item) => {
-					return renderItem(item);
-				}}
-				showClosingKnob={true}
-				//hideExtraDays={false}
-				pastScrollRange={6}
-				//futureScrollRange={12}
-				rowHasChanged={rowHasChanged}
-				// minDate={"2021-08-10"}
-				// Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
-				// maxDate={"2012-05-30"}
-				styles={{ justifyContent: "center", alignItems: "center" }}
+			<FlatList
+				ref={flatListRef}
+				keyExtractor={(item) => item["key"]}
+				style={{ width: "100%" }}
+				data={items}
+				renderItem={EventItem}
+				//getItemLayout={getItemLayout}
+				scrollToIndexFailed={scrollToIndexFailed}
+				scrollEnabled={scrollingEnabled}
 			/>
 			<FloatingAction
+				color={customTheme["color-primary-600"]}
 				ref={animation}
 				actions={actions}
 				onClose={() => setDayPressed(new Date())}
+				
 				onPressItem={(name) => {
 					props.navigation.navigate("AddItemToCalendar", {
 						type: name,
-						day: dayPressed.toISOString(),
+						day: timeToString2(dayPressed),
 					});
 				}}
 			/>
 		</Layout>
 	);
+};
+
+export const screenOptions = (navData) => {
+	return {
+		headerTitle: navData.route.params
+			? navData.route.params.currentMonth
+			: moment().format("MMMM"),
+		headerTitleStyle: { color: customTheme["color-primary-600"] },
+		//headerLeft: () => null,
+		headerLeft: () => (
+			<HeaderButtons HeaderButtonComponent={HeaderButton}>
+				<Item
+					title="PastMonth"
+					iconName={"arrow-back-outline"}
+					onPress={() => {
+						navData.route.params.travelMonth(-1);
+					}}
+				/>
+			</HeaderButtons>
+		),
+		headerRight: () => (
+			<HeaderButtons HeaderButtonComponent={HeaderButton}>
+				<Item
+					title="NextMonth"
+					iconName={"arrow-forward-outline"}
+					onPress={() => {
+						navData.route.params.travelMonth(1);
+					}}
+				/>
+			</HeaderButtons>
+		),
+	};
 };
 
 const styles = StyleSheet.create({
@@ -383,12 +635,38 @@ const styles = StyleSheet.create({
 	},
 	footerControl: {
 		marginHorizontal: 2,
+		backgroundColor: customTheme["color-primary-400"],
+		color: "white",
 	},
 	headerContainer: {
 		justifyContent: "space-between",
 		flexDirection: "row",
 		alignItems: "flex-start",
 	},
+	dateRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		flex: 1,
+	},
+	dateDisplayer: {
+		width: 60,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	writtenDay: {
+		color: '#ccc',
+		fontSize: 19,
+	},
+	dayNumber: {
+		color: customTheme["color-primary-500"],
+		fontSize: 22,
+	},
+	indicator: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: 80
+	  }
 });
 
 export default ScheduleScreen;
