@@ -1,10 +1,12 @@
-import { UPDATE_STUDY_FLOW_CONFIG } from "../actions/studyFlow";
+import { UPDATE_STUDY_FLOW_CONFIG, TOGGLE_STUDY_FLOW } from "../actions/studyFlow";
+
 
 const initialState = {
 	config: {
 		studyTime: 30,
 		breakTime: 10,
 	},
+	active: true
 };
 
 export default (state = initialState, action) => {
@@ -17,6 +19,11 @@ export default (state = initialState, action) => {
 					breakTime: action.breakTime,
 				},
 			};
+		case TOGGLE_STUDY_FLOW:
+			return {
+				...state,
+				active: !state.active
+			}
 		default:
 			return state;
 	}

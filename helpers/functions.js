@@ -33,7 +33,6 @@ export function getIconStringBasedOnEventType(eventType) {
 export function getStudyFlow(event, studyTime, breakTime) {
 	//get time in minutes of each pomodoro session
 	const pomodoroSession = studyTime + breakTime;
-	console.log(event);
 
 	// get total time in minutes of event
 	let hours = event.duration.getHours() * 60;
@@ -88,8 +87,8 @@ export const generateTimeline = (
 	//const totalPomodoro = studyTime + breakTime;
 	const { pomodoros, compromise } = pomodoroConfig;
 	let timeAdded = 0;
-	console.log("Study Time: " + studyTime);
-	console.log("Break Time: " + breakTime);
+	// console.log("Study Time: " + studyTime);
+	// console.log("Break Time: " + breakTime);
 	if (pomodoros) {
 		for (let i = 0; i < pomodoros; i++) {
 			let currentPomodoroStudy;

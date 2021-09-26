@@ -8,6 +8,7 @@ import {
 	View,
 	FlatList,
 	ActivityIndicator,
+	Alert
 } from "react-native";
 import { Agenda } from "react-native-calendars";
 import { Card, Layout, Button, Text } from "@ui-kitten/components";
@@ -17,6 +18,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getIconStringBasedOnEventType } from "../../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
 import * as eventsActions from "../../store/actions/events";
+import * as studyFlowActions from '../../store/actions/studyFlow'
 import customTheme from "../../assets/UIkitten/custom-theme.json";
 import HeaderButton from "../../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -31,10 +33,18 @@ const actions = [
 		iconName: "ellipsis-horizontal-outline",
 	},
 	{
+		text: "Lecture",
+		icon: require("../../assets/icons/book.png"),
+		name: "lecture",
+		position: 2,
+		color: customTheme["color-primary-500"],
+		iconName: "book-outline",
+	},
+	{
 		text: "Homework",
 		icon: require("../../assets/icons/reader.png"),
 		name: "homework",
-		position: 2,
+		position: 3,
 		color: customTheme["color-primary-500"],
 		iconName: "reader-outline",
 	},
@@ -42,7 +52,7 @@ const actions = [
 		text: "Assessment",
 		icon: require("../../assets/icons/school.png"),
 		name: "assessment",
-		position: 3,
+		position: 4,
 		color: customTheme["color-primary-500"],
 		iconName: "school-outline",
 	},
@@ -50,7 +60,7 @@ const actions = [
 		text: "Study Session",
 		icon: require("../../assets/icons/glasses.png"),
 		name: "study-session",
-		position: 4,
+		position: 5,
 		color: customTheme["color-primary-500"],
 		iconName: "glasses-outline",
 	},
@@ -129,7 +139,7 @@ function getDates(startDate, stopDate) {
 
 const Footer = (props) => (
 	<View {...props} style={[props.style, styles.footerContainer]}>
-		<Button
+		{props.studyFlowActive ? <Button
 			style={styles.footerControl}
 			onPress={() => {
 				props.previewHandler(props.item.id.toISOString());
@@ -137,19 +147,32 @@ const Footer = (props) => (
 			size="small"
 			status="basic"
 		>
-			<Ionicons name="eye-outline" color={"white"} size={14} />{" "}
-			<Text style={{ color: "white" }}>Preview</Text>
-		</Button>
-		<Button
+			<Ionicons name="eye-outline" size={14} /> Preview
+		</Button> : <TouchableCmp onPress={() => {
+			Alert.alert('Activate StudyFlow Mode?', 'Start using studyflow mode to improve your experience and get tailored statistics and feedback on your learning.', [{text: 'Activate', onPress:() => {props.toggleStudyFlow()}}, {text: 'Don\'t use'}])
+			}}>
+			<Button
 			style={styles.footerControl}
+			onPress={() => {
+				props.previewHandler(props.item.id.toISOString());
+			}}
+			size="small"
+			status="basic"
+			disabled={true}
+		>
+			<Ionicons name="eye-outline" size={14} /> Preview
+		</Button>
+		</TouchableCmp>}
+		<Button
+			style={{ backgroundColor: props.color ,...styles.footerControl}}
 			onPress={() => {
 				props.deleteHandler(props.item.id);
 			}}
 			size="small"
 			status="basic"
 		>
-			<Ionicons name="trash-outline" color={"white"} size={15} />
-			<Text style={{ color: "white" }}> Remove</Text>
+			<Ionicons name="trash-outline" color={props.theme === 'dark' ? 'black' : 'white'} size={15} />
+			<Text style={{ color: props.theme === 'dark' ? 'black' : 'white' }}> Remove</Text>
 		</Button>
 	</View>
 );
@@ -185,7 +208,7 @@ const Header = (props) => {
 			</View>
 			<Text
 				category="s2"
-				style={{ fontSize: 12, color: customTheme["color-primary-400"] }}
+				style={{ fontSize: 12, color: props.color }}
 			>
 				{props.item.timeRange}
 			</Text>
@@ -244,8 +267,10 @@ const ScheduleScreen = (props) => {
 	// //const [loadedEvents, setLoadedEvents] = useState([]);
 	// const [items, setItems] = useState({});
 	const dateToLoad = useSelector((state) => state.events.dateToTravelTo);
+	const theme = useSelector((state) => state.theme.theme)
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
+	const dispatch3 = useDispatch();
 	const animation = useRef(null);
 	//const [currentDay, setCurrentDay] = useState(moment());
 	const events = useSelector((state) => {
@@ -261,6 +286,12 @@ const ScheduleScreen = (props) => {
 	// });
 	const [scrollingEnabled, setScrollingEnabled] = useState(false);
 	const [loading, setLoading] = useState(true)
+
+	const studyFlowActive = useSelector(state => state.studyFlow.active)
+	const toggleStudyFlow = () => {
+		dispatch3(studyFlowActions.toggleStudyFlow())
+	}
+
 
 	//const [monthToLoad, setMonthToLoad] = useState()
 
@@ -399,7 +430,7 @@ const ScheduleScreen = (props) => {
 			return (
 				<View style={styles.dateRow}>
 					<DayDisplayer day={date} />
-					<View
+					<Layout
 						// onPress={() => {
 						// 	setDayPressed(date);
 						// 	animation.current.animateButton();
@@ -421,9 +452,10 @@ const ScheduleScreen = (props) => {
 								...styles.card,
 								height: 95,
 								justifyContent: "center",
-								backgroundColor: customTheme["color-primary-100"],
-								borderColor: customTheme["color-primary-400"],
+								backgroundColor: theme === 'dark' ? customTheme["color-primary-600"] : customTheme["color-primary-300"],
+								borderColor: theme === 'dark' ? customTheme["color-primary-400"] : customTheme["color-primary-600"],
 								borderWidth: 1,
+								marginBottom: 5
 							}}
 						>
 							{/* <TouchableCmp
@@ -477,19 +509,19 @@ const ScheduleScreen = (props) => {
 													justifyContent: "center",
 												}}
 											>
-												<View style={{backgroundColor: customTheme["color-primary-300"], borderRadius: 10, padding: 8, alignItems: 'center', justifyContent: 'center' }}>
+												<Layout style={{ borderRadius: 10, padding: 8, alignItems: 'center', justifyContent: 'center' }}>
 												<Ionicons
 													name={action.iconName}
-													color={'white'}
-													size={20}
-												/></View>
+													color={theme === 'dark' ? 'white' : 'black'}
+													size={18}
+												/></Layout>
 											</TouchableCmp>
 										);
 									})}
 							</View>
 							{/* </TouchableCmp> */}
 						</Card>
-					</View>
+					</Layout>
 				</View>
 			);
 		} else {
@@ -498,7 +530,7 @@ const ScheduleScreen = (props) => {
 				<View style={{ flex: 1 }}>
 					<FlatList
 						keyExtractor={(item) => item.id.toISOString()}
-						style={{ width: "100%" }}
+						style={{ width: "100%", marginBottom: 10 }}
 						data={currentItem}
 						renderItem={(itemData) => {
 							const iconName = getIconStringBasedOnEventType(
@@ -511,8 +543,10 @@ const ScheduleScreen = (props) => {
 									) : (
 										<View style={styles.dateDisplayer}></View>
 									)}
+									<Layout level="2" style={{flex: 1}}>
 									<TouchableCmp style={{ flex: 1, padding: 5 }}>
 										<Card
+										
 											style={styles.card}
 											disabled
 											footer={(props) => (
@@ -521,21 +555,25 @@ const ScheduleScreen = (props) => {
 													item={itemData.item}
 													deleteHandler={deleteEventHandler}
 													previewHandler={previewEventHandler}
+													theme={theme}
+													color={theme === 'dark' ? 'white' : customTheme['color-primary-300']}
+													studyFlowActive={studyFlowActive}
+													toggleStudyFlow={toggleStudyFlow}
 												/>
 											)}
 											header={(props) => (
-												<Header {...props} item={itemData.item} />
+												<Header {...props} item={itemData.item} color={theme === 'dark' ? 'white' : customTheme['color-primary-300']}/>
 											)}
 										>
 											<View style={{ flexDirection: "row" }}>
 												<Ionicons
 													name={iconName}
 													color={customTheme["color-primary-600"]}
-													size={18}
+													size={24}
 												>
 													<Text
 														category="h6"
-														style={{ color: customTheme["color-primary-600"] }}
+														style={{ color: theme === 'dark' ? 'white' : customTheme["color-primary-600"] }}
 													>
 														{" " + itemData.item.title}
 													</Text>
@@ -543,6 +581,7 @@ const ScheduleScreen = (props) => {
 											</View>
 										</Card>
 									</TouchableCmp>
+									</Layout>
 								</View>
 							);
 						}}
@@ -586,7 +625,7 @@ export const screenOptions = (navData) => {
 		headerTitle: navData.route.params
 			? navData.route.params.currentMonth
 			: moment().format("MMMM"),
-		headerTitleStyle: { color: customTheme["color-primary-600"] },
+		headerTitleStyle: { color: customTheme["color-primary-500"], fontFamily: 'yellow-tail', fontSize: 30, paddingHorizontal: 4 },
 		//headerLeft: () => null,
 		headerLeft: () => (
 			<HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -635,8 +674,6 @@ const styles = StyleSheet.create({
 	},
 	footerControl: {
 		marginHorizontal: 2,
-		backgroundColor: customTheme["color-primary-400"],
-		color: "white",
 	},
 	headerContainer: {
 		justifyContent: "space-between",
@@ -647,6 +684,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		flex: 1,
+		
 	},
 	dateDisplayer: {
 		width: 60,

@@ -9,11 +9,15 @@ import {
 	Alert,
 	Image,
 	Platform,
+	SafeAreaView,
+	alert,
 } from "react-native";
 import {
 	Card,
 	Text,
 	Input,
+	TopNavigation,
+	TopNavigationAction,
 	Divider,
 	Button,
 	Layout,
@@ -24,8 +28,8 @@ import LottieView from "lottie-react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
+import * as studyFlowActions from "../../store/actions/studyFlow";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
-
 
 import {
 	getStudyFlow,
@@ -43,30 +47,65 @@ function timeToString2(time) {
 	return localISOTime.split("T")[0];
 }
 
-const Footer = (props) => (
-	<View {...props} style={[props.style, styles.footerContainer]}>
-		<Button
-			style={styles.footerControl}
-			onPress={() => {
-				props.previewHandler(props.item.id.toISOString());
-			}}
-			size="small"
-			status="basic"
-		>
-			<Ionicons name="eye-outline" size={14} /> Preview
-		</Button>
-		<Button
-			style={styles.footerControl}
-			onPress={() => {
-				props.deleteHandler(props.item.id);
-			}}
-			size="small"
-			status="basic"
-		>
-			<Ionicons name="trash-outline" size={14} /> Remove
-		</Button>
-	</View>
-);
+const Footer = (props) => {
+	return (
+		<View {...props} style={[props.style, styles.footerContainer]}>
+			{props.studyFlowActive ? (
+				<Button
+					style={styles.footerControl}
+					onPress={() => {
+						props.previewHandler(props.item.id.toISOString());
+					}}
+					size="small"
+					status="basic"
+				>
+					<Ionicons name="eye-outline" size={14} /> Preview
+				</Button>
+			) : (
+				<TouchableCmp
+					onPress={() => {
+						Alert.alert(
+							"Activate StudyFlow Mode?",
+							"Start using studyflow mode to improve your experience and get tailored statistics and feedback on your learning.",
+							[
+								{
+									text: "Activate",
+									onPress: () => {
+										props.toggleStudyFlow();
+									},
+								},
+								{ text: "Don't use" },
+							]
+						);
+					}}
+				>
+					<Button
+						style={styles.footerControl}
+						onPress={() => {
+							props.previewHandler(props.item.id.toISOString());
+						}}
+						size="small"
+						status="basic"
+						disabled={true}
+					>
+						<Ionicons name="eye-outline" size={14} /> Preview
+					</Button>
+				</TouchableCmp>
+			)}
+
+			<Button
+				style={styles.footerControl}
+				onPress={() => {
+					props.deleteHandler(props.item.id);
+				}}
+				size="small"
+				status="basic"
+			>
+				<Ionicons name="trash-outline" size={14} /> Remove
+			</Button>
+		</View>
+	);
+};
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
@@ -149,17 +188,19 @@ const Header = (props) => {
 const StartFlowScreen = (props) => {
 	// get all events for today
 	const dispatch = useDispatch();
+	const dispatch2 = useDispatch();
 	const eventsToday = useSelector((state) =>
 		state.events.events.length > 0
-			? state.events.events.filter(
-					(event) =>
-						moment(event.date).isSame(moment(), "day") &&
-						(event.type === "study-session" ||
-							event.type === "homework" ||
-							event.type === "other")
+			? state.events.events.filter((event) =>
+					moment(event.date).isSame(moment(), "day")
 			  )
 			: state.events.events
 	);
+
+	const studyFlowActive = useSelector((state) => state.studyFlow.active);
+	const toggleStudyFlow = () => {
+		dispatch2(studyFlowActions.toggleStudyFlow());
+	};
 
 	const [selectedEventId, setSelectedEventId] = useState(null);
 	const deleteEventHandler = (id) => {
@@ -172,102 +213,190 @@ const StartFlowScreen = (props) => {
 	};
 
 	return eventsToday.length === 0 ? (
-		<Layout level={"2"} style={styles.screen}>
-			<TouchableWithoutFeedback
-				onPress={() => {
-					props.navigation.navigate("ChooseEventType");
-				}}
-				style={{flex: 1}}
-			><View style={{ alignItems: "center", justifyContent: "center", flex: 1}}>
-				<View style={{marginTop: 16, alignItems: "center", justifyContent: "center", width: '100%', backgroundColor: CustomTheme['color-primary-500'], padding: 7, borderRadius: 8}}>
-				<Text category={"h6"} style={{ color: 'white' }}>
-					No events planned for today
-				</Text>
-				</View>
-				<View
-					style={{ alignItems: "center", justifyContent: "center", flex: 1, marginTop: -38 }}
-				>
-					<LottieView
-						style={styles.buttonAnimationLottie}
-						source={require("../../assets/lottie/addEventRed.json")}
-						autoPlay={true}
-						loop={true}
-						speed={0.5}
-						
-					/>
-					<Text
-						style={{ color: CustomTheme["color-primary-600"] }}
-						category={"h5"}
+		<Layout style={{ flex: 1 }}>
+			<SafeAreaView style={{ flex: 1 }}>
+				<TopNavigation
+					//style={{flex: 1}}
+					alignment="center"
+					title={() => (
+						<View style={{ flex: 1 }}>
+							<Text
+								style={{
+									fontFamily: "yellow-tail",
+									fontSize: 32,
+									color: CustomTheme["color-primary-500"],
+									flex: 1,
+									paddingHorizontal: 2,
+								}}
+							>
+								StudyFlow
+							</Text>
+						</View>
+					)}
+
+					//subtitle='Enhance your learning'
+					// accessoryLeft={renderBackAction}
+					// accessoryRight={renderRightActions}
+				/>
+				<Layout level={"2"} style={styles.screen}>
+					<TouchableWithoutFeedback
+						onPress={() => {
+							props.navigation.navigate("ChooseEventType");
+						}}
+						style={{ flex: 1 }}
 					>
-						ADD NEW EVENT
-					</Text>
-				</View>
-				</View>
-			</TouchableWithoutFeedback>
+						<View
+							style={{
+								alignItems: "center",
+								justifyContent: "center",
+								flex: 1,
+							}}
+						>
+							<View
+								style={{
+									marginTop: 16,
+									alignItems: "center",
+									justifyContent: "center",
+									width: "100%",
+									backgroundColor: CustomTheme["color-primary-500"],
+									padding: 7,
+									borderRadius: 8,
+								}}
+							>
+								<Text category={"h6"} style={{ color: "white" }}>
+									No events planned for today
+								</Text>
+							</View>
+							<View
+								style={{
+									alignItems: "center",
+									justifyContent: "center",
+									flex: 1,
+									marginTop: -38,
+								}}
+							>
+								<LottieView
+									style={styles.buttonAnimationLottie}
+									source={require("../../assets/lottie/addEventRed.json")}
+									autoPlay={true}
+									loop={true}
+									speed={0.5}
+								/>
+								<Text
+									style={{ color: CustomTheme["color-primary-600"] }}
+									category={"h5"}
+								>
+									ADD NEW EVENT
+								</Text>
+							</View>
+						</View>
+					</TouchableWithoutFeedback>
+				</Layout>
+			</SafeAreaView>
 		</Layout>
 	) : (
-		<Layout level={"2"} style={styles.screen}>
-			<View style={{ marginTop: 12 }}>
-				<Text category={"h5"} style={{ color: CustomTheme["color-primary-600"] }}>
-					Events for Today
-				</Text>
-			</View>
-			<Divider style={{ width: "95%", marginTop: 10 }} />
-
-			<View style={styles.listContainer}>
-				<FlatList
-					style={{ width: "90%" }}
-					data={eventsToday}
-					keyExtractor={(item) => item.id.toString()}
-					renderItem={(itemData) => {
-						const iconName = getIconStringBasedOnEventType(itemData.item.type);
-
-						return (
-							<TouchableCmp
-								onPress={() => {
-									if (itemData.item.id === selectedEventId) {
-										setSelectedEventId(null);
-									} else {
-										setSelectedEventId(itemData.item.id);
-									}
+		<Layout style={{ flex: 1 }}>
+			<SafeAreaView style={{ flex: 1 }}>
+				<TopNavigation
+					//style={{flex: 1}}
+					alignment="center"
+					title={() => (
+						<View style={{ flex: 1 }}>
+							<Text
+								style={{
+									fontFamily: "yellow-tail",
+									fontSize: 32,
+									color: CustomTheme["color-primary-500"],
+									flex: 1,
+									paddingHorizontal: 2,
 								}}
-								style={
-									selectedEventId === itemData.item.id
-										? { ...styles.cardContainer, ...styles.selected }
-										: { ...styles.cardContainer }
-								}
-								key={itemData.item.id}
 							>
-								<Card
-									style={styles.card}
-									disabled
-									footer={(props) => (
-										<Footer
-											{...props}
-											item={itemData.item}
-											deleteHandler={deleteEventHandler}
-											previewHandler={previewEventHandler}
-										/>
-									)}
-									header={(props) => <Header {...props} item={itemData.item} />}
-								>
-									<View style={{ flexDirection: "row" }}>
-										<Ionicons name={iconName} size={18}>
-											<Text category="h6">{" " + itemData.item.title}</Text>
-										</Ionicons>
-									</View>
-								</Card>
-							</TouchableCmp>
-						);
-					}}
-				></FlatList>
-			</View>
-			<Divider style={{ width: "95%" }} />
-			<View style={styles.optionsContainer}>
-				<Button style={{ marginTop: 30 }} size="giant" onPress={() => {}}>
-					{"Start Session "} {" >"}
-				</Button>
-			</View>
+								StudyFlow
+							</Text>
+						</View>
+					)}
+
+					//subtitle='Enhance your learning'
+					// accessoryLeft={renderBackAction}
+					// accessoryRight={renderRightActions}
+				/>
+				<Layout level={"2"} style={styles.screen}>
+					<View style={{ marginTop: 12 }}>
+						<Text
+							category={"h5"}
+							style={{ color: CustomTheme["color-primary-600"] }}
+						>
+							Events for Today
+						</Text>
+					</View>
+					<Divider style={{ width: "95%", marginTop: 10 }} />
+
+					<View style={styles.listContainer}>
+						<FlatList
+							style={{ width: "90%" }}
+							data={eventsToday}
+							keyExtractor={(item) => item.id.toString()}
+							renderItem={(itemData) => {
+								const iconName = getIconStringBasedOnEventType(
+									itemData.item.type
+								);
+
+								return (
+									<TouchableCmp
+										onPress={() => {
+											if (itemData.item.id === selectedEventId) {
+												setSelectedEventId(null);
+											} else {
+												setSelectedEventId(itemData.item.id);
+											}
+										}}
+										style={
+											selectedEventId === itemData.item.id
+												? { ...styles.cardContainer, ...styles.selected }
+												: { ...styles.cardContainer }
+										}
+										key={itemData.item.id}
+									>
+										<Card
+											style={styles.card}
+											disabled
+											footer={(props) => (
+												<Footer
+													{...props}
+													item={itemData.item}
+													deleteHandler={deleteEventHandler}
+													previewHandler={previewEventHandler}
+													studyFlowActive={studyFlowActive}
+													toggleStudyFlow={toggleStudyFlow}
+												/>
+											)}
+											header={(props) => (
+												<Header {...props} item={itemData.item} />
+											)}
+										>
+											<View style={{ flexDirection: "row" }}>
+												<Ionicons
+													name={iconName}
+													color={CustomTheme["color-primary-500"]}
+													size={18}
+												>
+													<Text category="h6">{" " + itemData.item.title}</Text>
+												</Ionicons>
+											</View>
+										</Card>
+									</TouchableCmp>
+								);
+							}}
+						></FlatList>
+					</View>
+					<Divider style={{ width: "95%" }} />
+					<View style={styles.optionsContainer}>
+						<Button style={{ marginTop: 30 }} size="giant" onPress={() => {}}>
+							{"Start Session "} {" >"}
+						</Button>
+					</View>
+				</Layout>
+			</SafeAreaView>
 		</Layout>
 	);
 };
@@ -277,9 +406,21 @@ export default StartFlowScreen;
 export const screenOptions = (navData) => {
 	return {
 		headerTitle: () => (
-			<View style={{flex: 1}}><Text style={{fontFamily: 'yellow-tail', fontSize: 30, color: CustomTheme['color-primary-500'], flex: 1, minWidth: 117}}>StudyFlow</Text></View>
-				// style={{ width: Platform.OS === "android" ? 160 : 150, height: 50 }}
-				// source={require("../../assets/branding/logoColoured.png")}
+			<View style={{ flex: 1 }}>
+				<Text
+					style={{
+						fontFamily: "yellow-tail",
+						fontSize: 30,
+						color: CustomTheme["color-primary-500"],
+						flex: 1,
+						minWidth: 117,
+					}}
+				>
+					StudyFlow
+				</Text>
+			</View>
+			// style={{ width: Platform.OS === "android" ? 160 : 150, height: 50 }}
+			// source={require("../../assets/branding/logoColoured.png")}
 		),
 		//headerTitle: "Study Flow",
 		headerLeft: () => (
@@ -318,8 +459,7 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	buttonAnimationLottie: {
-		width: '80%'
-		
+		width: "80%",
 	},
 	footerContainer: {
 		flexDirection: "row",
@@ -336,8 +476,8 @@ const styles = StyleSheet.create({
 	},
 	selected: {
 		shadowColor: "#bbb",
-		shadowOffset: { width: 1, height: 4 },
-		shadowOpacity: 5,
+		shadowOffset: { width: 1, height: 0 },
+		shadowOpacity: 8,
 		shadowRadius: 4,
 		elevation: 5,
 		padding: 6,

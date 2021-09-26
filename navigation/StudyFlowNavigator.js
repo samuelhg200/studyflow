@@ -1,9 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, } from "react";
 import { StyleSheet, TouchableWithoutFeedback, Image } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LottieView from "lottie-react-native";
-import { BottomNavigation, BottomNavigationTab, Layout, Text } from '@ui-kitten/components';
+import {
+	BottomNavigation,
+	BottomNavigationTab,
+	Icon,
+	Layout,
+	Text,
+} from "@ui-kitten/components";
 
 import MetricsScreen from "../screens/MainApp/MetricsScreen";
 import ManagerScreen from "../screens/MainApp/ManagerScreen";
@@ -22,13 +28,14 @@ import AddItemToCalendarScreen, {
 import ChooseEventTypeScreen from "../screens/Modals/ChooseEventType";
 import TimerScreen from "../screens/MainApp/TimerScreen";
 import EventPreviewScreen from "../screens/Modals/EventPreviewScreen";
+import SubjectsModal from "../screens/Modals/SubjectsModal";
+import TopicsModal from "../screens/Modals/TopicsModal";
 
 import customTheme from "../assets/UIkitten/custom-theme.json";
 
 import CustomTheme from "../assets/UIkitten/custom-theme.json";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 
 const MetricsStackNavigator = createStackNavigator();
 const MetricsNavigator = () => (
@@ -40,7 +47,31 @@ const MetricsNavigator = () => (
 const ManagerStackNavigator = createStackNavigator();
 const ManagerNavigator = () => (
 	<ManagerStackNavigator.Navigator>
-		<ManagerStackNavigator.Screen name="Manager" component={ManagerScreen} />
+		<ManagerStackNavigator.Screen
+			name="Manager"
+			component={ManagerScreen}
+			options={{ headerShown: false }}
+		/>
+		<ManagerStackNavigator.Screen
+			name="Subjects"
+			component={SubjectsModal}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "Subjects",
+				headerBackTitle: "Manager",
+			}}
+		/>
+		<ManagerStackNavigator.Screen
+			name="Topics"
+			component={TopicsModal}
+			options={(navData) => ({
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "Topics",
+				headerBackTitle: "Subject",
+			})}
+		/>
 	</ManagerStackNavigator.Navigator>
 );
 
@@ -50,7 +81,8 @@ const StartFlowNavigator = () => (
 		<StartFlowStackNavigator.Screen
 			name="StartFlow"
 			component={StartFlowScreen}
-			options={startFlowScreenOptions}
+			//options={startFlowScreenOptions}
+			options={{ headerShown: false }}
 		/>
 		<StartFlowStackNavigator.Screen
 			name="ChooseEventType"
@@ -126,28 +158,54 @@ const ScheduleNavigator = () => {
 					...AddItemToCalendarScreenOptions,
 				}}
 			/>
+			<ScheduleStackNavigator.Screen
+			name="Subjects"
+			component={SubjectsModal}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "Subjects",
+				headerBackTitle: "Calendar",
+			}}
+		/>
 		</ScheduleStackNavigator.Navigator>
 	);
 };
 
 const StudyFlowTabNavigator = createBottomTabNavigator();
 
-const BottomTabBar = ({ navigation, state }) => (
-	<BottomNavigation
-	  selectedIndex={state.index}
-	  onSelect={index => navigation.navigate(state.routeNames[index])}>
-	  <BottomNavigationTab title='USERS'/>
-	  <BottomNavigationTab title='ORDERS'/>
-	</BottomNavigation>
-  );
+const MetricsIcon = (props) => <Icon {...props} name="bar-chart-outline" />;
 
-const StudyFlowNavigator = () => {
+const ManagerIcon = (props) => <Icon {...props} name="bulb-outline" />;
+
+const TimerIcon = (props) => <Icon {...props} name="book-open-outline" />;
+
+const CalendarIcon = (props) => (
+	<Icon {...props} name="calendar-outline" animation="zoom" />
+);
+
+const BottomTabBar = ({ navigation, state, managerIconRef }) => {
+	return (
+		<BottomNavigation
+			style={{ height: 80, alignItems: "flex-start", paddingTop: 15 }}
+			selectedIndex={state.index}
+			onSelect={(index) => navigation.navigate(state.routeNames[index])}
+		>
+			<BottomNavigationTab icon={ManagerIcon} />
+			<BottomNavigationTab icon={TimerIcon} />
+			<BottomNavigationTab icon={CalendarIcon} />
+		</BottomNavigation>
+	);
+};
+
+const StudyFlowNavigator = ({managerIconRef}) => {
 	return (
 		<StudyFlowTabNavigator.Navigator
 			initialRouteName="StartFlowStack"
-			tabBar={props => <BottomTabBar {...props} />}
+			tabBar={(props) => <BottomTabBar {...props} />}
 			screenOptions={({ route }) => ({
-				tabBarActiveTintColor: customTheme['color-primary-500'],
+				tabBarStyle: { height: 100 },
+				//tabBarActiveTintColor: customTheme['color-primary-500'],
 				headerShown: false,
 				tabBarShowLabel: false,
 				tabBarIcon: ({ focused, color, size }) => {
@@ -159,7 +217,7 @@ const StudyFlowNavigator = () => {
 							if (!focused) {
 								filepath = require("../assets/lottie/sand-clock.json");
 							} else {
-								filepath = require("../assets/lottie/sandClockRed.json")
+								filepath = require("../assets/lottie/sandClockRed.json");
 							}
 							style = { width: 60, overflow: "visible" };
 							return (
@@ -190,7 +248,7 @@ const StudyFlowNavigator = () => {
 				},
 			})}
 		>
-			<StudyFlowTabNavigator.Screen
+			{/* <StudyFlowTabNavigator.Screen
 				name="MetricsStack"
 				component={MetricsNavigator}
 				options={{
@@ -201,7 +259,7 @@ const StudyFlowNavigator = () => {
 						);
 					},
 				}}
-			/>
+			/> */}
 			<StudyFlowTabNavigator.Screen
 				name="ManagerStack"
 				component={ManagerNavigator}
@@ -238,7 +296,7 @@ const StudyFlowNavigator = () => {
 				// 	},
 				// }}
 			/>
-			<StudyFlowTabNavigator.Screen
+			{/* <StudyFlowTabNavigator.Screen
 				name="GoalsStack"
 				component={GoalsNavigator}
 				options={{
@@ -249,7 +307,7 @@ const StudyFlowNavigator = () => {
 						);
 					},
 				}}
-			/>
+			/> */}
 			<StudyFlowTabNavigator.Screen
 				name="ScheduleStack"
 				component={ScheduleNavigator}

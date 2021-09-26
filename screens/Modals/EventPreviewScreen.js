@@ -30,9 +30,9 @@ import { generateTimeline, getStudyFlow } from "../../helpers/functions";
 
 const EventPreviewScreen = (props) => {
     const event = useSelector(state => state.events.events.find((event) =>  event.id.toISOString() === props.route.params.id))
-    const studyFlowConfig = useSelector(state => state.studyFlow.config)
+	const studyFlowConfig = useSelector(state => state.studyFlow.config)
+	const theme = useSelector(state => state.theme.theme)
 	const sessionPreview = getStudyFlow(event, studyFlowConfig.studyTime, studyFlowConfig.breakTime)
-    console.log(sessionPreview)
 	const data = generateTimeline(sessionPreview, studyFlowConfig.studyTime, studyFlowConfig.breakTime, new Date(event.date))
 	return (
         <Layout style={styles.screen}>
@@ -40,12 +40,14 @@ const EventPreviewScreen = (props) => {
 			<Timeline 
 				data={data}
 				separator={true}
+				separatorStyle={ {backgroundColor: theme === 'dark' ? 'white' : 'gray'}}
 				innerCircle={'icon'}
 				circleSize={32}
 				circleColor={CustomTheme['color-primary-500']}
-				lineColor={CustomTheme['color-primary-200']}
+				lineColor={ theme === 'dark' ? 'white' : CustomTheme['color-primary-200']}
 				timeStyle={{textAlign: 'center', color:CustomTheme['color-primary-500'],  borderRadius:13}}
-				descriptionStyle={{color:'gray'}}
+				titleStyle={{color: theme === 'dark' ? 'white' : 'black'}}
+				descriptionStyle={{color: theme === 'dark' ? '#D9D2D2' : 'gray'}}
 				options={{
 					style:{padding:25 },
 					//ListFooterComponent:() => <Text>#</Text>,

@@ -4,6 +4,7 @@ import {
 	View,
 	TouchableNativeFeedback,
 	TouchableOpacity,
+	Dimensions
 } from "react-native";
 import {
 	Layout,
@@ -13,6 +14,7 @@ import {
 	Datepicker,
 	Button,
 } from "@ui-kitten/components";
+import { useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import customTheme from "../../assets/UIkitten/custom-theme.json";
 
@@ -35,23 +37,29 @@ const actions = [
 		text: "Study Session",
 		icon: "glasses-outline",
 		name: "study-session",
-		position: 4,
+		position: 5,
 		color: customTheme["color-primary-500"],
 	},{
 		text: "Assessment",
 		icon: "school-outline",
 		name: "assessment",
-		position: 3,
+		position: 4,
 		color: customTheme["color-primary-500"],
 	},
 	{
 		text: "Homework",
 		icon: "reader-outline",
 		name: "homework",
+		position: 3,
+		color: customTheme["color-primary-500"],
+	},
+	{
+		text: "Lecture",
+		icon: "book-outline",
+		name: "lecture",
 		position: 2,
 		color: customTheme["color-primary-500"],
 	},
-	
 	{
 		text: "Other",
 		icon: "ellipsis-horizontal-outline",
@@ -62,9 +70,10 @@ const actions = [
 ];
 
 const ChooseEventType = (props) => {
+	const theme = useSelector(state => state.theme.theme)
 	return (
 		<Layout style={styles.screen}>
-			<View style={{marginVertical: 20}}><Text style={{color: customTheme['color-primary-400']}}category={"h5"}>Choose an event type</Text></View>
+			<View style={{marginVertical: 20}}><Text style={{color: customTheme['color-primary-600']}}category={"h5"}>Choose an event type</Text></View>
 			{actions.map((type) => {
 				return (
 					<TouchableCmp
@@ -80,17 +89,17 @@ const ChooseEventType = (props) => {
 								
 							});
 						}}
-						style={styles.rowContainer}
+						style={{borderColor: customTheme['color-primary-500'] ,...styles.rowContainer}}
 					>
 						<View style={styles.row}>
 							<View style={{ flex: 1, alignItems: "center" }}>
-								<Ionicons name={type.icon} size={22} />
+								<Ionicons name={type.icon} color={theme === 'dark' ?  'white' : 'black'} size={22} />
 							</View>
 							<View style={{ flex: 2 }}>
 								<Text
 									style={{
 										fontSize: 22,
-										color: customTheme["color-primary-400"],
+										color: theme === 'dark' ?  'white' : 'black',
 									}}
 								>
 									{type.text}
@@ -113,9 +122,8 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-start",
 	},
 	rowContainer: {
-		height: 60,
-		margin: 20,
-		borderColor: customTheme["color-primary-400"],
+		height: Dimensions.get('screen').height > 800 ? 60 : 55,
+		margin: Dimensions.get('screen').height > 800 ? 18 : 10,
 		borderWidth: 1,
 		borderRadius: 4,
 		width: "80%",

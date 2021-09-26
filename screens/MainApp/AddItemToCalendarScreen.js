@@ -29,12 +29,12 @@ import { combineDateWithTime } from "../../helpers/functions";
 
 //const tags = ["IT", "Maths", "Biology", "History", "English", "ESL", "OOPS", "Calculus", "Principles of Computing"];
 
-const calendarIcon = (props) => {
-	return <Ionicons name="calendar-outline" color={"black"} size={16} />;
+const CalendarIcon = (props) => {
+	return <Ionicons name="calendar-outline" color={props.color} size={16} />;
 };
 
-const pencilIcon = (props) => {
-	return <Ionicons name="pencil-outline" color={"black"} size={16} />;
+const PencilIcon = (props) => {
+	return <Ionicons name="pencil-outline" color={props.color} size={16} />;
 };
 
 const AddItemToCalendarScreen = (props) => {
@@ -42,6 +42,7 @@ const AddItemToCalendarScreen = (props) => {
 	const dispatch2 = useDispatch();
 	const dispatch3 = useDispatch();
 	const dateLoaded = useSelector((state) => state.events.dateToTravelTo);
+	const theme = useSelector(state => state.theme.theme)
 	const tags = useSelector((state) => state.subject.subjects);
 	const [selectedSubjects, setSelectedSubjects] = useState([]);
 	const [firstClear, setFirstClear] = useState(false);
@@ -67,19 +68,23 @@ const AddItemToCalendarScreen = (props) => {
 			titleMessage = "What subject is this assessment for?";
 			customName = "assessment";
 			exclusive = true;
-			initialTitle = "";
-			studyFlowMode = false;
+			initialTitle = "Assessment";
 			break;
 		case "homework":
 			titleMessage = "What subject is this homework from?";
 			customName = "homework event";
-			initialTitle = "";
+			initialTitle = "Homework";
 			break;
 		case "other":
 			titleMessage = "Select relevant subjects:";
 			customName = "event";
 			initialTitle = "";
-			studyFlowMode = false;
+			break;
+		case 'lecture':
+			titleMessage= "Select relevant Lecture: "
+			customName = "lecture"
+			initialTitle="Lecture"
+			exclusive=true
 			break;
 	}
 
@@ -150,9 +155,10 @@ const AddItemToCalendarScreen = (props) => {
 		});
 	}, [eventTitle, duration, date, time, selectedSubjects, type, studyFlowMode]);
 	return (
+		<Layout level="2" style={{flex: 1}}>
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<ScrollView>
-				<Layout level="2" style={styles.container}>
+				<View style={styles.container}>
 					<View style={styles.screen}>
 						<View
 							style={{
@@ -188,7 +194,8 @@ const AddItemToCalendarScreen = (props) => {
 									}
 								}}
 								textStyle={{ minHeight: 42 }}
-								accessoryLeft={pencilIcon}
+								accessoryLeft={<PencilIcon color={theme === 'dark' ? 'white' : 'black'} />}
+								
 								multiline={true}
 							/>
 							{show && (
@@ -203,7 +210,7 @@ const AddItemToCalendarScreen = (props) => {
 										paddingLeft: 4
 									}}
 								>
-									<Ionicons name="timer-outline" color={"black"} size={16} />
+									<Ionicons name="timer-outline" color={theme === 'dark' ? 'white' : 'black'} size={16} />
 									<DateTimePicker
 										style={{ flex: 2, minWidth: 65, marginLeft: 6, marginRight: 2 }}
 										value={duration}
@@ -211,6 +218,7 @@ const AddItemToCalendarScreen = (props) => {
 										mode="time"
 										display={Platform.OS === "android" ? "spinner" : "default"}
 										onChange={onChangeDurationHandler}
+										themeVariant={theme}
 									/>
 									<Text>Hrs</Text>
 								</View>
@@ -242,7 +250,7 @@ const AddItemToCalendarScreen = (props) => {
 								style={{ flex: 2, textAlign: "left" }}
 								date={date}
 								onSelect={(nextDate) => setDate(nextDate)}
-								accessoryLeft={calendarIcon}
+								accessoryLeft={<CalendarIcon color={theme === 'dark' ? 'white' : 'black'} />}
 								accessoryRight={<View></View>}
 								min={
 									new Date(new Date().setFullYear(new Date().getFullYear() - 2))
@@ -263,7 +271,7 @@ const AddItemToCalendarScreen = (props) => {
 										paddingLeft: 4
 									}}
 								>
-									<Ionicons name="alarm-outline" color={"black"} size={16} />
+									<Ionicons name="alarm-outline" color={theme === 'dark' ? 'white' : 'black'} size={16} />
 									<DateTimePicker
 										style={{ flex: 1,minWidth: 65, marginLeft: 6, marginRight: 2 }}
 										value={time}
@@ -271,6 +279,7 @@ const AddItemToCalendarScreen = (props) => {
 										mode="time"
 										display={Platform.OS === "android" ? "spinner" : "default"}
 										onChange={onChangeTime}
+										themeVariant={theme}
 									/>
 									<View stle={{flex: 1}}><Text>Hrs</Text></View>
 								</View>
@@ -294,6 +303,7 @@ const AddItemToCalendarScreen = (props) => {
 							selected={selectedSubjects}
 							setSelectedItems={setSelectedSubjects}
 							isExclusive={exclusive}
+							onPressAdd={() => {props.navigation.navigate('Subjects')}}
 						/>
 						<Divider style={{ alignSelf: "stretch" }} />
 						<Button
@@ -304,9 +314,10 @@ const AddItemToCalendarScreen = (props) => {
 							{"Add " + customName} {" >"}
 						</Button>
 					</View>
-				</Layout>
+				</View>
 			</ScrollView>
 		</TouchableWithoutFeedback>
+		</Layout>
 	);
 };
 
