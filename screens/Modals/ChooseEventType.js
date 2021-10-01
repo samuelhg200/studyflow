@@ -36,7 +36,7 @@ const actions = [
 	{
 		text: "Study Session",
 		icon: "glasses-outline",
-		name: "study-session",
+		name: "studySession",
 		position: 5,
 		color: customTheme["color-primary-500"],
 	},{

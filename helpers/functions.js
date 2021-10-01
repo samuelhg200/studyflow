@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import moment from "moment";
-import React from 'react'
-import {View} from 'react-native'
+import React from "react";
+import { View } from "react-native";
 
 export function combineDateWithTime(d, t) {
 	return new Date(
@@ -17,7 +17,7 @@ export function combineDateWithTime(d, t) {
 
 export function getIconStringBasedOnEventType(eventType) {
 	switch (eventType) {
-		case "study-session":
+		case "studySession":
 			return "glasses-outline";
 		case "assessment":
 			return "school-outline";
@@ -25,6 +25,25 @@ export function getIconStringBasedOnEventType(eventType) {
 			return "reader-outline";
 		case "other":
 			return "ellipsis-horizontal-outline";
+		case "lecture":
+			return "book-outline";
+		default:
+			return;
+	}
+}
+
+export function getFormattedEventType(eventType) {
+	switch (eventType) {
+		case "studySession":
+			return "Study Session";
+		case "assessment":
+			return "Assessment";
+		case "homework":
+			return "Homework";
+		case "other":
+			return "Other";
+		case "Lecture":
+			return "book-outline";
 		default:
 			return;
 	}
@@ -87,33 +106,72 @@ export const generateTimeline = (
 	//const totalPomodoro = studyTime + breakTime;
 	const { pomodoros, compromise } = pomodoroConfig;
 	let timeAdded = 0;
+	let studyCount= 1;
 	// console.log("Study Time: " + studyTime);
 	// console.log("Break Time: " + breakTime);
 	if (pomodoros) {
 		for (let i = 0; i < pomodoros; i++) {
 			let currentPomodoroStudy;
+			
 			if (i === 0) {
 				currentPomodoroStudy = {
 					time: moment(startDate).format("HH:mm"),
-					title: "Study Time",
+					title: `#${studyCount} Study`,
 					description: "Improve your knowledge!",
-					icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'glasses-outline'} color='white' size={15}/></View>
+					icon: (
+						<View
+							style={{
+								flex: 1,
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
+							<Ionicons name={"glasses-outline"} color="white" size={15} />
+						</View>
+					),
+					iconName: "glasses-outline",
+					duration: studyTime,
+					eventType: 'study'
+					
 				};
 			} else {
 				currentPomodoroStudy = {
 					time: moment(startDate).add(timeAdded, "minutes").format("HH:mm"),
-					title: "Study Time",
+					title: `#${studyCount} Study`,
 					description: "Improve your knowledge!",
-					icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'glasses-outline'} color='white' size={15}/></View>
+					icon: (
+						<View
+							style={{
+								flex: 1,
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
+							<Ionicons name={"glasses-outline"} color="white" size={15} />
+						</View>
+					),
+					iconName: "glasses-outline",
+					duration: studyTime,
+					eventType: 'study'
 				};
 			}
 
 			timeAdded += studyTime;
+			studyCount++;
 			let currentPomodoroBreak = {
 				time: moment(startDate).add(timeAdded, "minutes").format("HH:mm"),
-				title: "Break Time",
+				title: "Break",
 				description: "Go watch some Netflix!",
-				icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'cafe-outline'} color='white' size={15}/></View>
+				icon: (
+					<View
+						style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+					>
+						<Ionicons name={"cafe-outline"} color="white" size={15} />
+					</View>
+				),
+				iconName: "cafe-outline",
+				duration: breakTime,
+				eventType: 'break'
 			};
 			timeAdded += breakTime;
 			data.push(currentPomodoroStudy);
@@ -124,21 +182,37 @@ export const generateTimeline = (
 	if (compromise) {
 		let currentCompromiseStudy = {
 			time: moment(startDate).add(timeAdded, "minutes").format("HH:mm"),
-			title: "Study Time - Compromise",
+			title: `#${studyCount} Study`,
 			description: "Improve your knowledge!",
-			icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'glasses-outline'} color='white' size={15}/></View>
+			icon: (
+				<View
+					style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+				>
+					<Ionicons name={"glasses-outline"} color="white" size={15} />
+				</View>
+			),
+			iconName: "glasses-outline",
+			duration: studyTime,
+			eventType: 'study'
 		};
 		timeAdded += compromise.studyTime;
+		studyCount++;
 		let currentCompromiseBreak;
 		if (compromise.breakTime) {
 			currentCompromiseBreak = {
-				time: moment(startDate).add(
-					timeAdded,
-					"minutes"
-				).format("HH:mm"),
-				title: "Break Time - Compromise",
+				time: moment(startDate).add(timeAdded, "minutes").format("HH:mm"),
+				title: "Break",
 				description: "Go watch some Netflix!",
-				icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'cafe-outline'} color='white' size={15}/></View>
+				icon: (
+					<View
+						style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+					>
+						<Ionicons name={"cafe-outline"} color="white" size={15} />
+					</View>
+				),
+				iconName: "cafe-outline",
+				duration: breakTime,
+				eventType: 'break'
 			};
 		}
 		timeAdded += compromise.breakTime;
@@ -149,9 +223,16 @@ export const generateTimeline = (
 	}
 	data.push({
 		time: moment(startDate).add(timeAdded, "minutes").format("HH:mm"),
-		title: "Session Ends",
+		title: "Session End",
 		description: "Good job! Let us get some feedback quickly!",
-		icon: <View style={{flex: 1, alignItems:'center', justifyContent: 'center'}}><Ionicons name={'stats-chart-outline'} color='white' size={15}/></View>
+		icon: (
+			<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+				<Ionicons name={"stats-chart-outline"} color="white" size={15} />
+			</View>
+		),
+		iconName: "stats-chart-outline",
+		eventType: 'feedback'
+		
 	});
 	return data;
 };

@@ -10,6 +10,7 @@ import {
 	Image,
 	Platform,
 	SafeAreaView,
+	Dimensions,
 } from "react-native";
 import {
 	Card,
@@ -20,53 +21,54 @@ import {
 	Layout,
 	TopNavigation,
 	TopNavigationAction,
-	Toggle
+	Toggle,
 } from "@ui-kitten/components";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import LottieView from "lottie-react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
-import * as studyFlowActions from '../../store/actions/studyFlow'
-import * as themeActions from '../../store/actions/theme'
+import * as studyFlowActions from "../../store/actions/studyFlow";
+import * as themeActions from "../../store/actions/theme";
 
 let TouchableCmp = TouchableOpacity;
-if (Platform.OS === 'android'){
+if (Platform.OS === "android") {
 	TouchableCmp = TouchableNativeFeedback;
 }
 
-const ManagerScreen = props => {
+const ManagerScreen = (props) => {
 	//REDUX
 	const subjects = useSelector((state) => state.subject.subjects);
 	const theme = useSelector((state) => state.theme.theme);
-	const studyFlowActive = useSelector(state => state.studyFlow.active)
+	const timeConfig = useSelector((state) => state.studyFlow.config);
 
-	//Activate or deactivate studyflow mode 
-	//This disables the preview button on the event cards for example
-	const dispatch = useDispatch()
-	const onToggleStudyFLow = () => {
-		dispatch(studyFlowActions.toggleStudyFlow())
-	}
+	const studyTimeRepresentation = moment(
+		new Date(0, 0, 0, 0, timeConfig.studyTime, 0)
+	).format("HH:mm");
+	const breakTimeRepresentation = moment(
+		new Date(0, 0, 0, 0, timeConfig.breakTime, 0)
+	).format("HH:mm");
 
 	//Change from dark theme to light and viceversa
-	const dispatch2 = useDispatch()
+	const dispatch2 = useDispatch();
 	const onToggleTheme = () => {
-		dispatch2(themeActions.toggleTheme())
-	}
+		dispatch2(themeActions.toggleTheme());
+	};
 
 	//Handle Click on Subjects Module
 	const onClickSubjects = () => {
-		props.navigation.navigate('Subjects');
-	}
+		props.navigation.navigate("Subjects");
+	};
 
 	//styling responsible for choosing the color of the modules depending on the theme
 	const colorsModule = {
 		backgroundColor:
 			theme === "dark"
 				? CustomTheme["color-primary-600"]
-				: CustomTheme["color-primary-200"],
+				: CustomTheme["color-primary-100"],
 		borderColor: theme === "dark" ? "white" : CustomTheme["color-primary-600"],
 		shadowColor: theme === "dark" ? CustomTheme["color-primary-600"] : "#bbb",
 	};
@@ -95,7 +97,10 @@ const ManagerScreen = props => {
 					// accessoryRight={renderRightActions}
 				/>
 				<Layout level={"2"} style={styles.screen}>
-					<TouchableCmp style={{ ...colorsModule, ...styles.module }} onPress={onClickSubjects}>
+					<TouchableCmp
+						style={{ ...colorsModule, ...styles.module }}
+						onPress={onClickSubjects}
+					>
 						<View
 							style={{
 								...styles.leftColumn,
@@ -131,7 +136,10 @@ const ManagerScreen = props => {
 								padding: 14,
 							}}
 						>
-							{subjects ? (
+							{subjects.length > 0 ? (
+								// 	<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+								// 	<Text style={{fontFamily: 'yellow-tail', fontSize: 110, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500'], textAlign: 'center', paddingHorizontal: 22}}>{subjects.length}</Text>
+								// </View>
 								subjects.slice(0, 6).map((subject) => {
 									return (
 										<View
@@ -139,32 +147,56 @@ const ManagerScreen = props => {
 											style={{
 												padding: 3,
 												margin: 2,
-												backgroundColor: subject.color,
-												borderRadius: 12,
+												//backgroundColor: 'black',
+												borderRadius: 10,
 												alignContent: "center",
 												alignItems: "center",
-												borderRightWidth: 3,
-												borderLeftWidth: 3,
-												borderColor: "white",
+												backgroundColor:
+													theme === "dark"
+														? "#224"
+														: CustomTheme["color-primary-200"],
+												borderRightWidth: 5,
+												borderLeftWidth: 5,
+												// borderTopWidth:1,
+												// borderBottomWidth: 1,
+												borderColor: subject.color,
 											}}
 										>
-											<Text style={styles.subjectText}>{subject.title}</Text>
+											<Text style={{...styles.subjectText, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-700']}}>{subject.title}</Text>
 										</View>
 									);
 								})
-								
 							) : (
-								<View style={{ flex: 1 }}>
-									<Text style={{ fontSize: 22, color: "white" }}>
+								<View
+									style={{
+										flex: 1,
+										alignItems: "center",
+										justifyContent: "center",
+									}}
+								>
+									<Text
+										style={{
+											fontFamily: "yellow-tail",
+											fontSize: 26,
+											color: "white",
+											textAlign: "center",
+											paddingHorizontal: 4,
+										}}
+									>
 										Click to start adding your subjects!
 									</Text>
 								</View>
 							)}
 						</View>
 					</TouchableCmp>
-					<View style={{ ...styles.modulePomodoro, ...colorsModule }}>
+					<TouchableCmp
+						onPress={() => {
+							props.navigation.navigate("EditStudyFlow");
+						}}
+						style={{ ...styles.modulePomodoro, ...colorsModule }}
+					>
 						<View style={{}}>
-							<View style={{alignItems: 'center'}}>
+							<View style={{ alignItems: "center" }}>
 								<Text
 									style={{
 										...styles.title,
@@ -176,15 +208,55 @@ const ManagerScreen = props => {
 								>
 									StudyFlow
 								</Text>
-								<Divider style={{ alignSelf: "stretch", backgroundColor: theme === 'dark' ? 'white' : CustomTheme['color-primary-600'], margin: 5, marginBottom: 15 }} />
-								<Toggle checked={studyFlowActive} onChange={onToggleStudyFLow} style={styles.checkbox}>
-								</Toggle>
+								<Divider
+									style={{
+										alignSelf: "stretch",
+										backgroundColor:
+											theme === "dark"
+												? "white"
+												: CustomTheme["color-primary-600"],
+										margin: 5,
+										marginBottom: 20,
+									}}
+								/>
+								<View
+									style={{
+										height: 55,
+										alignItems: "center",
+										justifyContent: "space-between",
+									}}
+								>
+									<Ionicons
+										name="glasses-outline"
+										color={theme === "dark" ? "white" : CustomTheme['color-primary-500']}
+										size={18}
+									>
+										{" "}
+										{studyTimeRepresentation}
+									</Ionicons>
+									<Ionicons
+										name="cafe-outline"
+										size={18}
+										color={theme === "dark" ? "white" : CustomTheme['color-primary-500']}
+									>
+										{" "}
+										{breakTimeRepresentation}
+									</Ionicons>
+								</View>
+								<LottieView
+									style={styles.settingsAnimation}
+									source={require("../../assets/lottie/handPressing.json")}
+									autoPlay={true}
+									loop={true}
+									speed={1}
+									resizeMode="contain"
+								/>
 							</View>
 						</View>
-					</View>
+					</TouchableCmp>
 					<View style={{ ...styles.modulePomodoro, ...colorsModule }}>
 						<View style={{}}>
-							<View style={{alignItems: 'center'}}>
+							<View style={{ alignItems: "center" }}>
 								<Text
 									style={{
 										...styles.title,
@@ -196,12 +268,25 @@ const ManagerScreen = props => {
 								>
 									Dark Theme
 								</Text>
-								<Divider style={{ alignSelf: "stretch", backgroundColor: theme === 'dark' ? 'white' : CustomTheme['color-primary-600'], margin: 5, marginBottom: 15 }} />
-								<Toggle checked={theme === 'dark'} onChange={onToggleTheme} style={styles.checkbox}>
-					
-								</Toggle>
+								<Divider
+									style={{
+										alignSelf: "stretch",
+										backgroundColor:
+											theme === "dark"
+												? "white"
+												: CustomTheme["color-primary-600"],
+										margin: 5,
+										marginBottom: 15,
+									}}
+								/>
+
+								<Toggle
+									checked={theme === "dark"}
+									onChange={onToggleTheme}
+									style={styles.checkbox}
+								></Toggle>
 							</View>
-						</View> 
+						</View>
 					</View>
 				</Layout>
 			</SafeAreaView>
@@ -214,16 +299,19 @@ export default ManagerScreen;
 const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
-		flexWrap:"wrap",
+		flexWrap: "wrap",
 		alignItems: "flex-start",
 		justifyContent: "space-between",
 		padding: 25,
 		flexDirection: "row",
 	},
 	subjectText: {
-		fontSize: 14,
+		fontSize: 16,
 		color: "white",
-		fontFamily: "roboto",
+		fontFamily: "yellow-tail",
+		paddingHorizontal: 2,
+		alignItems: 'center',
+		justifyContent: 'center'
 	},
 	module: {
 		flexDirection: "row",
@@ -240,9 +328,9 @@ const styles = StyleSheet.create({
 		marginBottom: 25,
 	},
 	modulePomodoro: {
-		padding: 10,
 		borderRadius: 24,
 		width: "47%",
+		height: 145,
 		shadowColor: "#bbb",
 		shadowOffset: { width: 2, height: 0 },
 		shadowOpacity: 8,
@@ -257,7 +345,7 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		fontFamily: "roboto-bold",
-		fontSize: 22,
+		fontSize: 20,
 		color: CustomTheme["color-primary-600"],
 	},
 	leftColumn: {
@@ -273,8 +361,12 @@ const styles = StyleSheet.create({
 		right: 4,
 		top: 1,
 	},
+	settingsAnimation: {
+		width: 110,
+		position: "absolute",
+		top: 19,
+	},
 	checkbox: {
 		padding: 10,
-		
-	}
+	},
 });

@@ -6,10 +6,4 @@ export default class Subject {
 		this.topics = topics;
 	}
 
-	addTopic(topic) {
-		if (!this.topics) {
-			this.topics = [];
-		}
-		this.topics = topics.push(topic);
-	}
 }

@@ -96,10 +96,6 @@ const CustomAgenda = () => {
 	const events = useSelector((state) => state.events.events);
 	const [items, setItems] = useState(getItems());
 
-	const onViewableItemsChanged = useCallback(({ viewableItems, changed }) => {
-		console.log("Visible items are", viewableItems);
-		console.log("Changed in this iteration", changed);
-	}, []);
 
 	function getItems() {
 		const itemsToReturn = events.slice();

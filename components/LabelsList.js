@@ -29,27 +29,59 @@ const RemoveIcon = (props) => {
 };
 
 const Label = (props) => {
-	const [showTopics, setShowTopics] = useState(false)
+	const [showTopics, setShowTopics] = useState(false);
+	const topics = useSelector(state => state.subject.topics.filter(topic => topic.subjectId === props.item.id))
 	return (
-		<View style={{alignItems: 'flex-end'}}>
+		<View style={{ alignItems: "flex-end" }}>
 			<TouchableCmp
 				style={{
 					...styles.labelRowContainer,
 					backgroundColor: props.item.color,
 				}}
-				onPress={() => setShowTopics(prev => !prev)}
+				onPress={() => setShowTopics((prev) => !prev)}
 			>
-				<Ionicons name={showTopics ? "chevron-down-outline" : "chevron-up-outline"} color={'white'} size={18}><Text style={styles.subjectText}> {props.item.title}</Text></Ionicons>
-				<View style={{ flexDirection: "row" }}>
+				<Ionicons
+					name={showTopics ? "chevron-up-outline" : "chevron-down-outline"}
+					color={"white"}
+					size={18}
+				>
+					<Text style={styles.subjectText}> {props.item.title}</Text>
+				</Ionicons>
+				
+				<TouchableWithoutFeedback onPress={() => {props.onAddTopic(props.item.id, props.item.title, props.item.color);}} style={{ flexDirection: "row" }}>
 					{/* <View style={{ paddingRight: 10 }}><RemoveIcon style={{ width: 22, height: 22}} /></View> */}
 
 					<EditIcon style={{ width: 22, height: 22 }} />
-				</View>
+				</TouchableWithoutFeedback>
 			</TouchableCmp>
-			{showTopics && props.item.topics.map((topic) => {
-				<View key={topic} style={styles.topic}></View>
-			})}
-			{showTopics && <TouchableCmp onPress={() => {props.onAddTopic(props.item.id)}} style={{...styles.topic, backgroundColor: '#ddd'}}><Ionicons name="add-outline" size={14}><Text style={{color: 'black'}}>Add new topic</Text></Ionicons></TouchableCmp>}
+			{showTopics &&
+				topics.map((topic) => {
+					return (
+						<View
+							key={topic.id}
+							style={{ ...styles.topic, backgroundColor: props.item.color }}
+						>
+							<Ionicons name="book-outline" size={12} color={"white"}>
+								<Text style={{ color: "white", fontSize: 14 }}>
+									{" "}
+									{topic.title}
+								</Text>
+							</Ionicons>
+						</View>
+					);
+				})}
+			{showTopics && (
+				<TouchableCmp
+					onPress={() => {
+						props.onAddTopic(props.item.id, props.item.title, props.item.color);
+					}}
+					style={{ ...styles.topic, backgroundColor: "#ddd" }}
+				>
+					<Ionicons name="add-outline" size={14}>
+						<Text style={{ color: "black", fontSize: 14 }}>Add new topic</Text>
+					</Ionicons>
+				</TouchableCmp>
+			)}
 		</View>
 	);
 };
@@ -64,9 +96,12 @@ const LabelsList = ({ data, onAddTopic }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView
-			keyboardVerticalOffset={Platform.select({ ios: 0, android: 200 })}
-			behavior={Platform.OS === "ios" ? "padding" : null}
+		<TouchableWithoutFeedback
+			//keyboardVerticalOffset={Platform.select({ ios: 0, android: 200 })}
+			//behavior={Platform.OS === "ios" ? "padding" : null}
+			onPress={() => {
+				Keyboard.dismiss();
+			}}
 			style={{ flex: 1, alignItems: "center" }}
 		>
 			<Input
@@ -113,7 +148,7 @@ const LabelsList = ({ data, onAddTopic }) => {
                             return (<Ionicons name={"chevron-forward-circle-outline"} size={22} color={theme === 'dark' ? 'white' : 'black'} />)
                         }}
 					/> */}
-		</KeyboardAvoidingView>
+		</TouchableWithoutFeedback>
 	);
 };
 
@@ -130,10 +165,10 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	topic: {
-		width: Dimensions.get("window").width / 1.50,
+		width: Dimensions.get("window").width / 1.5,
 		height: Dimensions.get("window").height / 22,
-		backgroundColor: '#ddd',
-		justifyContent: 'center',
+		backgroundColor: "#ddd",
+		justifyContent: "center",
 		marginBottom: 6,
 		paddingLeft: 7,
 		paddingRight: 12,

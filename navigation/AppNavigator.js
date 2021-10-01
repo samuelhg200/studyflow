@@ -11,13 +11,6 @@ const AppNavigator = () => {
     const didTutorial = useSelector(state => state.tutorial.didTutorial)
 	const theme = useSelector(state => state.theme.theme)
 
-    const MyTheme = {
-        dark: theme === 'dark',
-        colors: {
-          ...DefaultTheme.colors
-        },
-      };
-
     const MyDarkTheme = {
         dark: theme === 'dark',
         colors: {
@@ -30,9 +23,21 @@ const AppNavigator = () => {
             notification: '#222B45'
         }
     }
+
+    const MyLightTheme = {
+        dark: theme === 'dark',
+        colors: {
+            border: 'white',
+            background: 'white',
+            primary: 'white',
+            card: 'white',
+            text: 'white',
+            notification: 'white'
+        }
+    }
     
     return (
-        <NavigationContainer theme={MyTheme.dark ? MyDarkTheme : DefaultTheme }>
+        <NavigationContainer theme={theme === 'dark' ? MyDarkTheme : MyLightTheme }>
             {didTutorial ? <StudyFlowNavigator /> : <TutorialNavigator/>}
         </NavigationContainer>
     )

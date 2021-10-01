@@ -1,4 +1,4 @@
-import { ADD_SUBJECT, ADD_TOPIC } from "../actions/subject";
+import { ADD_SUBJECT, REMOVE_SUBJECT, ADD_TOPIC, REMOVE_TOPIC } from "../actions/subject";
 
 import { SUBJECTS } from "../../data/dummy-data";
 import Subject from "../../models/subject";
@@ -6,6 +6,7 @@ import { labelColors } from "../../data/label-colors";
 
 const initialState = {
 	subjects: SUBJECTS,
+	topics: []
 };
 
 export default (state = initialState, action) => {
@@ -29,7 +30,7 @@ export default (state = initialState, action) => {
 				choosenColor = labelColors[Math.floor(Math.random() * 16)];
 			}
 			const subjectToAdd = new Subject(
-				Math.floor(Math.random() * 1000).toString(),
+				Math.floor(Math.random() * 10000).toString(),
 				action.subjectTitle,
 				choosenColor,
 				[]
@@ -38,17 +39,32 @@ export default (state = initialState, action) => {
 				...state,
 				subjects: state.subjects.concat(subjectToAdd),
 			};
-		case ADD_TOPIC:
-			const newSubjects = state.subjects.concat()
-			newSubjects.forEach(subject => {
-				if (action.subjectId === subject.id){
-					subject.topics.push(action.topicTitle)
-				}
-			})
+		case REMOVE_SUBJECT:
+			const updatedSubjects = state.subjects.filter(subject => subject.id !== action.subjectId)
+			const updatedTopics = state.topics.filter(topic => topic.subjectId !== action.subjectId)
 			return {
 				...state,
-				subjects: newSubjects,
+				subjects: updatedSubjects,
+				topics: updatedTopics
+			}
+		case ADD_TOPIC:
+			const newTopicToAdd = {
+				id: Math.floor(Math.random() * 10000).toString(),
+				subjectId: action.subjectId,
+				title: action.topicTitle,
+			}
+			
+			return {
+				...state,
+				topics: state.topics.concat(newTopicToAdd),
 			};
+		case REMOVE_TOPIC:
+			const newTopics = state.topics.filter(topic => topic.id !== action.topicId)
+			return {
+				...state,
+				topics: newTopics
+			}
+			
 		default:
 			return state;
 	}

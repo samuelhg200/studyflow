@@ -8,9 +8,8 @@ import {
 	View,
 	FlatList,
 	ActivityIndicator,
-	Alert
+	Alert,
 } from "react-native";
-import { Agenda } from "react-native-calendars";
 import { Card, Layout, Button, Text } from "@ui-kitten/components";
 import moment from "moment";
 import { FloatingAction } from "react-native-floating-action";
@@ -18,7 +17,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getIconStringBasedOnEventType } from "../../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
 import * as eventsActions from "../../store/actions/events";
-import * as studyFlowActions from '../../store/actions/studyFlow'
+import * as studyFlowActions from "../../store/actions/studyFlow";
 import customTheme from "../../assets/UIkitten/custom-theme.json";
 import HeaderButton from "../../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -59,7 +58,7 @@ const actions = [
 	{
 		text: "Study Session",
 		icon: require("../../assets/icons/glasses.png"),
-		name: "study-session",
+		name: "studySession",
 		position: 5,
 		color: customTheme["color-primary-500"],
 		iconName: "glasses-outline",
@@ -139,40 +138,66 @@ function getDates(startDate, stopDate) {
 
 const Footer = (props) => (
 	<View {...props} style={[props.style, styles.footerContainer]}>
-		{props.studyFlowActive ? <Button
-			style={styles.footerControl}
-			onPress={() => {
-				props.previewHandler(props.item.id.toISOString());
-			}}
-			size="small"
-			status="basic"
-		>
-			<Ionicons name="eye-outline" size={14} /> Preview
-		</Button> : <TouchableCmp onPress={() => {
-			Alert.alert('Activate StudyFlow Mode?', 'Start using studyflow mode to improve your experience and get tailored statistics and feedback on your learning.', [{text: 'Activate', onPress:() => {props.toggleStudyFlow()}}, {text: 'Don\'t use'}])
-			}}>
+		{props.studyFlowConfig[props.item.type] ? (
 			<Button
-			style={styles.footerControl}
-			onPress={() => {
-				props.previewHandler(props.item.id.toISOString());
-			}}
-			size="small"
-			status="basic"
-			disabled={true}
-		>
-			<Ionicons name="eye-outline" size={14} /> Preview
-		</Button>
-		</TouchableCmp>}
+				style={styles.footerControl}
+				onPress={() => {
+					props.previewHandler(props.item.id.toISOString());
+				}}
+				size="small"
+				status="basic"
+			>
+				<Ionicons name="eye-outline" size={14}/> Preview
+			</Button>
+		) : (
+			<TouchableCmp
+				//style={{backgroundColor: props.color,}}
+				onPress={() => {
+					Alert.alert(
+						`Activate StudyFlow Mode for ${props.item.type}?`,
+						"Start using studyflow mode to improve your experience and get tailored statistics and feedback on your learning.",
+						[
+							{
+								text: "Activate",
+								onPress: () => {
+									props.updateEventConfig(props.item.type, !props.studyFlowConfig[props.item.type])
+								},
+							},
+							{ text: "Don't use" },
+						]
+					);
+				}}
+			>
+				<Button
+					style={styles.footerControl}
+					onPress={() => {
+						props.previewHandler(props.item.id.toISOString());
+					}}
+					size="small"
+					status="basic"
+					disabled={!props.studyFlowConfig[props.item.type]}
+				>
+					<Ionicons name="timer-outline" size={14} /> StudyFlow
+				</Button>
+			</TouchableCmp>
+		)}
 		<Button
-			style={{ backgroundColor: props.color ,...styles.footerControl}}
+			style={{ backgroundColor: props.color, ...styles.footerControl }}
 			onPress={() => {
 				props.deleteHandler(props.item.id);
 			}}
 			size="small"
 			status="basic"
 		>
-			<Ionicons name="trash-outline" color={props.theme === 'dark' ? 'black' : 'white'} size={15} />
-			<Text style={{ color: props.theme === 'dark' ? 'black' : 'white' }}> Remove</Text>
+			<Ionicons
+				name="trash-outline"
+				color={props.theme === "dark" ? "black" : "white"}
+				size={15}
+			/>
+			<Text style={{ color: props.theme === "dark" ? "black" : "white" }}>
+				{" "}
+				Remove
+			</Text>
 		</Button>
 	</View>
 );
@@ -206,10 +231,7 @@ const Header = (props) => {
 					);
 				})}
 			</View>
-			<Text
-				category="s2"
-				style={{ fontSize: 12, color: props.color }}
-			>
+			<Text category="s2" style={{ fontSize: 12, color: props.color }}>
 				{props.item.timeRange}
 			</Text>
 		</View>
@@ -267,10 +289,11 @@ const ScheduleScreen = (props) => {
 	// //const [loadedEvents, setLoadedEvents] = useState([]);
 	// const [items, setItems] = useState({});
 	const dateToLoad = useSelector((state) => state.events.dateToTravelTo);
-	const theme = useSelector((state) => state.theme.theme)
+	const theme = useSelector((state) => state.theme.theme);
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
 	const dispatch3 = useDispatch();
+	const dispatch4 = useDispatch();
 	const animation = useRef(null);
 	//const [currentDay, setCurrentDay] = useState(moment());
 	const events = useSelector((state) => {
@@ -285,13 +308,24 @@ const ScheduleScreen = (props) => {
 	// 	'currentMonth': new Date(),
 	// });
 	const [scrollingEnabled, setScrollingEnabled] = useState(false);
-	const [loading, setLoading] = useState(true)
+	const [loading, setLoading] = useState(true);
 
-	const studyFlowActive = useSelector(state => state.studyFlow.active)
+	const studyFlowActive = useSelector((state) => state.studyFlow.active);
 	const toggleStudyFlow = () => {
-		dispatch3(studyFlowActions.toggleStudyFlow())
-	}
+		dispatch3(studyFlowActions.toggleStudyFlow());
+	};
 
+	const studyFlowEventConfig = useSelector(
+		(state) => state.studyFlow.eventConfig
+	);
+	const updateEventConfig = (type, newValue) => {
+		dispatch3(
+			studyFlowActions.updateEventConfig({
+				...studyFlowEventConfig,
+				[type]: newValue,
+			})
+		);
+	};
 
 	//const [monthToLoad, setMonthToLoad] = useState()
 
@@ -302,8 +336,8 @@ const ScheduleScreen = (props) => {
 	};
 
 	const loadingHandler = (bool) => {
-		setLoading(bool)
-	}
+		setLoading(bool);
+	};
 
 	useEffect(() => {
 		props.navigation.setOptions({
@@ -406,7 +440,6 @@ const ScheduleScreen = (props) => {
 	// }, []);
 
 	useEffect(() => {
-	
 		setItems(getItems(events.slice(), dateToLoad));
 		//setLoading(false)
 		props.navigation.setOptions({
@@ -452,10 +485,16 @@ const ScheduleScreen = (props) => {
 								...styles.card,
 								height: 95,
 								justifyContent: "center",
-								backgroundColor: theme === 'dark' ? customTheme["color-primary-600"] : customTheme["color-primary-300"],
-								borderColor: theme === 'dark' ? customTheme["color-primary-400"] : customTheme["color-primary-600"],
+								backgroundColor:
+									theme === "dark"
+										? customTheme["color-primary-600"]
+										: customTheme["color-primary-300"],
+								borderColor:
+									theme === "dark"
+										? customTheme["color-primary-400"]
+										: customTheme["color-primary-600"],
 								borderWidth: 1,
-								marginBottom: 5
+								marginBottom: 5,
 							}}
 						>
 							{/* <TouchableCmp
@@ -509,12 +548,20 @@ const ScheduleScreen = (props) => {
 													justifyContent: "center",
 												}}
 											>
-												<Layout style={{ borderRadius: 10, padding: 8, alignItems: 'center', justifyContent: 'center' }}>
-												<Ionicons
-													name={action.iconName}
-													color={theme === 'dark' ? 'white' : 'black'}
-													size={18}
-												/></Layout>
+												<Layout
+													style={{
+														borderRadius: 10,
+														padding: 8,
+														alignItems: "center",
+														justifyContent: "center",
+													}}
+												>
+													<Ionicons
+														name={action.iconName}
+														color={theme === "dark" ? "white" : "black"}
+														size={18}
+													/>
+												</Layout>
 											</TouchableCmp>
 										);
 									})}
@@ -543,44 +590,62 @@ const ScheduleScreen = (props) => {
 									) : (
 										<View style={styles.dateDisplayer}></View>
 									)}
-									<Layout level="2" style={{flex: 1}}>
-									<TouchableCmp style={{ flex: 1, padding: 5 }}>
-										<Card
-										
-											style={styles.card}
-											disabled
-											footer={(props) => (
-												<Footer
-													{...props}
-													item={itemData.item}
-													deleteHandler={deleteEventHandler}
-													previewHandler={previewEventHandler}
-													theme={theme}
-													color={theme === 'dark' ? 'white' : customTheme['color-primary-300']}
-													studyFlowActive={studyFlowActive}
-													toggleStudyFlow={toggleStudyFlow}
-												/>
-											)}
-											header={(props) => (
-												<Header {...props} item={itemData.item} color={theme === 'dark' ? 'white' : customTheme['color-primary-300']}/>
-											)}
-										>
-											<View style={{ flexDirection: "row" }}>
-												<Ionicons
-													name={iconName}
-													color={customTheme["color-primary-600"]}
-													size={24}
-												>
-													<Text
-														category="h6"
-														style={{ color: theme === 'dark' ? 'white' : customTheme["color-primary-600"] }}
-													>
-														{" " + itemData.item.title}
-													</Text>
-												</Ionicons>
-											</View>
-										</Card>
-									</TouchableCmp>
+									<Layout level="2" style={{ flex: 1 }}>
+										<TouchableCmp style={{ flex: 1, padding: 5 }}>
+											<Card
+												style={styles.card}
+												disabled
+												footer={(props) => (
+													<Footer
+														{...props}
+														item={itemData.item}
+														deleteHandler={deleteEventHandler}
+														previewHandler={previewEventHandler}
+														theme={theme}
+														color={
+															theme === "dark"
+																? "white"
+																: customTheme["color-primary-300"]
+														}
+														studyFlowActive={studyFlowActive}
+														toggleStudyFlow={toggleStudyFlow}
+														studyFlowConfig={studyFlowEventConfig}
+														updateEventConfig={updateEventConfig}
+													/>
+												)}
+												header={(props) => (
+													<Header
+														{...props}
+														item={itemData.item}
+														color={
+															theme === "dark"
+																? "white"
+																: customTheme["color-primary-300"]
+														}
+													/>
+												)}
+											>
+												<View style={{ flexDirection: "row", alignItems: 'center' }}>
+													<Ionicons
+														name={iconName}
+														color={customTheme["color-primary-600"]}
+														size={24}
+													/>
+														<Text
+															category="h6"
+															style={{
+																color:
+																	theme === "dark"
+																		? "white"
+																		: customTheme["color-primary-600"],
+															}}
+														>
+															{" " + itemData.item.title}
+														</Text>
+													
+												</View>
+											</Card>
+										</TouchableCmp>
 									</Layout>
 								</View>
 							);
@@ -608,7 +673,6 @@ const ScheduleScreen = (props) => {
 				ref={animation}
 				actions={actions}
 				onClose={() => setDayPressed(new Date())}
-				
 				onPressItem={(name) => {
 					props.navigation.navigate("AddItemToCalendar", {
 						type: name,
@@ -625,7 +689,12 @@ export const screenOptions = (navData) => {
 		headerTitle: navData.route.params
 			? navData.route.params.currentMonth
 			: moment().format("MMMM"),
-		headerTitleStyle: { color: customTheme["color-primary-500"], fontFamily: 'yellow-tail', fontSize: 30, paddingHorizontal: 4 },
+		headerTitleStyle: {
+			color: customTheme["color-primary-500"],
+			fontFamily: "yellow-tail",
+			fontSize: 30,
+			paddingHorizontal: 4,
+		},
 		//headerLeft: () => null,
 		headerLeft: () => (
 			<HeaderButtons HeaderButtonComponent={HeaderButton}>
@@ -684,7 +753,6 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		flex: 1,
-		
 	},
 	dateDisplayer: {
 		width: 60,
@@ -692,7 +760,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 	},
 	writtenDay: {
-		color: '#ccc',
+		color: "#ccc",
 		fontSize: 19,
 	},
 	dayNumber: {
@@ -701,10 +769,10 @@ const styles = StyleSheet.create({
 	},
 	indicator: {
 		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center',
-		height: 80
-	  }
+		alignItems: "center",
+		justifyContent: "center",
+		height: 80,
+	},
 });
 
 export default ScheduleScreen;

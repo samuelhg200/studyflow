@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	StyleSheet,
 	View,
@@ -30,6 +30,7 @@ import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
 import * as studyFlowActions from "../../store/actions/studyFlow";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
 	getStudyFlow,
@@ -41,18 +42,27 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 function timeToString2(time) {
 	const date = new Date(time);
 	// return date.toISOString().split("T")[0];
-
 	let tzoffset = date.getTimezoneOffset() * 60000; //offset in milliseconds
 	let localISOTime = new Date(date - tzoffset).toISOString();
 	return localISOTime.split("T")[0];
 }
 
+const recordStartTime = async () => {
+	try {
+		const now = new Date();
+		await AsyncStorage.setItem("@start_time", now.toISOString());
+	} catch (err) {
+		// TODO: handle errors from setItem properly
+		console.warn(err);
+	}
+};
+
 const Footer = (props) => {
 	return (
 		<View {...props} style={[props.style, styles.footerContainer]}>
-			{props.studyFlowActive ? (
+			{props.studyFlowConfig[props.item.type] ? (
 				<Button
-					style={styles.footerControl}
+					style={styles.button}
 					onPress={() => {
 						props.previewHandler(props.item.id.toISOString());
 					}}
@@ -65,13 +75,16 @@ const Footer = (props) => {
 				<TouchableCmp
 					onPress={() => {
 						Alert.alert(
-							"Activate StudyFlow Mode?",
+							`Activate StudyFlow Mode for ${props.item.type}?`,
 							"Start using studyflow mode to improve your experience and get tailored statistics and feedback on your learning.",
 							[
 								{
 									text: "Activate",
 									onPress: () => {
-										props.toggleStudyFlow();
+										props.updateEventConfig(
+											props.item.type,
+											!props.studyFlowConfig[props.item.type]
+										);
 									},
 								},
 								{ text: "Don't use" },
@@ -80,7 +93,7 @@ const Footer = (props) => {
 					}}
 				>
 					<Button
-						style={styles.footerControl}
+						style={styles.button}
 						onPress={() => {
 							props.previewHandler(props.item.id.toISOString());
 						}}
@@ -88,13 +101,12 @@ const Footer = (props) => {
 						status="basic"
 						disabled={true}
 					>
-						<Ionicons name="eye-outline" size={14} /> Preview
+						<Ionicons name="timer-outline" size={14} /> StudyFlow
 					</Button>
 				</TouchableCmp>
 			)}
-
 			<Button
-				style={styles.footerControl}
+				style={styles.button}
 				onPress={() => {
 					props.deleteHandler(props.item.id);
 				}}
@@ -160,35 +172,11 @@ const Header = (props) => {
 	);
 };
 
-// {eventsToday.map((event) => {
-// 	const iconName = getIconStringBasedOnEventType(event.type);
-
-// 	return (
-// 		<View style={styles.cardContainer} key={event.id}>
-// 			<Card
-// 				style={styles.card}
-// 				footer={(props) => (
-// 					<Footer
-// 						{...props}
-// 						item={event} //deleteHandler={deleteEventHandler}
-// 					/>
-// 				)}
-// 				header={(props) => <Header {...props} item={event} />}
-// 			>
-// 				<View style={{ flexDirection: "row" }}>
-// 					<Ionicons name={iconName} size={18}>
-// 						<Text category="h6">{" " + event.title}</Text>
-// 					</Ionicons>
-// 				</View>
-// 			</Card>
-// 		</View>
-// 	);
-// })}
-
 const StartFlowScreen = (props) => {
 	// get all events for today
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
+	const dispatch3 = useDispatch();
 	const eventsToday = useSelector((state) =>
 		state.events.events.length > 0
 			? state.events.events.filter((event) =>
@@ -202,6 +190,18 @@ const StartFlowScreen = (props) => {
 		dispatch2(studyFlowActions.toggleStudyFlow());
 	};
 
+	const studyFlowEventConfig = useSelector(
+		(state) => state.studyFlow.eventConfig
+	);
+	const updateEventConfig = (type, newValue) => {
+		dispatch3(
+			studyFlowActions.updateEventConfig({
+				...studyFlowEventConfig,
+				[type]: newValue,
+			})
+		);
+	};
+
 	const [selectedEventId, setSelectedEventId] = useState(null);
 	const deleteEventHandler = (id) => {
 		dispatch(eventsActions.deleteEvent(id));
@@ -211,6 +211,15 @@ const StartFlowScreen = (props) => {
 			id: id,
 		});
 	};
+	useEffect(() => {
+		if (eventsToday.length > 0) {
+			if (!selectedEventId) {
+				setSelectedEventId(eventsToday[0].id);
+			}
+		} else {
+			setSelectedEventId(null);
+		}
+	}, [eventsToday]);
 
 	return eventsToday.length === 0 ? (
 		<Layout style={{ flex: 1 }}>
@@ -340,16 +349,8 @@ const StartFlowScreen = (props) => {
 								const iconName = getIconStringBasedOnEventType(
 									itemData.item.type
 								);
-
 								return (
-									<TouchableCmp
-										onPress={() => {
-											if (itemData.item.id === selectedEventId) {
-												setSelectedEventId(null);
-											} else {
-												setSelectedEventId(itemData.item.id);
-											}
-										}}
+									<View
 										style={
 											selectedEventId === itemData.item.id
 												? { ...styles.cardContainer, ...styles.selected }
@@ -366,32 +367,66 @@ const StartFlowScreen = (props) => {
 													item={itemData.item}
 													deleteHandler={deleteEventHandler}
 													previewHandler={previewEventHandler}
-													studyFlowActive={studyFlowActive}
-													toggleStudyFlow={toggleStudyFlow}
+													studyFlowConfig={studyFlowEventConfig}
+													updateEventConfig={updateEventConfig}
 												/>
 											)}
 											header={(props) => (
 												<Header {...props} item={itemData.item} />
 											)}
 										>
-											<View style={{ flexDirection: "row" }}>
-												<Ionicons
-													name={iconName}
-													color={CustomTheme["color-primary-500"]}
-													size={18}
+											<View
+												style={{
+													flex: 1,
+													flexDirection: "row",
+													alignItems: "center",
+													justifyContent: "space-between",
+												}}
+											>
+												<View
+													style={{ flexDirection: "row", alignItems: "center" }}
 												>
-													<Text category="h6">{" " + itemData.item.title}</Text>
-												</Ionicons>
+													<Ionicons
+														name={iconName}
+														color={CustomTheme["color-primary-500"]}
+														size={24}
+													/>
+													<Text category="h5">{" " + itemData.item.title}</Text>
+												</View>
+												<TouchableCmp
+													onPress={() => {
+														recordStartTime().then(
+															props.navigation.navigate("Timer", {
+																eventId: itemData.item.id.toISOString(),
+															})
+														);
+														//console.log(itemData.item.id.toISOString())
+													}}
+												>
+													<Ionicons
+														name="play-circle-outline"
+														size={40}
+														color={CustomTheme["color-primary-500"]}
+													/>
+												</TouchableCmp>
 											</View>
 										</Card>
-									</TouchableCmp>
+									</View>
 								);
 							}}
 						></FlatList>
 					</View>
 					<Divider style={{ width: "95%" }} />
 					<View style={styles.optionsContainer}>
-						<Button style={{ marginTop: 30 }} size="giant" onPress={() => {}}>
+						<Button
+							style={{ marginTop: 30 }}
+							size="giant"
+							onPress={() => {
+								props.navigation.navigate("Timer", {
+									eventId: selectedEventId.toISOString(),
+								});
+							}}
+						>
 							{"Start Session "} {" >"}
 						</Button>
 					</View>
@@ -463,7 +498,7 @@ const styles = StyleSheet.create({
 	},
 	footerContainer: {
 		flexDirection: "row",
-		justifyContent: "flex-end",
+		justifyContent: "center",
 	},
 	card: {
 		borderRadius: 10,
@@ -490,8 +525,9 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		alignContent: "center",
 	},
-	footerControl: {
-		marginHorizontal: 2,
+	footerControl: {},
+	button: {
+		marginHorizontal: 5,
 	},
 	headerContainer: {
 		justifyContent: "space-between",

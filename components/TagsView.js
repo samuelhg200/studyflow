@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Button, TouchableOpacity, TouchableNativeFeedback, Text } from "react-native";
+import {
+	View,
+	StyleSheet,
+	Button,
+	TouchableOpacity,
+	TouchableNativeFeedback,
+	Text,
+} from "react-native";
 import { useSelector } from "react-redux";
 import BackgroundButton from "../components/BackgroundButton";
 import CustomTheme from "../assets/UIkitten/custom-theme.json";
@@ -10,8 +17,8 @@ import CustomTheme from "../assets/UIkitten/custom-theme.json";
 */
 
 let TouchableCmp = TouchableOpacity;
-if (Platform.OS === 'android'){
-	TouchableCmp = TouchableNativeFeedback
+if (Platform.OS === "android") {
+	TouchableCmp = TouchableNativeFeedback;
 }
 
 const TagsView = (props) => {
@@ -37,6 +44,31 @@ const TagsView = (props) => {
 
 	return (
 		<View style={styles.container}>
+			{props.showAllMode && <TouchableCmp style={styles.touchable} onPress={props.onPressShowAll}>
+				<View
+					style={{
+						...styles.view,
+						backgroundColor: theme === "dark" ? "black" : "white",
+						borderColor: CustomTheme["color-primary-500"],
+					}}
+				>
+					<Ionicons
+						name={props.showingAll ? 'eye-off-outline' :  "eye-outline"}
+						size={18}
+						color={CustomTheme["color-primary-500"]}
+					/>
+					<Text
+						style={{
+							...styles.text,
+							color: CustomTheme["color-primary-500"],
+						}}
+					>
+						{props.showingAll ? ' Hide others' :  " Show All"}
+						
+					</Text>
+				</View>
+			</TouchableCmp>}
+			
 			{makeButtons()}
 			<TouchableCmp style={styles.touchable} onPress={props.onPressAdd}>
 				<View

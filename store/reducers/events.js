@@ -4,6 +4,7 @@ import {
 	DELETE_EVENT,
 	UPDATE_DAY_TO_TRAVEL_TO,
 	UPDATE_DATE_TO_TRAVEL_TO,
+	UPDATE_ACTIVITY,
 } from "../actions/events";
 
 const initialState = {
@@ -54,6 +55,19 @@ export default (state = initialState, action) => {
 				...state,
 				dateToTravelTo: action.date
 			}
+		case UPDATE_ACTIVITY: 
+			const eventsCopy = state.events.splice()
+			eventsCopy.forEach((event) => {
+				if(event.id === action.eventId){
+					event.activity = action.activity
+				}
+			}
+			)
+			return {
+				...state,
+				events: eventsCopy
+			}
+			
 		default:
 			return state;
 	}

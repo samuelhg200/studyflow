@@ -1,5 +1,10 @@
-import React, { useRef, useState, useEffect, } from "react";
-import { StyleSheet, TouchableWithoutFeedback, Image } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import {
+	StyleSheet,
+	TouchableWithoutFeedback,
+	Image,
+	Alert,
+} from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LottieView from "lottie-react-native";
@@ -30,12 +35,20 @@ import TimerScreen from "../screens/MainApp/TimerScreen";
 import EventPreviewScreen from "../screens/Modals/EventPreviewScreen";
 import SubjectsModal from "../screens/Modals/SubjectsModal";
 import TopicsModal from "../screens/Modals/TopicsModal";
+import EditStudyFLowModal from "../screens/Modals/EditStudyFLowModal";
+import PreTimerModal from "../screens/Modals/PreTimerModal";
+import HeaderButton from "../components/HeaderButton";
+import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
 import customTheme from "../assets/UIkitten/custom-theme.json";
 
 import CustomTheme from "../assets/UIkitten/custom-theme.json";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as subjectActions from "../store/actions/subject";
+import * as studyFlowActions from "../store/actions/studyFlow";
+
+import { useDispatch } from "react-redux";
 
 const MetricsStackNavigator = createStackNavigator();
 const MetricsNavigator = () => (
@@ -45,35 +58,80 @@ const MetricsNavigator = () => (
 );
 
 const ManagerStackNavigator = createStackNavigator();
-const ManagerNavigator = () => (
-	<ManagerStackNavigator.Navigator>
-		<ManagerStackNavigator.Screen
-			name="Manager"
-			component={ManagerScreen}
-			options={{ headerShown: false }}
-		/>
-		<ManagerStackNavigator.Screen
-			name="Subjects"
-			component={SubjectsModal}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "Subjects",
-				headerBackTitle: "Manager",
-			}}
-		/>
-		<ManagerStackNavigator.Screen
-			name="Topics"
-			component={TopicsModal}
-			options={(navData) => ({
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "Topics",
-				headerBackTitle: "Subject",
-			})}
-		/>
-	</ManagerStackNavigator.Navigator>
-);
+const ManagerNavigator = () => {
+	const dispatch = useDispatch();
+	const dispatch2 = useDispatch();
+	return (
+		<ManagerStackNavigator.Navigator>
+			<ManagerStackNavigator.Screen
+				name="Manager"
+				component={ManagerScreen}
+				options={{ headerShown: false }}
+			/>
+			<ManagerStackNavigator.Screen
+				name="Subjects"
+				component={SubjectsModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Subjects",
+					headerBackTitle: "Manager",
+				}}
+			/>
+			<ManagerStackNavigator.Screen
+				name="Topics"
+				component={TopicsModal}
+				options={(navData) => ({
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: navData.route.params.subjectTitle,
+					headerBackTitle: "Subjects",
+					headerRight: () => {
+						return (
+							<HeaderButtons HeaderButtonComponent={HeaderButton}>
+								<Item
+									title="topics"
+									iconName={"trash-outline"}
+									onPress={() => {
+										Alert.alert(
+											`Delete subject '${navData.route.params.subjectTitle}'`,
+											"Are you sure you want to delete this subject? You will loose all stats and linked topics!",
+											[
+												{
+													text: "Delete",
+													onPress: () => {
+														dispatch(
+															subjectActions.removeSubject(
+																navData.route.params.subjectId
+															)
+														);
+														navData.navigation.goBack();
+													},
+												},
+												{ text: "Keep" },
+											]
+										);
+									}}
+								/>
+							</HeaderButtons>
+						);
+					},
+				})}
+			/>
+			<ManagerStackNavigator.Screen
+				name="EditStudyFlow"
+				component={EditStudyFLowModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Edit StudyFlow",
+					headerBackTitle: "Manager",
+					
+				}}
+			/>
+		</ManagerStackNavigator.Navigator>
+	);
+};
 
 const StartFlowStackNavigator = createStackNavigator();
 const StartFlowNavigator = () => (
@@ -105,6 +163,56 @@ const StartFlowNavigator = () => (
 			}}
 		/>
 		<StartFlowStackNavigator.Screen
+			name="Subjects"
+			component={SubjectsModal}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "Subjects",
+				headerBackTitle: "Manager",
+			}}
+		/>
+		<StartFlowStackNavigator.Screen
+			name="Topics"
+			component={TopicsModal}
+			options={(navData) => ({
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: navData.route.params.subjectTitle,
+				headerBackTitle: "Subjects",
+				headerRight: () => {
+					return (
+						<HeaderButtons HeaderButtonComponent={HeaderButton}>
+							<Item
+								title="topics"
+								iconName={"trash-outline"}
+								onPress={() => {
+									Alert.alert(
+										`Delete subject '${navData.route.params.subjectTitle}'`,
+										"Are you sure you want to delete this subject? You will loose all stats and linked topics!",
+										[
+											{
+												text: "Delete",
+												onPress: () => {
+													dispatch(
+														subjectActions.removeSubject(
+															navData.route.params.subjectId
+														)
+													);
+													navData.navigation.goBack();
+												},
+											},
+											{ text: "Keep" },
+										]
+									);
+								}}
+							/>
+						</HeaderButtons>
+					);
+				},
+			})}
+		/>
+		<StartFlowStackNavigator.Screen
 			name="EventPreview"
 			component={EventPreviewScreen}
 			options={{
@@ -114,7 +222,28 @@ const StartFlowNavigator = () => (
 				headerBackTitle: "Home",
 			}}
 		/>
-		<StartFlowStackNavigator.Screen name="Timer" component={TimerScreen} />
+		<StartFlowStackNavigator.Screen
+			name="PreTimer"
+			component={PreTimerModal}
+			options={{
+				presentation: "modal",
+				headerTintColor: customTheme["color-primary-500"],
+				headerTitle: "",
+				headerBackTitle: "Home",				
+			}}
+		/>
+		<StartFlowStackNavigator.Screen
+				name="EditStudyFlow"
+				component={EditStudyFLowModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Edit StudyFlow",
+					headerBackTitle: "Event",
+				}}
+			/>
+		
+		<StartFlowStackNavigator.Screen name="Timer" component={TimerScreen} options={{headerShown: false}} />
 		<StartFlowStackNavigator.Screen name="Store" component={StoreScreen} />
 		<StartFlowStackNavigator.Screen name="Profile" component={ProfileScreen} />
 	</StartFlowStackNavigator.Navigator>
@@ -159,15 +288,55 @@ const ScheduleNavigator = () => {
 				}}
 			/>
 			<ScheduleStackNavigator.Screen
-			name="Subjects"
-			component={SubjectsModal}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "Subjects",
-				headerBackTitle: "Calendar",
-			}}
-		/>
+				name="Subjects"
+				component={SubjectsModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Subjects",
+					headerBackTitle: "Calendar",
+				}}
+			/>
+			<ScheduleStackNavigator.Screen
+				name="Topics"
+				component={TopicsModal}
+				options={(navData) => ({
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: navData.route.params.subjectTitle,
+					headerBackTitle: "Subjects",
+					headerRight: () => {
+						return (
+							<HeaderButtons HeaderButtonComponent={HeaderButton}>
+								<Item
+									title="PastMonth"
+									iconName={"trash-outline"}
+									onPress={() => {
+										Alert.alert(
+											`Delete subject '${navData.route.params.subjectTitle}'`,
+											"Are you sure you want to delete this subject? You will loose all stats and linked topics!",
+											[
+												{
+													text: "Delete",
+													onPress: () => {
+														dispatch(
+															subjectActions.removeSubject(
+																navData.route.params.subjectId
+															)
+														);
+														navData.navigation.goBack();
+													},
+												},
+												{ text: "Keep" },
+											]
+										);
+									}}
+								/>
+							</HeaderButtons>
+						);
+					},
+				})}
+			/>
 		</ScheduleStackNavigator.Navigator>
 	);
 };
@@ -198,7 +367,7 @@ const BottomTabBar = ({ navigation, state, managerIconRef }) => {
 	);
 };
 
-const StudyFlowNavigator = ({managerIconRef}) => {
+const StudyFlowNavigator = ({ managerIconRef }) => {
 	return (
 		<StudyFlowTabNavigator.Navigator
 			initialRouteName="StartFlowStack"
@@ -208,44 +377,6 @@ const StudyFlowNavigator = ({managerIconRef}) => {
 				//tabBarActiveTintColor: customTheme['color-primary-500'],
 				headerShown: false,
 				tabBarShowLabel: false,
-				tabBarIcon: ({ focused, color, size }) => {
-					let filepath;
-					let style = {};
-
-					switch (route.name) {
-						case "StartFlowStack":
-							if (!focused) {
-								filepath = require("../assets/lottie/sand-clock.json");
-							} else {
-								filepath = require("../assets/lottie/sandClockRed.json");
-							}
-							style = { width: 60, overflow: "visible" };
-							return (
-								<View
-									style={{
-										position: "absolute",
-										bottom: 15, // space from bottombar
-										height: 58,
-										width: 58,
-										borderRadius: 58,
-										backgroundColor: "white",
-										borderColor: focused ? color : "#ccc",
-										borderWidth: 0.5,
-										justifyContent: "center",
-										alignItems: "center",
-									}}
-								>
-									<LottieView
-										source={filepath}
-										autoPlay={focused}
-										style={style}
-									/>
-								</View>
-							);
-						default:
-							return;
-					}
-				},
 			})}
 		>
 			{/* <StudyFlowTabNavigator.Screen
