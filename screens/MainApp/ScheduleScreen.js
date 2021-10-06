@@ -147,7 +147,7 @@ const Footer = (props) => (
 				size="small"
 				status="basic"
 			>
-				<Ionicons name="eye-outline" size={14}/> Preview
+				<Ionicons name="eye-outline" size={14} /> Preview
 			</Button>
 		) : (
 			<TouchableCmp
@@ -160,7 +160,10 @@ const Footer = (props) => (
 							{
 								text: "Activate",
 								onPress: () => {
-									props.updateEventConfig(props.item.type, !props.studyFlowConfig[props.item.type])
+									props.updateEventConfig(
+										props.item.type,
+										!props.studyFlowConfig[props.item.type]
+									);
 								},
 							},
 							{ text: "Don't use" },
@@ -239,37 +242,39 @@ const Header = (props) => {
 };
 
 function getItems(eventsCopy, date = new Date()) {
-	let key = 0;
-	date = new Date(date);
+	
+		let key = 0;
+		date = new Date(date);
 
-	const allItems = [];
+		const allItems = [];
 
-	const minMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-	const maxMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-	const allDates = getDates(minMonth, maxMonth);
-	for (let i = 0; i < allDates.length; i++) {
-		const currentItem = {};
+		const minMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+		const maxMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+		const allDates = getDates(minMonth, maxMonth);
+		for (let i = 0; i < allDates.length; i++) {
+			const currentItem = {};
 
-		key++;
-		const currentDate = allDates[i].setHours(0, 0, 0, 0);
+			key++;
+			const currentDate = allDates[i].setHours(0, 0, 0, 0);
 
-		const formatedCurrentDate = timeToString2(currentDate);
+			const formatedCurrentDate = timeToString2(currentDate);
 
-		currentItem[formatedCurrentDate] = [];
-		currentItem["key"] = key.toString();
-		if (eventsCopy.length > 0) {
-			for (let j = 0; j < eventsCopy.length; j++) {
-				if (currentDate === new Date(eventsCopy[j].date).setHours(0, 0, 0, 0)) {
-					let range = getRange(eventsCopy[j].date, eventsCopy[j].duration);
-					eventsCopy[j]["timeRange"] = range;
-					currentItem[formatedCurrentDate].push(eventsCopy[j]);
+			currentItem[formatedCurrentDate] = [];
+			currentItem["key"] = key.toString();
+			if (eventsCopy.length > 0) {
+				for (let j = 0; j < eventsCopy.length; j++) {
+					if (
+						currentDate === new Date(eventsCopy[j].date).setHours(0, 0, 0, 0)
+					) {
+						let range = getRange(eventsCopy[j].date, eventsCopy[j].duration);
+						eventsCopy[j]["timeRange"] = range;
+						currentItem[formatedCurrentDate].push(eventsCopy[j]);
+					}
 				}
 			}
+			allItems.push(currentItem);
 		}
-		allItems.push(currentItem);
-	}
-
-	return allItems;
+		return allItems;
 }
 
 const DayDisplayer = ({ day }) => {
@@ -338,6 +343,27 @@ const ScheduleScreen = (props) => {
 	const loadingHandler = (bool) => {
 		setLoading(bool);
 	};
+	useEffect(() => {
+		
+			const items = getItems(events.slice(), dateToLoad);
+			setItems(items);
+			//travel to index
+			// if (flatListRef.current) {
+			// 	try {
+			// 		setScrollingEnabled(false);
+			// 		setTimeout(
+			// 			() =>
+			// 				flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+			// 			100
+			// 		);
+			// 		setScrollingEnabled(true);
+			// 	} catch (err) {}
+			// }
+		
+		props.navigation.setOptions({
+			headerTitle: moment(dateToLoad).format("MMMM YYYY"),
+		});
+	}, [events, dateToLoad]);
 
 	useEffect(() => {
 		props.navigation.setOptions({
@@ -370,15 +396,6 @@ const ScheduleScreen = (props) => {
 		// });
 	}, [dateToLoad, dispatch2]);
 
-	useEffect(() => {
-		//month to load
-		//monthToLoadRoute = props.route.params.monthToLoad ? props.route.params.monthToLoad : newDate()
-		//setMonthToLoad(monthToLoadRoute)
-		//day to skip to
-		//dayToTravelToRoute = props.route.params.dayToTravelTo ? props.route.params.dayToTravelTo : newDate().getDate()
-		//setDayToTravelTo(dayToTravelToRoute)
-	}, [props.route.params]);
-
 	const deleteEventHandler = (id) => {
 		dispatch(eventsActions.deleteEvent(id));
 	};
@@ -390,13 +407,27 @@ const ScheduleScreen = (props) => {
 
 	const flatListRef = useRef(null);
 
+	// useEffect(() => {
+	// 	if (flatListRef.current) {
+	// 		try {
+	// 			setScrollingEnabled(false);
+	// 			setTimeout(
+	// 				() => flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+	// 				400
+	// 			);
+	// 			setScrollingEnabled(true);
+	// 		} catch (err) {}
+	// 	}
+	// }, [dayToTravelTo]);
+
 	useEffect(() => {
 		if (flatListRef.current) {
 			try {
 				setScrollingEnabled(false);
 				setTimeout(
-					() => flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
-					1200
+					() =>
+						flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+					1000
 				);
 				setScrollingEnabled(true);
 			} catch (err) {}
@@ -406,12 +437,11 @@ const ScheduleScreen = (props) => {
 	function scrollToIndexFailed(error) {
 		setScrollingEnabled(false);
 		const offset = error.averageItemLength * error.index;
-		flatListRef.current.scrollToOffset({ offset });
-
-		setTimeout(
-			() => flatListRef.current.scrollToIndex({ index: error.index }),
-			100
-		);
+		//flatListRef.current.scrollToOffset({ offset });
+		const wait = new Promise((resolve) => setTimeout(resolve, 200));
+		wait.then(() => {
+			flatListRef.current.scrollToIndex({ index: error.index });
+		});
 		setScrollingEnabled(true);
 	}
 
@@ -438,14 +468,6 @@ const ScheduleScreen = (props) => {
 	// 	//console.log("Visible items are", viewableItems);
 	// 	//console.log("Changed in this iteration", changed);
 	// }, []);
-
-	useEffect(() => {
-		setItems(getItems(events.slice(), dateToLoad));
-		//setLoading(false)
-		props.navigation.setOptions({
-			headerTitle: moment(dateToLoad).format("MMMM YYYY"),
-		});
-	}, [events, dateToLoad]);
 
 	// if(loading){
 	// 	return <ActivityIndicator
@@ -625,24 +647,25 @@ const ScheduleScreen = (props) => {
 													/>
 												)}
 											>
-												<View style={{ flexDirection: "row", alignItems: 'center' }}>
+												<View
+													style={{ flexDirection: "row", alignItems: "center" }}
+												>
 													<Ionicons
 														name={iconName}
 														color={customTheme["color-primary-600"]}
 														size={24}
 													/>
-														<Text
-															category="h6"
-															style={{
-																color:
-																	theme === "dark"
-																		? "white"
-																		: customTheme["color-primary-600"],
-															}}
-														>
-															{" " + itemData.item.title}
-														</Text>
-													
+													<Text
+														category="h6"
+														style={{
+															color:
+																theme === "dark"
+																	? "white"
+																	: customTheme["color-primary-600"],
+														}}
+													>
+														{" " + itemData.item.title}
+													</Text>
 												</View>
 											</Card>
 										</TouchableCmp>
@@ -655,11 +678,13 @@ const ScheduleScreen = (props) => {
 			);
 		}
 	};
+
 	return (
 		<Layout level={"2"} style={{ flex: 1 }}>
 			<SafeAreaView />
 			<FlatList
 				ref={flatListRef}
+				//initialNumToRender={31}
 				keyExtractor={(item) => item["key"]}
 				style={{ width: "100%" }}
 				data={items}

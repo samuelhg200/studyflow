@@ -8,6 +8,7 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	TouchableNativeFeedback,
+	Platform
 } from "react-native";
 import { Layout, Text, Icon, Input } from "@ui-kitten/components";
 import { useDispatch, useSelector } from "react-redux";

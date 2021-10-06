@@ -8,6 +8,7 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	TouchableNativeFeedback,
+	Platform
 } from "react-native";
 import { Layout, Text, Icon, Input } from "@ui-kitten/components";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,7 +40,7 @@ const Label = (props) => {
 					backgroundColor: props.item.color,
 				}}
 				onPress={() => setShowTopics((prev) => !prev)}
-			>
+			><View style={Platform.OS === 'android' ? {...styles.labelRowContainer, backgroundColor: props.item.color} : {...styles.touchableContainer, flex: 1}}>
 				<Ionicons
 					name={showTopics ? "chevron-up-outline" : "chevron-down-outline"}
 					color={"white"}
@@ -52,7 +53,7 @@ const Label = (props) => {
 					{/* <View style={{ paddingRight: 10 }}><RemoveIcon style={{ width: 22, height: 22}} /></View> */}
 
 					<EditIcon style={{ width: 22, height: 22 }} />
-				</TouchableWithoutFeedback>
+				</TouchableWithoutFeedback></View>
 			</TouchableCmp>
 			{showTopics &&
 				topics.map((topic) => {
@@ -163,6 +164,11 @@ const styles = StyleSheet.create({
 		paddingLeft: 15,
 		paddingRight: 20,
 		borderRadius: 10,
+	},
+	touchableContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
 	},
 	topic: {
 		width: Dimensions.get("window").width / 1.5,

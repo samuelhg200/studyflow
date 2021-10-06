@@ -9,6 +9,7 @@ import {
 
 const initialState = {
 	events: [],
+	activities: [],
 	dayToTravelTo: new Date().getDate(),
 	dateToTravelTo: new Date().setDate(1)
 };
@@ -56,16 +57,11 @@ export default (state = initialState, action) => {
 				dateToTravelTo: action.date
 			}
 		case UPDATE_ACTIVITY: 
-			const eventsCopy = state.events.splice()
-			eventsCopy.forEach((event) => {
-				if(event.id === action.eventId){
-					event.activity = action.activity
-				}
-			}
-			)
+			const activitiesCopy = state.activities.filter(activity => activity.eventId !== action.activity.eventId) 
+			activitiesCopy.push(action.activity)
 			return {
 				...state,
-				events: eventsCopy
+				activities: activitiesCopy
 			}
 			
 		default:

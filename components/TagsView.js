@@ -7,6 +7,7 @@ import {
 	TouchableOpacity,
 	TouchableNativeFeedback,
 	Text,
+	Platform
 } from "react-native";
 import { useSelector } from "react-redux";
 import BackgroundButton from "../components/BackgroundButton";
@@ -44,6 +45,9 @@ const TagsView = (props) => {
 
 	return (
 		<View style={styles.container}>
+			
+			
+			{makeButtons()}
 			{props.showAllMode && <TouchableCmp style={styles.touchable} onPress={props.onPressShowAll}>
 				<View
 					style={{
@@ -63,13 +67,12 @@ const TagsView = (props) => {
 							color: CustomTheme["color-primary-500"],
 						}}
 					>
-						{props.showingAll ? ' Hide others' :  " Show All"}
+						{props.showingAll ? ' Hide non-assigned' :  " Show non-assigned"}
 						
 					</Text>
 				</View>
 			</TouchableCmp>}
-			
-			{makeButtons()}
+			{!props.hideAddSubject &&
 			<TouchableCmp style={styles.touchable} onPress={props.onPressAdd}>
 				<View
 					style={{
@@ -93,7 +96,7 @@ const TagsView = (props) => {
 						Add Subject
 					</Text>
 				</View>
-			</TouchableCmp>
+			</TouchableCmp>}
 		</View>
 	);
 

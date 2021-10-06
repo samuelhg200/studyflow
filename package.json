@@ -38,8 +38,10 @@
     "react-native-web": "~0.13.12",
     "react-navigation-header-buttons": "^9.0.0",
     "react-redux": "^7.2.5",
+    "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "redux": "^4.1.1",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "webpack-config": "^7.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"

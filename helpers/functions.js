@@ -36,6 +36,8 @@ export function getFormattedEventType(eventType) {
 	switch (eventType) {
 		case "studySession":
 			return "Study Session";
+		case "study": 
+			return "Study Session";
 		case "assessment":
 			return "Assessment";
 		case "homework":
@@ -44,6 +46,19 @@ export function getFormattedEventType(eventType) {
 			return "Other";
 		case "Lecture":
 			return "book-outline";
+		default:
+			return;
+	}
+}
+
+export function getFormattedActivityType(activityType){
+	switch (activityType) {
+		case "feedback":
+			return "Feedback";
+		case "study": 
+			return "Study Session";
+		case "break": 
+			return "Break"
 		default:
 			return;
 	}
@@ -236,3 +251,51 @@ export const generateTimeline = (
 	});
 	return data;
 };
+
+export function convertActivityToTimeline(activity) {
+	let studyCount = 0;
+	let timeAdded = 0;
+	const convertedTimeline = activity.miniSessions.map((ms) => {
+		
+		switch (ms.type) {
+			case "study":
+				studyCount++;
+				const tempTimeAdded = timeAdded
+				timeAdded += ms.duration;
+				return {
+					id: ms.id,
+					time: moment(activity.startTime).add(tempTimeAdded, "minutes").format("HH:mm"),
+					title: `#${studyCount} Study`,
+					description: "Improve your knowledge",
+					iconName: "glasses-outline",
+					duration: ms.duration,
+					eventType: ms.type,
+				};
+				
+			case "break":
+				const tempTimeAdded2 = timeAdded
+				timeAdded += ms.duration;
+				return {
+					id: ms.id,
+					time: moment(activity.startTime).add(tempTimeAdded2, "minutes").format("HH:mm"),
+					title: `Break`,
+					description: "Go watch some Netflix!",
+					iconName: "cafe-outline",
+					duration: ms.duration,
+					eventType: ms.type,
+				};
+			default: 
+				return {}
+		}
+		
+	});
+	convertedTimeline.push({
+		id: 1234,
+		time: moment(activity.startTime).add(timeAdded, "minutes").format("HH:mm"),
+		title: "Session End",
+		description: "Good job! Let us get some feedback quickly!",
+		iconName: "stats-chart-outline",
+		eventType: 'feedback'
+	})
+	return convertedTimeline
+}

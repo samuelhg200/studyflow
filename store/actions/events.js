@@ -38,6 +38,6 @@ export const updateDateToTravelTo = (date) => {
 	return { type: UPDATE_DATE_TO_TRAVEL_TO, date: date };
 };
 
-export const updateActivity = (eventId, activity) => {
-	return {type: UPDATE_ACTIVITY, eventId: eventId, activity: activity}
+export const updateActivity = (activity) => {
+	return {type: UPDATE_ACTIVITY, activity: activity}
 }

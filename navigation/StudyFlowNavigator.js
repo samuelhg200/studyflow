@@ -37,8 +37,10 @@ import SubjectsModal from "../screens/Modals/SubjectsModal";
 import TopicsModal from "../screens/Modals/TopicsModal";
 import EditStudyFLowModal from "../screens/Modals/EditStudyFLowModal";
 import PreTimerModal from "../screens/Modals/PreTimerModal";
+import MeditationModal from "../screens/Modals/MeditationModal";
 import HeaderButton from "../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 import customTheme from "../assets/UIkitten/custom-theme.json";
 
@@ -126,7 +128,6 @@ const ManagerNavigator = () => {
 					headerTintColor: customTheme["color-primary-500"],
 					headerTitle: "Edit StudyFlow",
 					headerBackTitle: "Manager",
-					
 				}}
 			/>
 		</ManagerStackNavigator.Navigator>
@@ -134,105 +135,107 @@ const ManagerNavigator = () => {
 };
 
 const StartFlowStackNavigator = createStackNavigator();
-const StartFlowNavigator = () => (
-	<StartFlowStackNavigator.Navigator>
-		<StartFlowStackNavigator.Screen
-			name="StartFlow"
-			component={StartFlowScreen}
-			//options={startFlowScreenOptions}
-			options={{ headerShown: false }}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="ChooseEventType"
-			component={ChooseEventTypeScreen}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "",
-				headerBackTitle: "Home",
-			}}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="AddItemToCalendar"
-			component={AddItemToCalendarScreen}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "",
-				headerBackTitle: "Home",
-			}}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="Subjects"
-			component={SubjectsModal}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "Subjects",
-				headerBackTitle: "Manager",
-			}}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="Topics"
-			component={TopicsModal}
-			options={(navData) => ({
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: navData.route.params.subjectTitle,
-				headerBackTitle: "Subjects",
-				headerRight: () => {
-					return (
-						<HeaderButtons HeaderButtonComponent={HeaderButton}>
-							<Item
-								title="topics"
-								iconName={"trash-outline"}
-								onPress={() => {
-									Alert.alert(
-										`Delete subject '${navData.route.params.subjectTitle}'`,
-										"Are you sure you want to delete this subject? You will loose all stats and linked topics!",
-										[
-											{
-												text: "Delete",
-												onPress: () => {
-													dispatch(
-														subjectActions.removeSubject(
-															navData.route.params.subjectId
-														)
-													);
-													navData.navigation.goBack();
+const StartFlowNavigator = () => {
+	
+	return (
+		<StartFlowStackNavigator.Navigator>
+			<StartFlowStackNavigator.Screen
+				name="StartFlow"
+				component={StartFlowScreen}
+				//options={startFlowScreenOptions}
+				options={{ headerShown: false }}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="ChooseEventType"
+				component={ChooseEventTypeScreen}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="AddItemToCalendar"
+				component={AddItemToCalendarScreen}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="Subjects"
+				component={SubjectsModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Subjects",
+					headerBackTitle: "Manager",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="Topics"
+				component={TopicsModal}
+				options={(navData) => ({
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: navData.route.params.subjectTitle,
+					headerBackTitle: "Subjects",
+					headerRight: () => {
+						return (
+							<HeaderButtons HeaderButtonComponent={HeaderButton}>
+								<Item
+									title="topics"
+									iconName={"trash-outline"}
+									onPress={() => {
+										Alert.alert(
+											`Delete subject '${navData.route.params.subjectTitle}'`,
+											"Are you sure you want to delete this subject? You will loose all stats and linked topics!",
+											[
+												{
+													text: "Delete",
+													onPress: () => {
+														dispatch(
+															subjectActions.removeSubject(
+																navData.route.params.subjectId
+															)
+														);
+														navData.navigation.goBack();
+													},
 												},
-											},
-											{ text: "Keep" },
-										]
-									);
-								}}
-							/>
-						</HeaderButtons>
-					);
-				},
-			})}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="EventPreview"
-			component={EventPreviewScreen}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "Event Info",
-				headerBackTitle: "Home",
-			}}
-		/>
-		<StartFlowStackNavigator.Screen
-			name="PreTimer"
-			component={PreTimerModal}
-			options={{
-				presentation: "modal",
-				headerTintColor: customTheme["color-primary-500"],
-				headerTitle: "",
-				headerBackTitle: "Home",				
-			}}
-		/>
-		<StartFlowStackNavigator.Screen
+												{ text: "Keep" },
+											]
+										);
+									}}
+								/>
+							</HeaderButtons>
+						);
+					},
+				})}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="EventPreview"
+				component={EventPreviewScreen}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Event Info",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="PreTimer"
+				component={PreTimerModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
 				name="EditStudyFlow"
 				component={EditStudyFLowModal}
 				options={{
@@ -242,12 +245,30 @@ const StartFlowNavigator = () => (
 					headerBackTitle: "Event",
 				}}
 			/>
-		
-		<StartFlowStackNavigator.Screen name="Timer" component={TimerScreen} options={{headerShown: false}} />
-		<StartFlowStackNavigator.Screen name="Store" component={StoreScreen} />
-		<StartFlowStackNavigator.Screen name="Profile" component={ProfileScreen} />
-	</StartFlowStackNavigator.Navigator>
-);
+
+			<StartFlowStackNavigator.Screen
+				name="Timer"
+				component={TimerScreen}
+				options={{ headerShown: false }}
+			/>
+			<StartFlowStackNavigator.Screen name="Store" component={StoreScreen} />
+			<StartFlowStackNavigator.Screen
+				name="Profile"
+				component={ProfileScreen}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="Meditation"
+				component={MeditationModal}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Meditation",
+					headerBackTitle: " ",
+				}}
+			/>
+		</StartFlowStackNavigator.Navigator>
+	);
+};
 
 const GoalsStackNavigator = createStackNavigator();
 const GoalsNavigator = () => (

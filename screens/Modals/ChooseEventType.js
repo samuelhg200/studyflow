@@ -4,7 +4,8 @@ import {
 	View,
 	TouchableNativeFeedback,
 	TouchableOpacity,
-	Dimensions
+	Dimensions,
+	Platform
 } from "react-native";
 import {
 	Layout,

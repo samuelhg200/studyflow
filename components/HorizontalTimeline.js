@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { StyleSheet, View, FlatList } from "react-native";
 import { Text, Divider } from "@ui-kitten/components";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSelector } from "react-redux";
-import { getStudyFlow, generateTimeline } from "../helpers/functions";
+import {
+	getStudyFlow,
+	generateTimeline,
+	convertActivityToTimeline,
+} from "../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
 import { default as CustomTheme } from "../assets/UIkitten/custom-theme.json";
 
 const Interval = (props) => {
+	
 	let itemColor;
 	switch (props.item.eventType) {
 		case "study":
@@ -27,7 +32,17 @@ const Interval = (props) => {
 	let lineColor =
 		props.theme === "dark" ? "white" : CustomTheme["color-primary-500"];
 	return (
-		<View style={styles.intervalContainer}>
+		<View
+			style={
+				props.selected
+					? {
+							...styles.intervalContainer,
+							...styles.shadow,
+							shadowColor: lineColor,
+					  }
+					: { ...styles.intervalContainer }
+			}
+		>
 			<Divider style={{ height: 2, backgroundColor: lineColor, width: 75 }} />
 			<View style={{ alignItems: "center", justifyContent: "center" }}>
 				<View
@@ -41,7 +56,7 @@ const Interval = (props) => {
 					<Text
 						style={{
 							flex: 1,
-                            fontSize: 14,
+							fontSize: 14,
 							color:
 								props.theme === "dark"
 									? props.item.eventType === "break"
@@ -87,13 +102,25 @@ const Interval = (props) => {
 					</Text>
 				</View>
 				<View
-					style={{
-						borderRadius: 22,
-						padding: 9,
-						alignItems: "center",
-						justifyContent: "center",
-						backgroundColor: itemColor,
-					}}
+					style={
+						props.selected
+							? {
+									...styles.shadow,
+									shadowColor: lineColor,
+									borderRadius: 22,
+									padding: 9,
+									alignItems: "center",
+									justifyContent: "center",
+									backgroundColor: itemColor,
+							  }
+							: {
+									borderRadius: 22,
+									padding: 9,
+									alignItems: "center",
+									justifyContent: "center",
+									backgroundColor: itemColor,
+							  }
+					}
 				>
 					<Ionicons
 						name={props.item.iconName}
@@ -134,36 +161,101 @@ const Interval = (props) => {
 	);
 };
 
+const getItemLayout = (data, index) => ({
+	length: 145,
+	offset: 145 * index,
+	index,
+});
+
 const HorizontalTimeline = (props) => {
+	const flatListRef = useRef(null);
+	const [newIndex, setNewIndex] = useState(1);
+	
 	const event = useSelector((state) =>
 		state.events.events.find(
 			(event) => event.id.toISOString() === props.eventId
 		)
 	);
+	const activity = useSelector(
+		(state) =>
+			state.events.activities.filter(
+				(activity) => activity.eventId.toISOString() === props.eventId
+			)[0]
+	);
 	const studyFlowConfig = useSelector((state) => state.studyFlow.config);
 	const theme = useSelector((state) => state.theme.theme);
-	const sessionPreview = getStudyFlow(
-		event,
-		studyFlowConfig.studyTime,
-		studyFlowConfig.breakTime
+	const [initialData, setInitialData] = useState(
+		generateTimeline(
+			getStudyFlow(event, studyFlowConfig.studyTime, studyFlowConfig.breakTime),
+			studyFlowConfig.studyTime,
+			studyFlowConfig.breakTime,
+			new Date(event.date)
+		)
 	);
-	const data = generateTimeline(
-		sessionPreview,
-		studyFlowConfig.studyTime,
-		studyFlowConfig.breakTime,
-		new Date(event.date)
-	); //JSO - description, icon, time, title
+	// useEffect(() => {
+	// 	const sessionPreview = getStudyFlow(
+	// 		event,
+	// 		studyFlowConfig.studyTime,
+	// 		studyFlowConfig.breakTime
+	// 	);
+	// 	const data = generateTimeline(
+	// 		sessionPreview,
+	// 		studyFlowConfig.studyTime,
+	// 		studyFlowConfig.breakTime,
+	// 		new Date(event.date)
+	// 	);
+	// });
+
+	//JSO - description, icon, time, title
+	//activity && console.log(convertActivityToTimeline(event.date, activity))
+
+
+	useEffect(() => {
+		
+		if (props.miniSessionId !== newIndex) {
+			setNewIndex(props.miniSessionId);
+		}
+	}, [props.miniSessionId]);
+
+
+	useEffect(() => {
+		if (flatListRef.current && newIndex >= 1) {
+			try {
+				setTimeout(
+					() => flatListRef.current.scrollToIndex({ index: newIndex - 1 }),
+					100
+				);
+			} catch (err) {}
+		}
+	}, [newIndex]);
+
 	return (
 		<FlatList
-			style={{flexGrow: 0, height: 160, width: "100%" }}
-			contentContainerStyle={{height: 160}}
-			data={data}
-			keyExtractor={(item) => item.time}
+			ref={flatListRef}
+			style={{ flexGrow: 0, height: 160, width: "100%" }}
+			contentContainerStyle={{ height: 160 }}
+			data={activity ? convertActivityToTimeline(activity) : initialData}
+			keyExtractor={
+				activity ? (item) => item.id.toString() : (item) => item.time
+			}
 			renderItem={(itemData) => {
-				return <Interval item={itemData.item} theme={theme} />;
+				let selected;
+				if (activity) {
+					selected = props.miniSessionId
+						? props.miniSessionId === itemData.item.id
+							? true
+							: false
+						: false;
+				} else {
+					selected = false;
+				}
+				return (
+					<Interval item={itemData.item} theme={theme} selected={selected} />
+				);
 			}}
 			horizontal={true}
 			showsHorizontalScrollIndicator={false}
+			getItemLayout={getItemLayout}
 		></FlatList>
 	);
 };
@@ -177,6 +269,13 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
-		flexGrow: 0
+		flexGrow: 0,
+	},
+	shadow: {
+		shadowColor: "red",
+		shadowOffset: { width: 0, height: -0.5 },
+		shadowOpacity: 1,
+		shadowRadius: 27,
+		elevation: 24,
 	},
 });

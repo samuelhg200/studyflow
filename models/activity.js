@@ -1,7 +1,10 @@
 export default class Activity {
-    constructor (minuteStamp, miniSessions) {
-        this.minuteStamp = minuteStamp;
-        /* [
+	constructor(eventId, startTime, secondStamp, miniSessions) {
+		this.eventId = eventId;
+		this.secondStamp = secondStamp;
+        this.startTime = startTime;
+		/* 
+        [
             {
                 id: 1,
                 type: 'study',
@@ -20,7 +23,6 @@ export default class Activity {
             ...
         ]
         */
-        this.miniSessions = miniSessions
-
-    }
+		this.miniSessions = miniSessions;
+	}
 }

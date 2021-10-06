@@ -79,6 +79,8 @@ const EditStudyFLowModal = (props) => {
 	const handleBreakTime = (event, date) => {
 		setBreakTimeDuration(date);
 	};
+	
+
 	return (
 		<ScrollView style={{ flex: 1 }} contentContainerStyle={styles.screen}>
 			{/* <Text style={styles.title}>Study / Break</Text> */}
@@ -106,7 +108,7 @@ const EditStudyFLowModal = (props) => {
 						<DateTimePicker
 							style={{ minWidth: 100 }}
 							value={studyTimeDuration}
-							minuteInterval={5}
+							minuteInterval={1}
 							is24Hour={true}
 							mode="time"
 							display={Platform.OS === "android" ? "spinner" : "spinner"}
@@ -162,7 +164,7 @@ const EditStudyFLowModal = (props) => {
 							style={{ minWidth: 100 }}
 							value={breakTimeDuration}
 							is24Hour={false}
-							minuteInterval={5}
+							minuteInterval={1}
 							mode="time"
 							display={Platform.OS === "android" ? "spinner" : "spinner"}
 							onChange={handleBreakTime}

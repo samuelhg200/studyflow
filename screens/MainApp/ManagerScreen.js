@@ -100,7 +100,7 @@ const ManagerScreen = (props) => {
 					<TouchableCmp
 						style={{ ...colorsModule, ...styles.module }}
 						onPress={onClickSubjects}
-					>
+					><View style={Platform.OS === 'android' ? {flexDirection: 'row', ...colorsModule, ...styles.module} : {flexDirection: 'row'}}>
 						<View
 							style={{
 								...styles.leftColumn,
@@ -188,7 +188,7 @@ const ManagerScreen = (props) => {
 								</View>
 							)}
 						</View>
-					</TouchableCmp>
+					</View></TouchableCmp>
 					<TouchableCmp
 						onPress={() => {
 							props.navigation.navigate("EditStudyFlow");
