@@ -1,10 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import {
-	StyleSheet,
-	TouchableWithoutFeedback,
-	Image,
-	Alert,
-} from "react-native";
+import { StyleSheet, Alert, Platform, Dimensions, SafeAreaView } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LottieView from "lottie-react-native";
@@ -12,8 +7,6 @@ import {
 	BottomNavigation,
 	BottomNavigationTab,
 	Icon,
-	Layout,
-	Text,
 } from "@ui-kitten/components";
 
 import MetricsScreen from "../screens/MainApp/MetricsScreen";
@@ -136,7 +129,6 @@ const ManagerNavigator = () => {
 
 const StartFlowStackNavigator = createStackNavigator();
 const StartFlowNavigator = () => {
-	
 	return (
 		<StartFlowStackNavigator.Navigator>
 			<StartFlowStackNavigator.Screen
@@ -184,7 +176,8 @@ const StartFlowNavigator = () => {
 					headerTitle: navData.route.params.subjectTitle,
 					headerBackTitle: "Subjects",
 					headerRight: () => {
-						return (
+						!navData.route.params.disableDelete ?
+						 (
 							<HeaderButtons HeaderButtonComponent={HeaderButton}>
 								<Item
 									title="topics"
@@ -211,7 +204,7 @@ const StartFlowNavigator = () => {
 									}}
 								/>
 							</HeaderButtons>
-						);
+						) : (<View></View>)
 					},
 				})}
 			/>
@@ -376,15 +369,16 @@ const CalendarIcon = (props) => (
 
 const BottomTabBar = ({ navigation, state, managerIconRef }) => {
 	return (
+		//<SafeAreaView>
 		<BottomNavigation
-			style={{ height: 80, alignItems: "flex-start", paddingTop: 15 }}
+			style={{ height: Dimensions.get("window").height / 10, alignItems: "flex-start", paddingTop: 15 }}
 			selectedIndex={state.index}
 			onSelect={(index) => navigation.navigate(state.routeNames[index])}
 		>
 			<BottomNavigationTab icon={ManagerIcon} />
 			<BottomNavigationTab icon={TimerIcon} />
 			<BottomNavigationTab icon={CalendarIcon} />
-		</BottomNavigation>
+		</BottomNavigation>//</SafeAreaView>
 	);
 };
 
@@ -394,7 +388,7 @@ const StudyFlowNavigator = ({ managerIconRef }) => {
 			initialRouteName="StartFlowStack"
 			tabBar={(props) => <BottomTabBar {...props} />}
 			screenOptions={({ route }) => ({
-				tabBarStyle: { height: 100 },
+				tabBarStyle: {  },
 				//tabBarActiveTintColor: customTheme['color-primary-500'],
 				headerShown: false,
 				tabBarShowLabel: false,

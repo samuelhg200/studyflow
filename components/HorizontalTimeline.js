@@ -232,12 +232,13 @@ const HorizontalTimeline = (props) => {
 	return (
 		<FlatList
 			ref={flatListRef}
-			style={{ flexGrow: 0, height: 160, width: "100%" }}
+			style={{ flexGrow: 0, height: 160, width: "100%", opacity: props.blur ? 0.1 : 1}}
 			contentContainerStyle={{ height: 160 }}
 			data={activity ? convertActivityToTimeline(activity) : initialData}
 			keyExtractor={
 				activity ? (item) => item.id.toString() : (item) => item.time
 			}
+			
 			renderItem={(itemData) => {
 				let selected;
 				if (activity) {

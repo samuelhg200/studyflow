@@ -8,7 +8,7 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	TouchableNativeFeedback,
-	Platform
+	Platform,
 } from "react-native";
 import { Layout, Text, Icon, Input } from "@ui-kitten/components";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,31 +35,36 @@ const Label = (props) => {
 					{/* <View style={{ paddingRight: 10 }}><RemoveIcon style={{ width: 22, height: 22}} /></View> */}
 					<Text style={{ color: "white" }}>{props.item.title}</Text>
 				</View>
-				<TouchableCmp onPress={() => {props.onDelete(props.item.id)}}><Ionicons name="trash-outline" size={16} color="white" /></TouchableCmp>
+				<TouchableCmp
+					onPress={() => {
+						props.onDelete(props.item.id);
+					}}
+				>
+					<Ionicons name="trash-outline" size={16} color="white" />
+				</TouchableCmp>
 			</TouchableCmp>
 		</View>
 	);
 };
 
 const TopicsModal = (props) => {
-	const topics = useSelector(
-		(state) =>
-			state.subject.topics.filter(
-				(topic) => topic.subjectId === props.route.params.subjectId
-			)
+	const topics = useSelector((state) =>
+		state.subject.topics.filter(
+			(topic) => topic.subjectId === props.route.params.subjectId
+		)
 	);
 	const theme = useSelector((state) => state.theme.theme);
 	const [newTopic, setNewTopic] = useState("");
 	const dispatch = useDispatch();
-    const dispatch2 = useDispatch();
+	const dispatch2 = useDispatch();
 
 	const onSubmit = (subjectId, topicTitle) => {
 		dispatch(subjectActions.addTopic(subjectId, topicTitle));
 	};
 
-    const onDelete = (subjectId, topicId) => {
-        dispatch2(subjectActions.removeTopic(subjectId, topicId))
-    }
+	const onDelete = (subjectId, topicId) => {
+		dispatch2(subjectActions.removeTopic(subjectId, topicId));
+	};
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -100,7 +105,13 @@ const TopicsModal = (props) => {
 					contentContainerStyle={styles.list}
 					data={topics}
 					renderItem={({ item }) => {
-						return <Label item={item} color={props.route.params.subjectColor} onDelete={onDelete} />;
+						return (
+							<Label
+								item={item}
+								color={props.route.params.subjectColor}
+								onDelete={onDelete}
+							/>
+						);
 					}}
 				/>
 				{/* <Input

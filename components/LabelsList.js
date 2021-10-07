@@ -8,13 +8,14 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	TouchableNativeFeedback,
-	Platform
+	Platform,
 } from "react-native";
 import { Layout, Text, Icon, Input } from "@ui-kitten/components";
 import { useDispatch, useSelector } from "react-redux";
 import * as subjectActions from "../store/actions/subject";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
+import CustomTheme from '../assets/UIkitten/custom-theme.json'
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
@@ -31,7 +32,16 @@ const RemoveIcon = (props) => {
 
 const Label = (props) => {
 	const [showTopics, setShowTopics] = useState(false);
-	const topics = useSelector(state => state.subject.topics.filter(topic => topic.subjectId === props.item.id))
+	const topics = useSelector((state) =>
+		state.subject.topics.filter((topic) => topic.subjectId === props.item.id)
+	);
+	const isSelected = (topicId) => {
+		if (props.selectedTopics.find(topic => topic.id === topicId)){
+			return true;
+		} else {
+			return false
+		}
+	}
 	return (
 		<View style={{ alignItems: "flex-end" }}>
 			<TouchableCmp
@@ -40,35 +50,60 @@ const Label = (props) => {
 					backgroundColor: props.item.color,
 				}}
 				onPress={() => setShowTopics((prev) => !prev)}
-			><View style={Platform.OS === 'android' ? {...styles.labelRowContainer, backgroundColor: props.item.color} : {...styles.touchableContainer, flex: 1}}>
-				<Ionicons
-					name={showTopics ? "chevron-up-outline" : "chevron-down-outline"}
-					color={"white"}
-					size={18}
+			>
+				<View
+					style={
+						Platform.OS === "android"
+							? {
+									...styles.labelRowContainer,
+									backgroundColor: props.item.color,
+							  }
+							: { ...styles.touchableContainer, flex: 1 }
+					}
 				>
-					<Text style={styles.subjectText}> {props.item.title}</Text>
-				</Ionicons>
-				
-				<TouchableWithoutFeedback onPress={() => {props.onAddTopic(props.item.id, props.item.title, props.item.color);}} style={{ flexDirection: "row" }}>
-					{/* <View style={{ paddingRight: 10 }}><RemoveIcon style={{ width: 22, height: 22}} /></View> */}
+					<Ionicons
+						name={showTopics ? "chevron-up-outline" : "chevron-down-outline"}
+						color={"white"}
+						size={18}
+					>
+						<Text style={styles.subjectText}> {props.item.title}</Text>
+					</Ionicons>
 
-					<EditIcon style={{ width: 22, height: 22 }} />
-				</TouchableWithoutFeedback></View>
+					<TouchableWithoutFeedback
+						onPress={() => {
+							props.onAddTopic(
+								props.item.id,
+								props.item.title,
+								props.item.color
+							);
+						}}
+						style={{ flexDirection: "row" }}
+					>
+						{/* <View style={{ paddingRight: 10 }}><RemoveIcon style={{ width: 22, height: 22}} /></View> */}
+
+						<EditIcon style={{ width: 22, height: 22 }} />
+					</TouchableWithoutFeedback>
+				</View>
 			</TouchableCmp>
 			{showTopics &&
 				topics.map((topic) => {
+					
+					const selected = props.selectableMode ? isSelected(topic.id) : false
+					
 					return (
-						<View
-							key={topic.id}
-							style={{ ...styles.topic, backgroundColor: props.item.color }}
-						>
-							<Ionicons name="book-outline" size={12} color={"white"}>
-								<Text style={{ color: "white", fontSize: 14 }}>
-									{" "}
-									{topic.title}
-								</Text>
-							</Ionicons>
-						</View>
+						<TouchableCmp key={topic.id} disabled={!props.selectableMode} onPress={() => props.onTopicPress(topic)}>
+							<View
+								
+								style={{ ...styles.topic, backgroundColor: selected ? CustomTheme['color-primary-500'] : props.item.color }}
+							>
+								<Ionicons name={props.selectableMode ? (selected ? 'checkbox-outline'  : "square-outline") : 'book-outline' }size={12.8} color={"white"}>
+									<Text style={{ color: "white", fontSize: 14 }}>
+										{" "}
+										{topic.title}
+									</Text>
+								</Ionicons>
+							</View>
+						</TouchableCmp>
 					);
 				})}
 			{showTopics && (
@@ -87,10 +122,18 @@ const Label = (props) => {
 	);
 };
 
-const LabelsList = ({ data, onAddTopic }) => {
+const LabelsList = ({
+	data,
+	onAddTopic,
+	disableInput,
+	selectableTopics,
+	selectedTopics,
+	onTopicPressHandler
+}) => {
 	const theme = useSelector((state) => state.theme.theme);
 	const [newSubject, setNewSubject] = useState("");
 	const dispatch = useDispatch();
+	//console.log(data)
 
 	const onSubmit = () => {
 		dispatch(subjectActions.addSubject(newSubject));
@@ -103,39 +146,50 @@ const LabelsList = ({ data, onAddTopic }) => {
 			onPress={() => {
 				Keyboard.dismiss();
 			}}
-			style={{ flex: 1, alignItems: "center" }}
+			style={{ flex: 1, alignItems: "center", height: 300 }}
 		>
-			<Input
-				placeholder={"Enter new subject"}
-				value={newSubject}
-				onChangeText={(nextValue) => setNewSubject(nextValue)}
-				style={styles.input}
-				size="large"
-				//autoFocus={true}
-				accessoryRight={() => {
-					return (
-						<TouchableWithoutFeedback
-							onPress={() => {
-								onSubmit();
-								setNewSubject("");
-								Keyboard.dismiss();
-							}}
-						>
-							<Ionicons
-								name={"chevron-forward-circle-outline"}
-								size={22}
-								color={theme === "dark" ? "white" : "black"}
-							/>
-						</TouchableWithoutFeedback>
-					);
-				}}
-			/>
+			{!disableInput && (
+				<Input
+					placeholder={"Enter new subject"}
+					value={newSubject}
+					onChangeText={(nextValue) => setNewSubject(nextValue)}
+					style={styles.input}
+					size="large"
+					//autoFocus={true}
+					accessoryRight={() => {
+						return (
+							<TouchableWithoutFeedback
+								onPress={() => {
+									onSubmit();
+									setNewSubject("");
+									Keyboard.dismiss();
+								}}
+							>
+								<Ionicons
+									name={"chevron-forward-circle-outline"}
+									size={22}
+									color={theme === "dark" ? "white" : "black"}
+								/>
+							</TouchableWithoutFeedback>
+						);
+					}}
+				/>
+			)}
+
 			<FlatList
 				contentContainerStyle={styles.list}
 				data={data}
 				keyExtractor={(item) => item.id}
 				renderItem={({ item }) => {
-					return <Label item={item} onAddTopic={onAddTopic} />;
+					return (
+						<Label
+							item={item}
+							onAddTopic={onAddTopic}
+							selectableMode={selectableTopics}
+							onTopicPress={onTopicPressHandler}
+							selectedTopics={selectedTopics}
+						/>
+					);
 				}}
 			/>
 			{/* <Input
@@ -179,6 +233,10 @@ const styles = StyleSheet.create({
 		paddingLeft: 7,
 		paddingRight: 12,
 		borderRadius: 4,
+	},
+	topicTouchable: {
+		width: Dimensions.get("window").width / 1.5,
+		height: Dimensions.get("window").height / 22,
 	},
 	input: {
 		width: Dimensions.get("window").width / 1.15,

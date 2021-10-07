@@ -16,7 +16,7 @@ const SubjectsModal = (props) => {
 	};
 	return (
 		<View style={{ flex: 1 }}>
-			<LabelsList data={subjects} onAddTopic={onAddTopic} />
+			<LabelsList data={subjects} onAddTopic={onAddTopic} selectableTopics={false} />
 		</View>
 	);
 };

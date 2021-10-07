@@ -107,14 +107,14 @@ const TimerScreen = (props) => {
 	);
 	const [showedSubjects, setshowedSubjects] = useState(currentEvent.subjects);
 	const [selectedSubjects, setSelectedSubjects] = useState([]);
+	const [selectedTopics, setSelectedTopics] = useState([]);
 	const [showingAll, setShowingAll] = useState(false);
 	const [timeline, setTimeline] = useState(null);
 	const [blurBackground, setBlurBackground] = useState(true);
 	const [miniSession, setMiniSession] = useState(null);
 
-	
-	//modal
-	const renderContent = () => {
+	//Subjects modal renderer function
+	const renderSubjectsContent = () => {
 		const currentMiniSession = currentActivity
 			? getCurrentMiniSession(currentActivity)
 			: null;
@@ -123,7 +123,7 @@ const TimerScreen = (props) => {
 				level="1"
 				style={{
 					padding: 10,
-					height: Dimensions.get("window").height / 1.8 - 15,
+					height: Dimensions.get("window").height / 1.8 - 15, //dependent on maximum snap point - padding
 					alignItems: "center",
 					paddingTop: 15,
 				}}
@@ -131,7 +131,9 @@ const TimerScreen = (props) => {
 				<Text
 					category={"h6"}
 					style={{ color: CustomTheme["color-primary-500"], fontSize: 22 }}
-				>{`Block #${currentMiniSession ? currentMiniSession.id : "1"}`}</Text>
+				>{`Block #${
+					currentMiniSession ? Math.ceil(currentMiniSession.id / 2) : "1"
+				}`}</Text>
 				{timeline && currentMiniSession && (
 					<Text
 						style={{
@@ -204,13 +206,122 @@ const TimerScreen = (props) => {
 		);
 	};
 
+	//Topics modal render function
+	const renderTopicsContent = () => {
+		const currentMiniSession = currentActivity
+			? getCurrentMiniSession(currentActivity)
+			: null;
+		return (
+			<Layout
+				level="1"
+				style={{
+					padding: 10,
+					height: Dimensions.get("window").height / 1.55 - 15, //dependent on maximum snap point - padding
+					alignItems: "center",
+					paddingTop: 15,
+				}}
+			>
+				<Text
+					category={"h6"}
+					style={{ color: CustomTheme["color-primary-500"], fontSize: 22 }}
+				>{`Block #${
+					currentMiniSession ? Math.ceil(currentMiniSession.id / 2) : "1"
+				}`}</Text>
+				{timeline && currentMiniSession && (
+					<Text
+						style={{
+							color: CustomTheme["color-primary-500"],
+							fontSize: 18,
+							padding: 4,
+						}}
+					>{`${timeline[currentMiniSession.id - 1].time} - ${
+						timeline[currentMiniSession.id].time
+					}`}</Text>
+				)}
+				<Divider
+					style={
+						theme === "dark"
+							? {
+									...themeStylesDark.divider,
+									marginTop: Dimensions.get("window").height / 50,
+									backgroundColor: CustomTheme["color-primary-500"],
+							  }
+							: {
+									...themeStylesLight.divider,
+									marginTop: Dimensions.get("window").height / 80,
+							  }
+					}
+				/>
+				{
+					currentActivity && (
+						//getCurrentMiniSession(currentActivity).type === "study" && (
+						<View
+							style={{
+								width: "100%",
+								marginVertical: Dimensions.get("window").height / 60,
+								alignItems: "flex-start",
+							}}
+						>
+							{/* <View style={{...styles.subjectTitleContainer, borderColor: theme === 'dark' ? 'white' :'black'}}><Text style={{...styles.subTitle, color: theme === 'dark' ? 'white' : 'black'}}>#1 Study Interval subject</Text></View> */}
+							<View
+								style={{
+									width: "100%",
+									alignItems: "center",
+									justifyContent: "center",
+									opacity: 0.7,
+								}}
+							>
+								<Text
+									style={{
+										color:
+											theme === "dark"
+												? "white"
+												: CustomTheme["color-primary-700"],
+										fontSize: 14.5,
+										textAlign: 'center'
+									}}
+								>{`Choose all the topics you have worked on or plan to work on now`}</Text>
+							</View>
+							<View>
+								<LabelsList
+									data={selectedSubjects}
+									onAddTopic={(subjectId, subjectTitle, subjectColor) => {
+										props.navigation.navigate("Topics", {
+											subjectId: subjectId,
+											subjectTitle: subjectTitle,
+											subjectColor: subjectColor,
+											disableDelete: true,
+										});
+									}}
+									selectableTopics
+									disableInput
+									onTopicPressHandler={(newTopic) => {
+										if (selectedTopics.find((t) => t.id === newTopic.id)) {
+											setSelectedTopics((prev) =>
+												prev.filter((topic) => topic.id !== newTopic.id)
+											);
+										} else {
+											setSelectedTopics((prev) => [...prev, newTopic]);
+										}
+									}}
+									selectedTopics={selectedTopics}
+								/>
+							</View>
+						</View>
+					)
+					//)
+				}
+			</Layout>
+		);
+	};
+
 	const sheetRef = useRef(null);
+	const topicsSheetRef = useRef(null);
 
 	//Timer related stuff
 	const appState = useRef(AppState.currentState);
 	const [elapsed, setElapsed] = useState(0);
 	const [countdown, setCountdown] = useState(0);
-
 
 	const getElapsedTime = async () => {
 		try {
@@ -281,16 +392,16 @@ const TimerScreen = (props) => {
 
 	useEffect(() => {
 		if (selectedSubjects.length > 0) {
-			
-				sheetRef.current.snapTo(2);
-				if (blurBackground) {
-					setBlurBackground(false);
-				}
-			
+			sheetRef.current.snapTo(2);
+			// if (blurBackground) {
+			// 	setBlurBackground(false);
+			// }
+			setTimeout(() => {
+				topicsSheetRef.current.snapTo(0);
+				setBlurBackground(true);
+			}, 200);
 		}
 	}, [selectedSubjects]);
-	
-	
 
 	// every ten seconds update current mini session
 	useEffect(() => {
@@ -317,26 +428,34 @@ const TimerScreen = (props) => {
 	}, [sheetRef.current?.contentPosition]);
 
 	useEffect(() => {
-		reEvalutateAll();
-		if (selectedSubjects.length === 0) {
-			sheetRef.current.snapTo(0);
-			setBlurBackground(true)
-		}
+		// if (selectedSubjects.length === 0) {
+		// 	sheetRef.current.snapTo(0);
+		// 	setBlurBackground(true);
+		// }
 		//listen to when app is left
 		AppState.addEventListener("change", handleAppStateChange);
 		return () => AppState.removeEventListener("change", handleAppStateChange);
 	}, []);
 
+	//do when new study session appears
+	useEffect(() => {
+		if (miniSession?.type === "study") {
+			setTimeout(() => {
+				setSelectedSubjects([]);
+				setBlurBackground(true);
+				sheetRef.current.snapTo(0);
+			}, 100);
+		}
+	}, [miniSession]);
+
 	useEffect(() => {
 		//update activity state every 10 seconds
+		reEvalutateAll();
 		const interval = setInterval(() => {
 			reEvalutateAll();
 		}, 10000);
 		return () => clearInterval(interval);
 	}, []);
-
-	// let elapsedTime = getElapsedTime()
-	// console.log(elapsed)
 
 	useEffect(() => {
 		if (currentActivity) {
@@ -347,7 +466,11 @@ const TimerScreen = (props) => {
 				currentMiniSession.minuteStart * 60 +
 				currentMiniSession.duration * 60 -
 				currentActivity.secondStamp;
-			setCountdown(timeRemaining);
+			if (timeRemaining > 1) {
+				setCountdown(timeRemaining);
+			} else {
+				reEvalutateAll();
+			}
 
 			let interval = setInterval(() => {
 				setCountdown((prev) => {
@@ -361,8 +484,6 @@ const TimerScreen = (props) => {
 			return () => clearInterval(interval);
 		}
 	}, [elapsed, currentActivity]);
-
-	
 
 	const onPressShowAll = () => {
 		if (showingAll) {
@@ -384,8 +505,6 @@ const TimerScreen = (props) => {
 	// const handleStudyFlowPress = () => {
 	// 	props.navigation.navigate("EditStudyFlow");
 	// };
-
-	
 
 	//console.log(getCurrentMiniSession(currentActivity))
 	//console.log(currentActivity)
@@ -426,7 +545,7 @@ const TimerScreen = (props) => {
 				accessoryLeft={() => {
 					return (
 						<TouchableCmp
-							style={{ padding: 2, paddingHorizontal: 10  }}
+							style={{ padding: 2, marginHorizontal: 10 }}
 							onPress={() => {
 								Alert.alert("Are you sure you want to leave?", "", [
 									{
@@ -438,15 +557,10 @@ const TimerScreen = (props) => {
 									{ text: "Stay" },
 								]);
 							}}
-							
 						>
 							<Ionicons
 								name="close-circle"
-								color={
-									theme === "dark"
-										? CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-500"]
-								}
+								color={CustomTheme["color-primary-500"]}
 								size={32}
 							/>
 						</TouchableCmp>
@@ -491,6 +605,7 @@ const TimerScreen = (props) => {
 					style={{ flex: 1 }}
 					onPress={() => {
 						sheetRef.current.snapTo(2);
+						topicsSheetRef.current.snapTo(2);
 						if (blurBackground) {
 							setBlurBackground(false);
 						}
@@ -537,9 +652,11 @@ const TimerScreen = (props) => {
 											: CustomTheme["color-primary-500"],
 								}}
 							>
-								{moment(
-									new Date(0, 0, 0, 0, Math.floor(countdown / 60))
-								).format("mm")}
+								{countdown > 0
+									? moment(
+											new Date(0, 0, 0, 0, Math.floor(countdown / 60))
+									  ).format("mm")
+									: "00"}
 							</Text>
 
 							<Text
@@ -554,41 +671,42 @@ const TimerScreen = (props) => {
 											: CustomTheme["color-primary-500"],
 								}}
 							>
-								{moment(
-									new Date(0, 0, 0, 0, 0, Math.floor(countdown % 60))
-								).format("ss")}
+								{countdown > 0
+									? moment(
+											new Date(0, 0, 0, 0, 0, Math.floor(countdown % 60))
+									  ).format("ss")
+									: "00"}
 							</Text>
 						</View>
 					</View>
 					<Divider
-							style={
-								theme === "dark"
-									? {
-											...themeStylesDark.divider,
-											marginTop: Dimensions.get("window").height / 50,
-									  }
-									: {
-											...themeStylesLight.divider,
-											marginTop: Dimensions.get("window").height / 80,
-									  }
-							}
-						/>
-						<HorizontalTimeline
-							eventId={props.route.params.eventId}
-							miniSessionId={
-								currentActivity
-									? getCurrentMiniSession(currentActivity).id
-									: null
-							}
-						/>
+						style={
+							theme === "dark"
+								? {
+										...themeStylesDark.divider,
+										marginTop: Dimensions.get("window").height / 50,
+								  }
+								: {
+										...themeStylesLight.divider,
+										marginTop: Dimensions.get("window").height / 80,
+								  }
+						}
+					/>
+					<HorizontalTimeline
+						eventId={props.route.params.eventId}
+						miniSessionId={
+							currentActivity ? getCurrentMiniSession(currentActivity).id : null
+						}
+						blur={blurBackground}
+					/>
 
-						<Divider
-							style={
-								theme === "dark"
-									? themeStylesDark.divider
-									: themeStylesLight.divider
-							}
-						/>
+					<Divider
+						style={
+							theme === "dark"
+								? themeStylesDark.divider
+								: themeStylesLight.divider
+						}
+					/>
 					<ScrollView
 						contentContainerStyle={styles.screen}
 						style={{ opacity: blurBackground ? 0.1 : 1 }}
@@ -627,93 +745,114 @@ const TimerScreen = (props) => {
 								{getFormattedEventType(currentEvent.type)}
 							</Text>
 						</View> */}
-						
-						{currentActivity && getCurrentMiniSession(currentActivity).type === "study" && (
-							<TouchableCmp
-								style={{ width: "100%" }}
-								onPress={() => {
-									if (sheetRef.current) {
-										setBlurBackground(true)
-										sheetRef.current.snapTo(0);
-									}
-								}}
-							>
-								<View
-									style={{
-										flexDirection: "row",
-										alignItems: "center",
-										justifyContent: "space-between",
-										width: "100%",
-										paddingHorizontal: Dimensions.get("window").width / 30,
-										paddingVertical: Dimensions.get("window").height / 40,
+
+						{currentActivity &&
+							getCurrentMiniSession(currentActivity).type === "study" && (
+								<TouchableCmp
+									style={{ width: "100%" }}
+									onPress={() => {
+										if (sheetRef.current) {
+											setBlurBackground(true);
+											sheetRef.current.snapTo(0);
+										}
 									}}
 								>
 									<View
 										style={{
 											flexDirection: "row",
 											alignItems: "center",
-											justifyContent: "center",
+											justifyContent: "space-between",
+											width: "100%",
+											paddingHorizontal: Dimensions.get("window").width / 30,
+											paddingVertical: Dimensions.get("window").height / 40,
 										}}
 									>
-										<Ionicons
-											name="library-outline"
-											color={
-												selectedSubjects[0]?.color
-													? selectedSubjects[0].color
-													: theme === "dark"
-													? "white"
-													: CustomTheme["color-primary-400"]
-											}
-											size={Dimensions.get("window").width / 11.5}
-										/>
 										<View
 											style={{
-												backgroundColor: selectedSubjects[0]?.color
-													? selectedSubjects[0].color
-													: theme === "dark"
-													? "white"
-													: CustomTheme["color-primary-400"],
-												padding: 4,
-												borderRadius: 10,
-												marginLeft: Dimensions.get("window").width / 50,
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "center",
 											}}
+										>
+											<Ionicons
+												name="library-outline"
+												color={
+													selectedSubjects[0]?.color
+														? selectedSubjects[0].color
+														: theme === "dark"
+														? "white"
+														: CustomTheme["color-primary-400"]
+												}
+												size={Dimensions.get("window").width / 11.5}
+											/>
+											<View
+												style={{
+													backgroundColor: selectedSubjects[0]?.color
+														? selectedSubjects[0].color
+														: theme === "dark"
+														? "white"
+														: CustomTheme["color-primary-400"],
+													padding: 4,
+													borderRadius: 10,
+													marginLeft: Dimensions.get("window").width / 50,
+												}}
+											>
+												<Text
+													style={{
+														fontFamily: "yellow-tail",
+														paddingHorizontal: 6,
+														paddingRight: 10,
+														fontSize: 24,
+														textAlign: "center",
+														color: selectedSubjects[0]?.color
+															? "white"
+															: theme === "dark"
+															? CustomTheme["color-primary-500"]
+															: "white",
+													}}
+												>
+													{selectedSubjects[0]
+														? selectedSubjects[0].title
+														: "Press to select subject"}
+												</Text>
+											</View>
+										</View>
+										<View
+											style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
 										>
 											<Text
 												style={{
-													fontFamily: "yellow-tail",
-													paddingHorizontal: 6,
-													paddingRight: 10,
-													fontSize: 24,
-													textAlign: 'center',
-													color: selectedSubjects[0]?.color
-													? 'white'
-													: theme === "dark"
-													? CustomTheme['color-primary-500']
-													: 'white',
+													
+													fontSize: Dimensions.get("window").width / 23.5,
+													color:
+														selectedSubjects.length === 0
+															? theme === "dark"
+																? CustomTheme["color-primary-500"]
+																: CustomTheme["color-primary-400"]
+															: theme === "dark"
+															? "white"
+															: CustomTheme["color-primary-400"],
 												}}
 											>
-												{selectedSubjects[0]
-													? selectedSubjects[0].title
-													: "Press to select subject"}
+												Update
 											</Text>
+											<Ionicons
+												name="chevron-forward-outline"
+												color={
+													selectedSubjects.length === 0
+														? theme === "dark"
+															? CustomTheme["color-primary-500"]
+															: CustomTheme["color-primary-400"]
+														: theme === "dark"
+														? "white"
+														: CustomTheme["color-primary-400"]
+												}
+												size={Dimensions.get("window").width / 14}
+											/>
 										</View>
 									</View>
-									<Ionicons
-										name="chevron-forward-circle-outline"
-										color={
-											selectedSubjects.length === 0
-												? theme === "dark"
-													? CustomTheme["color-primary-500"]
-													: CustomTheme["color-primary-400"]
-												: theme === "dark"
-												? "white"
-												: CustomTheme["color-primary-400"]
-										}
-										size={Dimensions.get("window").width / 12}
-									/>
-								</View>
-							</TouchableCmp>
-						)}
+								</TouchableCmp>
+							)}
 						<Divider
 							style={
 								theme === "dark"
@@ -814,53 +953,85 @@ const TimerScreen = (props) => {
 					</View> */}
 					</ScrollView>
 				</TouchableWithoutFeedback>
-				
-					<BottomSheet
-						ref={sheetRef}
-						style={{ overflow: "hidden" }}
-						snapPoints={[
-							Dimensions.get("window").height / 1.8,
-							Dimensions.get("window").height / 2.5,
-							0,
-						]}
-						borderRadius={20}
-						initialSnap={2}
-						renderContent={renderContent}
-						onCloseStart={() => {
-							
-								if (blurBackground) {
-									setBlurBackground(false);
-								}
-							
-						}}
-						onCloseEnd={() => {
-							
-								if (blurBackground) {
-									setBlurBackground(false);
-								}
-						
-						}}
-						renderHeader={() => {
-							return (
+
+				<BottomSheet
+					ref={sheetRef}
+					style={{ overflow: "hidden" }}
+					snapPoints={[
+						Dimensions.get("window").height / 1.8,
+						Dimensions.get("window").height / 2.5,
+						0,
+					]}
+					borderRadius={20}
+					initialSnap={2}
+					renderContent={renderSubjectsContent}
+					onCloseStart={() => {
+						if (blurBackground) {
+							setBlurBackground(false);
+						}
+					}}
+					onCloseEnd={() => {
+						if (blurBackground) {
+							setBlurBackground(false);
+						}
+					}}
+					renderHeader={() => {
+						return (
+							<View style={{ width: "100%", alignItems: "center", padding: 5 }}>
 								<View
-									style={{ width: "100%", alignItems: "center", padding: 5 }}
-								>
-									<View
-										style={{
-											backgroundColor:
-												theme === "dark"
-													? "white"
-													: CustomTheme["color-primary-500"],
-											width: 50,
-											height: 4,
-											borderRadius: 5,
-										}}
-									></View>
-								</View>
-							);
-						}}
-					/>
-				
+									style={{
+										backgroundColor:
+											theme === "dark"
+												? "white"
+												: CustomTheme["color-primary-500"],
+										width: 50,
+										height: 4,
+										borderRadius: 5,
+									}}
+								></View>
+							</View>
+						);
+					}}
+				/>
+				<BottomSheet
+					ref={topicsSheetRef}
+					style={{ overflow: "hidden" }}
+					snapPoints={[
+						Dimensions.get("window").height / 1.55,
+						Dimensions.get("window").height / 1.9,
+						0,
+					]}
+					borderRadius={20}
+					initialSnap={2}
+					renderContent={renderTopicsContent}
+					onCloseStart={() => {
+						if (blurBackground) {
+							setBlurBackground(false);
+						}
+					}}
+					onCloseEnd={() => {
+						if (blurBackground) {
+							setBlurBackground(false);
+						}
+					}}
+					renderHeader={() => {
+						return (
+							<View style={{ width: "100%", alignItems: "center", padding: 5 }}>
+								<View
+									style={{
+										backgroundColor:
+											theme === "dark"
+												? "white"
+												: CustomTheme["color-primary-500"],
+										width: 50,
+										height: 4,
+										borderRadius: 5,
+									}}
+								></View>
+							</View>
+						);
+					}}
+				/>
 			</Layout>
 		</SafeAreaView>
 	);
@@ -921,7 +1092,7 @@ const styles = StyleSheet.create({
 		height: Dimensions.get("window").height / 3.5,
 		position: "absolute",
 		top: 7, //- (Dimensions.get("window").height / 81)
-		left: 20,
+		left: Dimensions.get("window").width / 19,
 	},
 	timerBackground: {
 		backgroundColor: "black",
