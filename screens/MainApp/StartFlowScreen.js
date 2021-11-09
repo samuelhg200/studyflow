@@ -5,19 +5,15 @@ import {
 	TouchableOpacity,
 	TouchableNativeFeedback,
 	TouchableWithoutFeedback,
-	Keyboard,
 	Alert,
-	Image,
 	Platform,
 	SafeAreaView,
-	alert,
 } from "react-native";
 import {
 	Card,
 	Text,
 	Input,
 	TopNavigation,
-	TopNavigationAction,
 	Divider,
 	Button,
 	Layout,
@@ -32,12 +28,9 @@ import * as studyFlowActions from "../../store/actions/studyFlow";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import {
-	getStudyFlow,
-	getIconStringBasedOnEventType,
-} from "../../helpers/functions";
+import { getIconStringBasedOnEventType } from "../../helpers/functions";
 import HeaderButton from "../../components/HeaderButton";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 
 function timeToString2(time) {
 	const date = new Date(time);
@@ -64,7 +57,7 @@ const Footer = (props) => {
 				<Button
 					style={styles.button}
 					onPress={() => {
-						props.previewHandler(props.item.id.toISOString());
+						props.previewHandler(props.item.id.toString());
 					}}
 					size="small"
 					status="basic"
@@ -95,7 +88,7 @@ const Footer = (props) => {
 					<Button
 						style={styles.button}
 						onPress={() => {
-							props.previewHandler(props.item.id.toISOString());
+							props.previewHandler(props.item.id.toString());
 						}}
 						size="small"
 						status="basic"
@@ -108,7 +101,7 @@ const Footer = (props) => {
 			<Button
 				style={styles.button}
 				onPress={() => {
-					props.deleteHandler(props.item.id);
+					props.deleteHandler(props.item.id, props.item.seriesId);
 				}}
 				size="small"
 				status="basic"
@@ -165,9 +158,20 @@ const Header = (props) => {
 					);
 				})}
 			</View>
+
 			<Text category="s2" style={{ fontSize: 12 }}>
-				{getRange(props.item.date, props.item.duration)}
+				{getRange(props.item.date, props.item.duration)}{" "}
 			</Text>
+			{props.item.seriesId ? (
+				<Ionicons
+					name="repeat-outline"
+					color={
+						props.theme === "dark" ? "white" : CustomTheme["color-primary-500"]
+					}
+				/>
+			) : (
+				<View></View>
+			)}
 		</View>
 	);
 };
@@ -177,6 +181,7 @@ const StartFlowScreen = (props) => {
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
 	const dispatch3 = useDispatch();
+	const theme = useSelector((state) => state.theme.theme);
 	const eventsToday = useSelector((state) =>
 		state.events.events.length > 0
 			? state.events.events.filter((event) =>
@@ -203,8 +208,29 @@ const StartFlowScreen = (props) => {
 	};
 
 	const [selectedEventId, setSelectedEventId] = useState(null);
-	const deleteEventHandler = (id) => {
-		dispatch(eventsActions.deleteEvent(id));
+	const deleteEventHandler = (id, seriesId) => {
+		if (seriesId) {
+			Alert.alert(
+				"Remove event or series",
+				"Do you wish to delete only this event or events in the series too",
+				[
+					{
+						text: "Series",
+						onPress: () => {
+							dispatch(eventsActions.deleteEventSeries(seriesId));
+						},
+					},
+					{
+						text: "Event",
+						onPress: () => {
+							dispatch(eventsActions.deleteEvent(id));
+						},
+					},
+				]
+			);
+		} else {
+			dispatch(eventsActions.deleteEvent(id));
+		}
 	};
 	const previewEventHandler = (id) => {
 		props.navigation.navigate("EventPreview", {
@@ -242,6 +268,24 @@ const StartFlowScreen = (props) => {
 							</Text>
 						</View>
 					)}
+					accessoryRight={() => (
+						<TouchableCmp
+							style={{ paddingHorizontal: 4 }}
+							onPress={() => {
+								props.navigation.navigate('Store')
+							}}
+						>
+							<Ionicons
+								name="wallet-outline"
+								color={
+									theme === "dark"
+										? CustomTheme["color-primary-500"]
+										: CustomTheme["color-primary-500"]
+								}
+								size={32}
+							/>
+						</TouchableCmp>
+					)}
 
 					//subtitle='Enhance your learning'
 					// accessoryLeft={renderBackAction}
@@ -276,6 +320,7 @@ const StartFlowScreen = (props) => {
 									No events planned for today
 								</Text>
 							</View>
+
 							<View
 								style={{
 									alignItems: "center",
@@ -323,6 +368,24 @@ const StartFlowScreen = (props) => {
 								StudyFlow
 							</Text>
 						</View>
+					)}
+					accessoryRight={() => (
+						<TouchableCmp
+							style={{ paddingHorizontal: 4 }}
+							onPress={() => {
+								props.navigation.navigate('Store')
+							}}
+						>
+							<Ionicons
+								name="wallet-outline"
+								color={
+									theme === "dark"
+										? CustomTheme["color-primary-500"]
+										: CustomTheme["color-primary-500"]
+								}
+								size={32}
+							/>
+						</TouchableCmp>
 					)}
 
 					//subtitle='Enhance your learning'
@@ -372,7 +435,7 @@ const StartFlowScreen = (props) => {
 												/>
 											)}
 											header={(props) => (
-												<Header {...props} item={itemData.item} />
+												<Header {...props} item={itemData.item} theme={theme} />
 											)}
 										>
 											<View
@@ -397,7 +460,7 @@ const StartFlowScreen = (props) => {
 													onPress={() => {
 														recordStartTime().then(
 															props.navigation.navigate("Timer", {
-																eventId: itemData.item.id.toISOString(),
+																eventId: itemData.item.id.toString(),
 															})
 														);
 														//console.log(itemData.item.id.toISOString())
@@ -423,7 +486,7 @@ const StartFlowScreen = (props) => {
 							size="giant"
 							onPress={() => {
 								props.navigation.navigate("Timer", {
-									eventId: selectedEventId.toISOString(),
+									eventId: selectedEventId.toString(),
 								});
 							}}
 						>

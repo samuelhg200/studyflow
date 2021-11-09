@@ -101,6 +101,7 @@ const ManagerScreen = (props) => {
 						style={{ ...colorsModule, ...styles.module }}
 						onPress={onClickSubjects}
 					><View style={Platform.OS === 'android' ? {flexDirection: 'row', ...colorsModule, ...styles.module} : {flexDirection: 'row'}}>
+						
 						<View
 							style={{
 								...styles.leftColumn,

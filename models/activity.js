@@ -1,8 +1,9 @@
 export default class Activity {
-	constructor(eventId, startTime, secondStamp, miniSessions) {
+	constructor(eventId, startTime, secondStamp, miniSessions, studyLog) {
 		this.eventId = eventId;
 		this.secondStamp = secondStamp;
         this.startTime = startTime;
+        
 		/* 
         [
             {
@@ -24,5 +25,16 @@ export default class Activity {
         ]
         */
 		this.miniSessions = miniSessions;
+        /* 
+            [
+                {
+                    subjectId: 1,
+                    startTime: new Date(),
+                },
+                ...
+            ]
+        */
+        this.studyLog = studyLog;
+
 	}
 }

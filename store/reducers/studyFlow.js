@@ -6,8 +6,8 @@ import {
 
 const initialState = {
 	config: {
-		studyTime: 2,
-		breakTime: 2,
+		studyTime: 20,
+		breakTime: 5,
 	},
 	eventConfig: {
 		studySession: true,

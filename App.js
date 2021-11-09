@@ -23,6 +23,10 @@ import subjectReducer from "./store/reducers/subject";
 import eventsReducer from "./store/reducers/events";
 import studyFlowReducer from "./store/reducers/studyFlow";
 import themeReducer from "./store/reducers/theme";
+import eventHistoryReducer from "./store/reducers/eventHistory";
+import currentEventRepeatReducer from "./store/reducers/currentEventRepeat";
+import walletReducer from './store/reducers/wallet'
+import productReducer from './store/reducers/product'
 
 const rootReducer = combineReducers({
 	tutorial: tutorialReducer,
@@ -30,6 +34,10 @@ const rootReducer = combineReducers({
 	events: eventsReducer,
 	studyFlow: studyFlowReducer,
 	theme: themeReducer,
+	eventHistory: eventHistoryReducer,
+	currentEventRepeat: currentEventRepeatReducer,
+	wallet: walletReducer,
+	product: productReducer
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

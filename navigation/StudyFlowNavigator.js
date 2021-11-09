@@ -1,8 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
-import { StyleSheet, Alert, Platform, Dimensions, SafeAreaView } from "react-native";
+import React from "react";
+import { StyleSheet, Alert, Dimensions, SafeAreaView } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import LottieView from "lottie-react-native";
 import {
 	BottomNavigation,
 	BottomNavigationTab,
@@ -31,9 +30,12 @@ import TopicsModal from "../screens/Modals/TopicsModal";
 import EditStudyFLowModal from "../screens/Modals/EditStudyFLowModal";
 import PreTimerModal from "../screens/Modals/PreTimerModal";
 import MeditationModal from "../screens/Modals/MeditationModal";
+import SessionFeedbackScreen from "../screens/MainApp/SessionFeedbackScreen";
+import StudyTipsPopUp from "../screens/PopUp/StudyTipsPopUp";
+import ChooseRepeatFrequency from "../screens/Modals/ChooseRepeatFrequency";
+
 import HeaderButton from "../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 
 import customTheme from "../assets/UIkitten/custom-theme.json";
 
@@ -138,6 +140,16 @@ const StartFlowNavigator = () => {
 				options={{ headerShown: false }}
 			/>
 			<StartFlowStackNavigator.Screen
+				name="Store"
+				component={StoreScreen}
+				//options={startFlowScreenOptions}
+				options={{
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Store",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
 				name="ChooseEventType"
 				component={ChooseEventTypeScreen}
 				options={{
@@ -176,8 +188,7 @@ const StartFlowNavigator = () => {
 					headerTitle: navData.route.params.subjectTitle,
 					headerBackTitle: "Subjects",
 					headerRight: () => {
-						!navData.route.params.disableDelete ?
-						 (
+						!navData.route.params.disableDelete ? (
 							<HeaderButtons HeaderButtonComponent={HeaderButton}>
 								<Item
 									title="topics"
@@ -204,7 +215,9 @@ const StartFlowNavigator = () => {
 									}}
 								/>
 							</HeaderButtons>
-						) : (<View></View>)
+						) : (
+							<View></View>
+						);
 					},
 				})}
 			/>
@@ -244,10 +257,19 @@ const StartFlowNavigator = () => {
 				component={TimerScreen}
 				options={{ headerShown: false }}
 			/>
-			<StartFlowStackNavigator.Screen name="Store" component={StoreScreen} />
 			<StartFlowStackNavigator.Screen
 				name="Profile"
 				component={ProfileScreen}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="StudyTips"
+				component={StudyTipsPopUp}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Study Tip",
+					headerBackTitle: " ",
+				}}
 			/>
 			<StartFlowStackNavigator.Screen
 				name="Meditation"
@@ -257,6 +279,26 @@ const StartFlowNavigator = () => {
 					headerTintColor: customTheme["color-primary-500"],
 					headerTitle: "Meditation",
 					headerBackTitle: " ",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="SessionFeedback"
+				component={SessionFeedbackScreen}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Feedback",
+					headerBackTitle: "Home",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="ChooseRepeatFrequency"
+				component={ChooseRepeatFrequency}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Repeat",
+					headerBackTitle: "Event",
 				}}
 			/>
 		</StartFlowStackNavigator.Navigator>
@@ -351,13 +393,21 @@ const ScheduleNavigator = () => {
 					},
 				})}
 			/>
+			<ScheduleStackNavigator.Screen
+				name="ChooseRepeatFrequency"
+				component={ChooseRepeatFrequency}
+				options={{
+					presentation: "modal",
+					headerTintColor: customTheme["color-primary-500"],
+					headerTitle: "Repeat",
+					headerBackTitle: "Event",
+				}}
+			/>
 		</ScheduleStackNavigator.Navigator>
 	);
 };
 
 const StudyFlowTabNavigator = createBottomTabNavigator();
-
-const MetricsIcon = (props) => <Icon {...props} name="bar-chart-outline" />;
 
 const ManagerIcon = (props) => <Icon {...props} name="bulb-outline" />;
 
@@ -371,14 +421,18 @@ const BottomTabBar = ({ navigation, state, managerIconRef }) => {
 	return (
 		//<SafeAreaView>
 		<BottomNavigation
-			style={{ height: Dimensions.get("window").height / 10, alignItems: "flex-start", paddingTop: 15 }}
+			style={{
+				height: Dimensions.get("window").height / 10,
+				alignItems: "flex-start",
+				paddingTop: 15,
+			}}
 			selectedIndex={state.index}
 			onSelect={(index) => navigation.navigate(state.routeNames[index])}
 		>
 			<BottomNavigationTab icon={ManagerIcon} />
 			<BottomNavigationTab icon={TimerIcon} />
 			<BottomNavigationTab icon={CalendarIcon} />
-		</BottomNavigation>//</SafeAreaView>
+		</BottomNavigation> //</SafeAreaView>
 	);
 };
 
@@ -388,7 +442,7 @@ const StudyFlowNavigator = ({ managerIconRef }) => {
 			initialRouteName="StartFlowStack"
 			tabBar={(props) => <BottomTabBar {...props} />}
 			screenOptions={({ route }) => ({
-				tabBarStyle: {  },
+				tabBarStyle: {},
 				//tabBarActiveTintColor: customTheme['color-primary-500'],
 				headerShown: false,
 				tabBarShowLabel: false,

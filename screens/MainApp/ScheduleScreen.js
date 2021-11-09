@@ -142,7 +142,7 @@ const Footer = (props) => (
 			<Button
 				style={styles.footerControl}
 				onPress={() => {
-					props.previewHandler(props.item.id.toISOString());
+					props.previewHandler(props.item.id.toString());
 				}}
 				size="small"
 				status="basic"
@@ -174,7 +174,7 @@ const Footer = (props) => (
 				<Button
 					style={styles.footerControl}
 					onPress={() => {
-						props.previewHandler(props.item.id.toISOString());
+						props.previewHandler(props.item.id.toString());
 					}}
 					size="small"
 					status="basic"
@@ -187,7 +187,7 @@ const Footer = (props) => (
 		<Button
 			style={{ backgroundColor: props.color, ...styles.footerControl }}
 			onPress={() => {
-				props.deleteHandler(props.item.id);
+				props.deleteHandler(props.item.id, props.item.seriesId);
 			}}
 			size="small"
 			status="basic"
@@ -235,46 +235,53 @@ const Header = (props) => {
 				})}
 			</View>
 			<Text category="s2" style={{ fontSize: 12, color: props.color }}>
-				{props.item.timeRange}
+				{props.item.timeRange}{" "}
 			</Text>
+			{props.item.seriesId ? (
+				<Ionicons
+					name="repeat-outline"
+					color={
+						props.theme === "dark" ? "white" : customTheme["color-primary-500"]
+					}
+				/>
+			) : (
+				<View></View>
+			)}
 		</View>
 	);
 };
 
 function getItems(eventsCopy, date = new Date()) {
-	
-		let key = 0;
-		date = new Date(date);
+	let key = 0;
+	date = new Date(date);
 
-		const allItems = [];
+	const allItems = [];
 
-		const minMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-		const maxMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-		const allDates = getDates(minMonth, maxMonth);
-		for (let i = 0; i < allDates.length; i++) {
-			const currentItem = {};
+	const minMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+	const maxMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+	const allDates = getDates(minMonth, maxMonth);
+	for (let i = 0; i < allDates.length; i++) {
+		const currentItem = {};
 
-			key++;
-			const currentDate = allDates[i].setHours(0, 0, 0, 0);
+		key++;
+		const currentDate = allDates[i].setHours(0, 0, 0, 0);
 
-			const formatedCurrentDate = timeToString2(currentDate);
+		const formatedCurrentDate = timeToString2(currentDate);
 
-			currentItem[formatedCurrentDate] = [];
-			currentItem["key"] = key.toString();
-			if (eventsCopy.length > 0) {
-				for (let j = 0; j < eventsCopy.length; j++) {
-					if (
-						currentDate === new Date(eventsCopy[j].date).setHours(0, 0, 0, 0)
-					) {
-						let range = getRange(eventsCopy[j].date, eventsCopy[j].duration);
-						eventsCopy[j]["timeRange"] = range;
-						currentItem[formatedCurrentDate].push(eventsCopy[j]);
-					}
+		currentItem[formatedCurrentDate] = [];
+		currentItem["key"] = key.toString();
+		if (eventsCopy.length > 0) {
+			for (let j = 0; j < eventsCopy.length; j++) {
+				if (currentDate === new Date(eventsCopy[j].date).setHours(0, 0, 0, 0)) {
+					let range = getRange(eventsCopy[j].date, eventsCopy[j].duration);
+					eventsCopy[j]["timeRange"] = range;
+					currentItem[formatedCurrentDate].push(eventsCopy[j]);
 				}
 			}
-			allItems.push(currentItem);
 		}
-		return allItems;
+		allItems.push(currentItem);
+	}
+	return allItems;
 }
 
 const DayDisplayer = ({ day }) => {
@@ -344,22 +351,21 @@ const ScheduleScreen = (props) => {
 		setLoading(bool);
 	};
 	useEffect(() => {
-		
-			const items = getItems(events.slice(), dateToLoad);
-			setItems(items);
-			//travel to index
-			// if (flatListRef.current) {
-			// 	try {
-			// 		setScrollingEnabled(false);
-			// 		setTimeout(
-			// 			() =>
-			// 				flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
-			// 			100
-			// 		);
-			// 		setScrollingEnabled(true);
-			// 	} catch (err) {}
-			// }
-		
+		const items = getItems(events.slice(), dateToLoad);
+		setItems(items);
+		//travel to index
+		// if (flatListRef.current) {
+		// 	try {
+		// 		setScrollingEnabled(false);
+		// 		setTimeout(
+		// 			() =>
+		// 				flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+		// 			100
+		// 		);
+		// 		setScrollingEnabled(true);
+		// 	} catch (err) {}
+		// }
+
 		props.navigation.setOptions({
 			headerTitle: moment(dateToLoad).format("MMMM YYYY"),
 		});
@@ -396,8 +402,29 @@ const ScheduleScreen = (props) => {
 		// });
 	}, [dateToLoad, dispatch2]);
 
-	const deleteEventHandler = (id) => {
-		dispatch(eventsActions.deleteEvent(id));
+	const deleteEventHandler = (id, seriesId) => {
+		if (seriesId) {
+			Alert.alert(
+				"Remove event or series",
+				"Do you wish to delete only this event or events in the series too",
+				[
+					{
+						text: "Series",
+						onPress: () => {
+							dispatch(eventsActions.deleteEventSeries(seriesId));
+						},
+					},
+					{
+						text: "Event",
+						onPress: () => {
+							dispatch(eventsActions.deleteEvent(id));
+						},
+					},
+				]
+			);
+		} else {
+			dispatch(eventsActions.deleteEvent(id));
+		}
 	};
 	const previewEventHandler = (id) => {
 		props.navigation.navigate("EventPreview", {
@@ -425,8 +452,7 @@ const ScheduleScreen = (props) => {
 			try {
 				setScrollingEnabled(false);
 				setTimeout(
-					() =>
-						flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
+					() => flatListRef.current.scrollToIndex({ index: dayToTravelTo - 1 }),
 					1000
 				);
 				setScrollingEnabled(true);
@@ -598,7 +624,7 @@ const ScheduleScreen = (props) => {
 			return (
 				<View style={{ flex: 1 }}>
 					<FlatList
-						keyExtractor={(item) => item.id.toISOString()}
+						keyExtractor={(item) => item.id.toString()}
 						style={{ width: "100%", marginBottom: 10 }}
 						data={currentItem}
 						renderItem={(itemData) => {

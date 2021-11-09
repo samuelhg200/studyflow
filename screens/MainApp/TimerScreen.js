@@ -9,26 +9,20 @@ import {
 	TouchableNativeFeedback,
 	Alert,
 	SafeAreaView,
-	PixelRatio,
 } from "react-native";
 import {
 	Text,
 	Layout,
-	Toggle,
 	Divider,
 	TopNavigation,
-	TopNavigationAction,
 } from "@ui-kitten/components";
 //import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import LabelsList from "../../components/LabelsList";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
-import * as studyFlowActions from "../../store/actions/studyFlow";
 import * as eventsActions from "../../store/actions/events";
-import HeaderButton from "../../components/HeaderButton";
-import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import * as eventHistoryActions from "../../store/actions/eventHistory";
 import moment from "moment";
 import LottieView from "lottie-react-native";
 import BottomSheet from "reanimated-bottom-sheet";
@@ -36,15 +30,14 @@ import BottomSheet from "reanimated-bottom-sheet";
 import { convertActivityToTimeline } from "../../helpers/functions";
 import HorizontalTimeline from "../../components/HorizontalTimeline";
 import TagsView from "../../components/TagsView";
-import { getStudyFlow, generateTimeline } from "../../helpers/functions";
+import { getStudyFlow, generateTimeline, getSubjectStudyTime } from "../../helpers/functions";
 import {
 	getFormattedEventType,
-	getIconStringBasedOnEventType,
 	getFormattedActivityType,
 } from "../../helpers/functions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
-import { differenceInSeconds, differenceInMinutes } from "date-fns";
+import { differenceInSeconds } from "date-fns";
 import Activity from "../../models/activity";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
 
@@ -87,6 +80,7 @@ const themeStylesDark = {
 
 const TimerScreen = (props) => {
 	const dispatch = useDispatch();
+	const dispatch2 = useDispatch();
 	//states
 	const timeConfig = useSelector((state) => state.studyFlow.config);
 	const theme = useSelector((state) => state.theme.theme);
@@ -95,14 +89,14 @@ const TimerScreen = (props) => {
 		(state) =>
 			state.events.activities.filter(
 				(activity) =>
-					activity.eventId.toISOString() === props.route.params.eventId
+					activity.eventId.toString() === props.route.params.eventId
 			)[0]
 	);
 	const subjects = useSelector((state) => state.subject.subjects);
 
 	const [currentEvent, setCurrentEvent] = useState(
 		events.filter(
-			(event) => event.id.toISOString() === props.route.params.eventId
+			(event) => event.id.toString() === props.route.params.eventId
 		)[0]
 	);
 	const [showedSubjects, setshowedSubjects] = useState(currentEvent.subjects);
@@ -112,6 +106,7 @@ const TimerScreen = (props) => {
 	const [timeline, setTimeline] = useState(null);
 	const [blurBackground, setBlurBackground] = useState(true);
 	const [miniSession, setMiniSession] = useState(null);
+	const [studyLog, setStudyLog] = useState([]);
 
 	//Subjects modal renderer function
 	const renderSubjectsContent = () => {
@@ -141,9 +136,9 @@ const TimerScreen = (props) => {
 							fontSize: 18,
 							padding: 4,
 						}}
-					>{`${timeline[currentMiniSession.id - 1].time} - ${
+					>{currentMiniSession.type !== 'feedback' ? `${timeline[currentMiniSession.id - 1].time} - ${
 						timeline[currentMiniSession.id].time
-					}`}</Text>
+					}` : ''}</Text>
 				)}
 				<Divider
 					style={
@@ -205,7 +200,7 @@ const TimerScreen = (props) => {
 			</Layout>
 		);
 	};
-
+	
 	//Topics modal render function
 	const renderTopicsContent = () => {
 		const currentMiniSession = currentActivity
@@ -234,9 +229,9 @@ const TimerScreen = (props) => {
 							fontSize: 18,
 							padding: 4,
 						}}
-					>{`${timeline[currentMiniSession.id - 1].time} - ${
+					>{currentMiniSession.type !== 'feedback' ? `${timeline[currentMiniSession.id - 1].time} - ${
 						timeline[currentMiniSession.id].time
-					}`}</Text>
+					}` : ''}</Text>
 				)}
 				<Divider
 					style={
@@ -278,7 +273,7 @@ const TimerScreen = (props) => {
 												? "white"
 												: CustomTheme["color-primary-700"],
 										fontSize: 14.5,
-										textAlign: 'center'
+										textAlign: "center",
 									}}
 								>{`Choose all the topics you have worked on or plan to work on now`}</Text>
 							</View>
@@ -358,6 +353,7 @@ const TimerScreen = (props) => {
 			timeConfig.breakTime,
 			currentEvent.date
 		);
+		//console.log(timeline[timeline.length - 1])
 		const miniSessions = timeline.map((miniSession, index) => {
 			if (miniSession.eventType !== "feedback") {
 				return {
@@ -365,12 +361,17 @@ const TimerScreen = (props) => {
 					type: miniSession.eventType,
 					duration: miniSession.duration,
 				};
+			} else {
+				return {
+					id: index + 1,
+					type: miniSession.eventType,
+					duration: null
+				}
 			}
 		});
 		const cleanMiniSessions = miniSessions.filter(
 			(session) => session !== undefined
 		);
-
 		const getTime = async () => {
 			const startTime = await AsyncStorage.getItem("@start_time");
 			return startTime;
@@ -382,7 +383,8 @@ const TimerScreen = (props) => {
 				currentEvent.id,
 				time,
 				elapsed,
-				cleanMiniSessions
+				cleanMiniSessions,
+				studyLog
 			);
 			dispatch(eventsActions.updateActivity(activityToUpdate));
 			setTimeline(convertActivityToTimeline(activityToUpdate));
@@ -392,14 +394,19 @@ const TimerScreen = (props) => {
 
 	useEffect(() => {
 		if (selectedSubjects.length > 0) {
+			//hide lower module
 			sheetRef.current.snapTo(2);
-			// if (blurBackground) {
-			// 	setBlurBackground(false);
-			// }
 			setTimeout(() => {
 				topicsSheetRef.current.snapTo(0);
 				setBlurBackground(true);
 			}, 200);
+			//log new study change in app
+			setStudyLog(() =>
+				studyLog.concat({
+					subjectId: selectedSubjects[0].id,
+					startTime: Date.now(),
+				})
+			);
 		}
 	}, [selectedSubjects]);
 
@@ -413,6 +420,7 @@ const TimerScreen = (props) => {
 					setMiniSession(temp);
 				} else if (miniSession.id !== temp.id) {
 					setMiniSession(temp);
+
 				}
 			}
 		};
@@ -436,8 +444,9 @@ const TimerScreen = (props) => {
 		AppState.addEventListener("change", handleAppStateChange);
 		return () => AppState.removeEventListener("change", handleAppStateChange);
 	}, []);
-
-	//do when new study session appears
+	
+	
+	
 	useEffect(() => {
 		if (miniSession?.type === "study") {
 			setTimeout(() => {
@@ -445,7 +454,20 @@ const TimerScreen = (props) => {
 				setBlurBackground(true);
 				sheetRef.current.snapTo(0);
 			}, 100);
+			//should also account for end of study session
+		} else if (miniSession?.type === "break" || miniSession?.type === 'feedback') {
+			//add null record to signify break to the study log (for easier calculation)
+			setStudyLog(() =>
+				studyLog.concat({
+					subjectId: null,
+					startTime: Date.now(),
+				})
+			);
 		}
+		if (miniSession?.type === 'feedback'){
+			endSession()
+		}
+		
 	}, [miniSession]);
 
 	useEffect(() => {
@@ -495,19 +517,35 @@ const TimerScreen = (props) => {
 		}
 	};
 
-	// const studyTimeRepresentation = moment(
-	// 	new Date(0, 0, 0, 0, timeConfig.studyTime, 0)
-	// ).format("HH:mm");
-	// const breakTimeRepresentation = moment(
-	// 	new Date(0, 0, 0, 0, timeConfig.breakTime, 0)
-	// ).format("HH:mm");
+	//when session ends handle navigation to feedback screen and calculate stats
+	function endSession () {
+		//calculate and submit stats for current session
+		const subjectStudyTime = getSubjectStudyTime(studyLog, Date.now())
+		//console.log(new Date(currentActivity.startTime).toISOString())
+		const currST = currentActivity.startTime//avoid accessing data on an already closed screen
+		//dispatch current event history to state
+		dispatch2(
+			eventHistoryActions.addEventHistory(
+				props.route.params.eventId,
+				currentActivity.startTime,
+				Date.now(),
+				currentActivity.miniSessions,
+				studyLog
+			)
+		);
 
-	// const handleStudyFlowPress = () => {
-	// 	props.navigation.navigate("EditStudyFlow");
-	// };
+		//navigate to feedback page and pass stats
+		props.navigation.pop()
+		props.navigation.navigate('SessionFeedback', {
+			subjectStudyTime: subjectStudyTime,
+			startTime: currST,
+			endTime: Date.now(),
+		})
+	}
 
-	//console.log(getCurrentMiniSession(currentActivity))
-	//console.log(currentActivity)
+	
+
+	
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
 			<TopNavigation
@@ -551,7 +589,17 @@ const TimerScreen = (props) => {
 									{
 										text: "Leave",
 										onPress: () => {
-											props.navigation.goBack();
+											// dispatch2(
+											// 	eventHistoryActions.addEventHistory(
+											// 		props.route.params.eventId,
+											// 		currentActivity.startTime,
+											// 		Date.now(),
+											// 		currentActivity.miniSessions,
+											// 		studyLog
+											// 	)
+											// );
+											// props.navigation.goBack();
+											endSession()
 										},
 									},
 									{ text: "Stay" },
@@ -594,7 +642,31 @@ const TimerScreen = (props) => {
 							/>
 						</TouchableCmp>
 					) : (
-						<View></View>
+						<TouchableCmp
+							style={{ paddingHorizontal: 4 }}
+							onPress={() => {
+								const currentMiniSession =
+									getCurrentMiniSession(currentActivity);
+								//countdown
+								const timeRemaining =
+									currentMiniSession.minuteStart * 60 +
+									currentMiniSession.duration * 60 -
+									currentActivity.secondStamp;
+								props.navigation.navigate("StudyTips", {
+									timeLeft: timeRemaining,
+								});
+							}}
+						>
+							<Ionicons
+								name="bulb-outline"
+								color={
+									theme === "dark"
+										? CustomTheme["color-primary-500"]
+										: CustomTheme["color-primary-500"]
+								}
+								size={30}
+							/>
+						</TouchableCmp>
 					)
 				}
 			/>
@@ -783,7 +855,7 @@ const TimerScreen = (props) => {
 														? "white"
 														: CustomTheme["color-primary-400"]
 												}
-												size={Dimensions.get("window").width / 11.5}
+												size={Dimensions.get("window").width / 12}
 											/>
 											<View
 												style={{
@@ -802,7 +874,7 @@ const TimerScreen = (props) => {
 														fontFamily: "yellow-tail",
 														paddingHorizontal: 6,
 														paddingRight: 10,
-														fontSize: 24,
+														fontSize: 22,
 														textAlign: "center",
 														color: selectedSubjects[0]?.color
 															? "white"
@@ -818,11 +890,14 @@ const TimerScreen = (props) => {
 											</View>
 										</View>
 										<View
-											style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center' }}
+											style={{
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "center",
+											}}
 										>
 											<Text
 												style={{
-													
 													fontSize: Dimensions.get("window").width / 23.5,
 													color:
 														selectedSubjects.length === 0
@@ -860,6 +935,120 @@ const TimerScreen = (props) => {
 									: themeStylesLight.divider
 							}
 						/>
+						{currentActivity &&
+							getCurrentMiniSession(currentActivity).type === "study" && (
+								<TouchableCmp
+									style={{ width: "100%" }}
+									onPress={() => {
+										if (sheetRef.current) {
+											setBlurBackground(true);
+											topicsSheetRef.current.snapTo(0);
+										}
+									}}
+								>
+									<View
+										style={{
+											flexDirection: "row",
+											alignItems: "center",
+											justifyContent: "space-between",
+											width: "100%",
+											paddingHorizontal: Dimensions.get("window").width / 30,
+											paddingVertical: Dimensions.get("window").height / 40,
+										}}
+									>
+										<View
+											style={{
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "center",
+											}}
+										>
+											<Ionicons
+												name="list-outline"
+												color={
+													selectedTopics.length > 0
+														? selectedSubjects[0].color
+														: theme === "dark"
+														? "white"
+														: CustomTheme["color-primary-400"]
+												}
+												size={Dimensions.get("window").width / 12}
+											/>
+											<View
+												style={{
+													backgroundColor:
+														selectedTopics.length > 0
+															? selectedSubjects[0].color
+															: theme === "dark"
+															? "white"
+															: CustomTheme["color-primary-400"],
+													padding: 4,
+													borderRadius: 10,
+													marginLeft: Dimensions.get("window").width / 50,
+												}}
+											>
+												<Text
+													style={{
+														fontFamily: "yellow-tail",
+														paddingHorizontal: 6,
+														paddingRight: 10,
+														fontSize: 22,
+														textAlign: "center",
+														color:
+															selectedTopics.length > 0
+																? "white"
+																: theme === "dark"
+																? CustomTheme["color-primary-500"]
+																: "white",
+													}}
+												>
+													{selectedTopics.length > 0
+														? `${selectedTopics.length} Topic${
+																selectedTopics.length > 1 ? "s" : ""
+														  } covered`
+														: "Press to update topics"}
+												</Text>
+											</View>
+										</View>
+										<View
+											style={{
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "center",
+											}}
+										>
+											<Text
+												style={{
+													fontSize: Dimensions.get("window").width / 23.5,
+													color:
+														selectedTopics.length === 0
+															? theme === "dark"
+																? CustomTheme["color-primary-500"]
+																: CustomTheme["color-primary-400"]
+															: theme === "dark"
+															? "white"
+															: CustomTheme["color-primary-400"],
+												}}
+											>
+												Update
+											</Text>
+											<Ionicons
+												name="chevron-forward-outline"
+												color={
+													selectedTopics.length === 0
+														? theme === "dark"
+															? CustomTheme["color-primary-500"]
+															: CustomTheme["color-primary-400"]
+														: theme === "dark"
+														? "white"
+														: CustomTheme["color-primary-400"]
+												}
+												size={Dimensions.get("window").width / 14}
+											/>
+										</View>
+									</View>
+								</TouchableCmp>
+							)}
 						{/* <View style={styles.timeConfigContainer}>
 							<TouchableCmp
 								onPress={handleStudyFlowPress}

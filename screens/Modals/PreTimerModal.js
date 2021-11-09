@@ -35,7 +35,7 @@ const PreTimerModal = (props) => {
 	const theme = useSelector((state) => state.theme.theme);
 	const events = useSelector((state) => state.events.events);
 	const subjects = useSelector((state) => state.subject.subjects);
-    const [currentEvent, setCurrentEvent] = useState(events.filter((event) => event.id.toISOString() === props.route.params.eventId)[0])
+    const [currentEvent, setCurrentEvent] = useState(events.filter((event) => event.id.toString() === props.route.params.eventId)[0])
     console.log('hey1')
 	console.log(currentEvent);
     console.log('ehy 3')

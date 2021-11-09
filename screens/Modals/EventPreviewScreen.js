@@ -29,7 +29,7 @@ import Timeline from 'react-native-timeline-flatlist'
 import { generateTimeline, getStudyFlow } from "../../helpers/functions";
 
 const EventPreviewScreen = (props) => {
-    const event = useSelector(state => state.events.events.find((event) =>  event.id.toISOString() === props.route.params.id))
+    const event = useSelector(state => state.events.events.find((event) =>  event.id.toString() === props.route.params.id))
 	const studyFlowConfig = useSelector(state => state.studyFlow.config)
 	const theme = useSelector(state => state.theme.theme)
 	const sessionPreview = getStudyFlow(event, studyFlowConfig.studyTime, studyFlowConfig.breakTime)

@@ -173,13 +173,13 @@ const HorizontalTimeline = (props) => {
 	
 	const event = useSelector((state) =>
 		state.events.events.find(
-			(event) => event.id.toISOString() === props.eventId
+			(event) => event.id.toString() === props.eventId
 		)
 	);
 	const activity = useSelector(
 		(state) =>
 			state.events.activities.filter(
-				(activity) => activity.eventId.toISOString() === props.eventId
+				(activity) => activity.eventId.toString() === props.eventId
 			)[0]
 	);
 	const studyFlowConfig = useSelector((state) => state.studyFlow.config);
