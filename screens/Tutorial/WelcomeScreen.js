@@ -2,10 +2,12 @@ import React from "react";
 import { StyleSheet, View, SafeAreaView, Dimensions } from "react-native";
 import LottieView from "lottie-react-native";
 import { Layout, Text, Button } from "@ui-kitten/components";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
+import { useSelector } from "react-redux";
 
 const WelcomeScreen = (props) => {
-
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+	
 	return (
 		<Layout style={styles.screen} level="1">
 			<SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start'  }}>
@@ -19,7 +21,7 @@ const WelcomeScreen = (props) => {
 						style={{
 							padding: 5,
 							borderRadius: 4,
-							backgroundColor: CustomTheme["color-primary-200"],
+							backgroundColor: colorTheme[colorThemeIndex].source["color-primary-200"],
 						}}
 					>
 						<Text style={{ fontSize: 16, color: "black" }}>

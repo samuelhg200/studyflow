@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 
 import StudyFlowNavigator from './StudyFlowNavigator';
 import TutorialNavigator from './TutorialNavigator';
-import CustomTheme from '../assets/UIkitten/custom-theme.json'
 
 const AppNavigator = () => {
         // get if user has made tutorial yet

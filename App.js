@@ -6,7 +6,6 @@ import {
 	Layout,
 	Text,
 } from "@ui-kitten/components";
-import { default as CustomTheme } from "./assets/UIkitten/custom-theme.json";
 import ReduxThunk from "redux-thunk";
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import { Provider, useSelector } from "react-redux";
@@ -28,6 +27,9 @@ import currentEventRepeatReducer from "./store/reducers/currentEventRepeat";
 import walletReducer from './store/reducers/wallet'
 import productReducer from './store/reducers/product'
 
+import { colorTheme } from "./data/products";
+
+
 const rootReducer = combineReducers({
 	tutorial: tutorialReducer,
 	subject: subjectReducer,
@@ -44,6 +46,7 @@ const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 
 function App() {
 	const theme = useSelector((state) => state.theme.theme);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 	//const [theme, setTheme] = React.useState('dark');
 
 	// const toggleTheme = () => {
@@ -54,7 +57,7 @@ function App() {
 	return (
 		<ThemeContext.Provider value={{ theme }} value={{ theme }}>
 			<IconRegistry icons={EvaIconsPack} />
-			<ApplicationProvider {...eva} theme={{ ...eva[theme], ...CustomTheme }}>
+			<ApplicationProvider {...eva} theme={{ ...eva[theme], ...colorTheme[colorThemeIndex].source }}>
 				<SafeAreaProvider>
 					<AppNavigator />
 				</SafeAreaProvider>

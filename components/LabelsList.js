@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as subjectActions from "../store/actions/subject";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
-import CustomTheme from '../assets/UIkitten/custom-theme.json'
+import { colorTheme } from "../data/products";
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
@@ -35,6 +35,7 @@ const Label = (props) => {
 	const topics = useSelector((state) =>
 		state.subject.topics.filter((topic) => topic.subjectId === props.item.id)
 	);
+	const colorThemeIndex = useSelector(state => state.product.colorTheme)
 	const isSelected = (topicId) => {
 		if (props.selectedTopics.find(topic => topic.id === topicId)){
 			return true;
@@ -42,6 +43,7 @@ const Label = (props) => {
 			return false
 		}
 	}
+
 	return (
 		<View style={{ alignItems: "flex-end" }}>
 			<TouchableCmp
@@ -94,7 +96,7 @@ const Label = (props) => {
 						<TouchableCmp key={topic.id} disabled={!props.selectableMode} onPress={() => props.onTopicPress(topic)}>
 							<View
 								
-								style={{ ...styles.topic, backgroundColor: selected ? CustomTheme['color-primary-500'] : props.item.color }}
+								style={{ ...styles.topic, backgroundColor: selected ? colorTheme[colorThemeIndex].source['color-primary-500'] : props.item.color }}
 							>
 								<Ionicons name={props.selectableMode ? (selected ? 'checkbox-outline'  : "square-outline") : 'book-outline' }size={12.8} color={"white"}>
 									<Text style={{ color: "white", fontSize: 14 }}>

@@ -15,13 +15,14 @@ import { BarChart } from "react-native-chart-kit";
 import moment from "moment";
 import LottieView from "lottie-react-native";
 
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 import {
 	convertStudyStatsToChartData,
 	getSubjectStudyTime,
 } from "../../helpers/functions";
 
 const SessionFeedbackScreen = (props) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 	const studyTimes = props.route.params.subjectStudyTime
 		? props.route.params.subjectStudyTime
 		: null;
@@ -100,8 +101,9 @@ const SessionFeedbackScreen = (props) => {
 						<View
 							style={{
 								...styles.modal,
+								shadowColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 								backgroundColor:
-									theme === "dark" ? CustomTheme["color-primary-500"] : CustomTheme["color-primary-200"] ,
+									theme === "dark" ? colorTheme[colorThemeIndex].source["color-primary-500"] : colorTheme[colorThemeIndex].source["color-primary-200"] ,
 							}}
 						>
 							<Text
@@ -162,7 +164,7 @@ const SessionFeedbackScreen = (props) => {
 					<View>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "yellow-tail",
 								fontSize: 23,
 								paddingHorizontal: 4,
@@ -173,7 +175,7 @@ const SessionFeedbackScreen = (props) => {
 						</Text>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "roboto-bold",
 								fontSize: 28,
 								paddingHorizontal: 5,
@@ -186,7 +188,7 @@ const SessionFeedbackScreen = (props) => {
 					<View>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "yellow-tail",
 								fontSize: 23,
 								paddingHorizontal: 4,
@@ -197,7 +199,7 @@ const SessionFeedbackScreen = (props) => {
 						</Text>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "roboto-bold",
 								fontSize: 28,
 								paddingHorizontal: 5,
@@ -220,7 +222,7 @@ const SessionFeedbackScreen = (props) => {
 					<View>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "yellow-tail",
 								fontSize: 23,
 								paddingHorizontal: 4,
@@ -231,7 +233,7 @@ const SessionFeedbackScreen = (props) => {
 						</Text>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "roboto-bold",
 								fontSize: 28,
 								paddingHorizontal: 5,
@@ -241,7 +243,7 @@ const SessionFeedbackScreen = (props) => {
 							{totalStudyTime}
 							<Text
 								style={{
-									color: CustomTheme["color-primary-500"],
+									color: colorTheme[colorThemeIndex].source["color-primary-500"],
 									fontFamily: "roboto",
 									fontSize: 12,
 									color: themeStyle.supportiveText,
@@ -254,7 +256,7 @@ const SessionFeedbackScreen = (props) => {
 					<View>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "yellow-tail",
 								fontSize: 23,
 								paddingHorizontal: 4,
@@ -265,7 +267,7 @@ const SessionFeedbackScreen = (props) => {
 						</Text>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "roboto-bold",
 								fontSize: 28,
 								paddingHorizontal: 5,
@@ -275,7 +277,7 @@ const SessionFeedbackScreen = (props) => {
 							{totalBreakTime}
 							<Text
 								style={{
-									color: CustomTheme["color-primary-500"],
+									color: colorTheme[colorThemeIndex].source["color-primary-500"],
 									fontFamily: "roboto",
 									fontSize: 12,
 									color: themeStyle.supportiveText,
@@ -290,7 +292,7 @@ const SessionFeedbackScreen = (props) => {
 					<View style={{ width: "100%", paddingVertical: 10 }}>
 						<Text
 							style={{
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								fontFamily: "yellow-tail",
 								fontSize: 23,
 								paddingHorizontal: 4,
@@ -300,7 +302,6 @@ const SessionFeedbackScreen = (props) => {
 							Subject Times
 						</Text>
 					</View>
-					{/* <Divider style={{height: 0.5, alignSelf: 'stretch', marginBottom: 20, marginTop: 1, backgroundColor: CustomTheme['color-primary-500']}}/> */}
 					<BarChart
 						style={{ borderRadius: 15 }}
 						data={data}
@@ -310,9 +311,9 @@ const SessionFeedbackScreen = (props) => {
 						fromZero
 						chartConfig={{
 							backgroundColor: "red",
-							backgroundGradientFrom: CustomTheme["color-primary-500"],
+							backgroundGradientFrom: colorTheme[colorThemeIndex].source["color-primary-500"],
 							backgroundGradientFromOpacity: 0.7,
-							backgroundGradientTo: CustomTheme["color-primary-600"],
+							backgroundGradientTo: colorTheme[colorThemeIndex].source["color-primary-600"],
 							backgroundGradientToOpacity: 0.25,
 							decimalPlaces: notEnoughDataPoints ? 1 : 0, // optional, defaults to 2dp
 							color: (opacity = 1) =>
@@ -343,7 +344,6 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		padding: 30,
 		alignItems: "center",
-		shadowColor: CustomTheme["color-primary-500"],
 		shadowOffset: {
 			width: 0,
 			height: 2,

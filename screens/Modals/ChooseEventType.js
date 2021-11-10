@@ -17,7 +17,7 @@ import {
 } from "@ui-kitten/components";
 import { useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import customTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
@@ -33,48 +33,52 @@ function timeToString2(time) {
 	return localISOTime.split("T")[0];
 }
 
-const actions = [
-	{
-		text: "Study Session",
-		icon: "glasses-outline",
-		name: "studySession",
-		position: 5,
-		color: customTheme["color-primary-500"],
-	},{
-		text: "Assessment",
-		icon: "school-outline",
-		name: "assessment",
-		position: 4,
-		color: customTheme["color-primary-500"],
-	},
-	{
-		text: "Homework",
-		icon: "reader-outline",
-		name: "homework",
-		position: 3,
-		color: customTheme["color-primary-500"],
-	},
-	{
-		text: "Lecture",
-		icon: "book-outline",
-		name: "lecture",
-		position: 2,
-		color: customTheme["color-primary-500"],
-	},
-	{
-		text: "Other",
-		icon: "ellipsis-horizontal-outline",
-		name: "other",
-		position: 1,
-		color: customTheme["color-primary-500"],
-	},
-];
 
 const ChooseEventType = (props) => {
 	const theme = useSelector(state => state.theme.theme)
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+
+
+	const actions = [
+		{
+			text: "Study Session",
+			icon: "glasses-outline",
+			name: "studySession",
+			position: 5,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+		},{
+			text: "Assessment",
+			icon: "school-outline",
+			name: "assessment",
+			position: 4,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+		},
+		{
+			text: "Homework",
+			icon: "reader-outline",
+			name: "homework",
+			position: 3,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+		},
+		{
+			text: "Lecture",
+			icon: "book-outline",
+			name: "lecture",
+			position: 2,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+		},
+		{
+			text: "Other",
+			icon: "ellipsis-horizontal-outline",
+			name: "other",
+			position: 1,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+		},
+	];
+
 	return (
 		<Layout style={styles.screen}>
-			<View style={{marginVertical: 20}}><Text style={{color: customTheme['color-primary-600']}}category={"h5"}>Choose an event type</Text></View>
+			<View style={{marginVertical: 20}}><Text style={{color: colorTheme[colorThemeIndex].source['color-primary-600']}}category={"h5"}>Choose an event type</Text></View>
 			{actions.map((type) => {
 				return (
 					<TouchableCmp
@@ -90,7 +94,7 @@ const ChooseEventType = (props) => {
 								
 							});
 						}}
-						style={{borderColor: customTheme['color-primary-500'] ,...styles.rowContainer}}
+						style={{borderColor: colorTheme[colorThemeIndex].source['color-primary-500'] ,...styles.rowContainer}}
 					>
 						<View style={styles.row}>
 							<View style={{ flex: 1, alignItems: "center" }}>

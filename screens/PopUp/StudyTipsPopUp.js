@@ -6,9 +6,9 @@ import { useSelector } from "react-redux";
 import * as Animatable from "react-native-animatable";
 
 import { studyTips } from "../../data/study-tips";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
+import { colorTheme } from "../../data/products";
 
 const StudyTipsPopUp = (props) => {
 	const theme = useSelector((state) => state.theme.theme);
@@ -16,6 +16,7 @@ const StudyTipsPopUp = (props) => {
 		studyTips[Math.floor(Math.random() * studyTips.length)]
 	);
 	const textRef = useRef();
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 
 	useEffect(() => {
 		const timeout = setTimeout(() => {
@@ -93,7 +94,7 @@ const StudyTipsPopUp = (props) => {
 				<Divider
 					style={{
 						backgroundColor:
-							theme === "dark" ? "white" : CustomTheme["color-primary-500"],
+							theme === "dark" ? "white" : colorTheme[colorThemeIndex].source["color-primary-500"],
 						height: 1,
 						width: Dimensions.get("window").width / 2,
 						marginBottom: Dimensions.get("window").height / 20,
@@ -103,21 +104,21 @@ const StudyTipsPopUp = (props) => {
 					style={{
 						...styles.lightBulb,
 						marginBottom: Dimensions.get("window").height / 20,
-						backgroundColor: theme === 'dark' ? 'white' : CustomTheme['color-primary-500']
+						backgroundColor: theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']
 					}}
 				>
 					<TouchableWithoutFeedback onPress={updateTipToRandom}>
 						<Ionicons
 							name="bulb-outline"
 							size={38}
-							color={theme === 'dark' ? CustomTheme['color-primary-500'] : 'white'}
+							color={theme === 'dark' ? colorTheme[colorThemeIndex].source['color-primary-500'] : 'white'}
 						/>
 					</TouchableWithoutFeedback>
 				</View>
 				<Divider
 					style={{
 						backgroundColor:
-							theme === "dark" ? "white" : CustomTheme["color-primary-500"],
+							theme === "dark" ? "white" : colorTheme[colorThemeIndex].source["color-primary-500"],
 						height: 1,
 						width: Dimensions.get("window").width / 2,
 						marginBottom: Dimensions.get("window").height / 20,

@@ -18,7 +18,6 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import customTheme from "../../assets/UIkitten/custom-theme.json";
 
 import HeaderButton from "../../components/HeaderButton";
 import TagsView from "../../components/TagsView";
@@ -27,6 +26,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import * as eventsActions from "../../store/actions/events";
 import { combineDateWithTime } from "../../helpers/functions";
 import * as currentEventRepeatActions from "../../store/actions/currentEventRepeat";
+import { colorTheme } from "../../data/products";
 
 
 //const tags = ["IT", "Maths", "Biology", "History", "English", "ESL", "OOPS", "Calculus", "Principles of Computing"];
@@ -52,6 +52,7 @@ const AddItemToCalendarScreen = (props) => {
 	const dateLoaded = useSelector((state) => state.events.dateToTravelTo);
 	const theme = useSelector((state) => state.theme.theme);
 	const tags = useSelector((state) => state.subject.subjects);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 	const repeatOn = useSelector(
 		(state) => state.currentEventRepeat.repeatConfig
 	);
@@ -223,7 +224,7 @@ const AddItemToCalendarScreen = (props) => {
 											marginLeft: 10,
 											flexDirection: "row",
 											alignItems: "center",
-											borderColor: customTheme["color-primary-500"],
+											borderColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 											borderLeftWidth: 1,
 											paddingLeft: 4,
 										}}
@@ -303,7 +304,7 @@ const AddItemToCalendarScreen = (props) => {
 											marginLeft: 10,
 											flexDirection: "row",
 											alignItems: "center",
-											borderColor: customTheme["color-primary-500"],
+											borderColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 											borderLeftWidth: 1,
 											paddingLeft: 4,
 										}}
@@ -385,7 +386,7 @@ const AddItemToCalendarScreen = (props) => {
 										</Text>
 										<View
 											style={{
-												backgroundColor: customTheme["color-primary-500"],
+												backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 												padding: 4,
 												borderRadius: 10,
 												paddingLeft: 12,

@@ -9,7 +9,8 @@ import {
 	convertActivityToTimeline,
 } from "../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
-import { default as CustomTheme } from "../assets/UIkitten/custom-theme.json";
+import {colorTheme } from "../data/products";
+
 
 const Interval = (props) => {
 	
@@ -17,11 +18,11 @@ const Interval = (props) => {
 	switch (props.item.eventType) {
 		case "study":
 			itemColor =
-				props.theme === "dark" ? "white" : CustomTheme["color-primary-500"];
+				props.theme === "dark" ? "white" : colorTheme[props.colorThemeIndex].source["color-primary-500"];
 			break;
 		case "break":
 			itemColor =
-				props.theme === "dark" ? CustomTheme["color-primary-500"] : "black";
+				props.theme === "dark" ? colorTheme[props.colorThemeIndex].source["color-primary-500"] : "black";
 			break;
 		case "feedback":
 			itemColor = "black";
@@ -30,7 +31,7 @@ const Interval = (props) => {
 			itemColor = "#bbb";
 	}
 	let lineColor =
-		props.theme === "dark" ? "white" : CustomTheme["color-primary-500"];
+		props.theme === "dark" ? "white" : colorTheme[props.colorThemeIndex].source["color-primary-500"];
 	return (
 		<View
 			style={
@@ -60,13 +61,13 @@ const Interval = (props) => {
 							color:
 								props.theme === "dark"
 									? props.item.eventType === "break"
-										? CustomTheme["color-primary-500"]
+										? colorTheme[props.colorThemeIndex].source["color-primary-500"]
 										: "white"
 									: props.item.eventType === "break"
 									? "black"
 									: props.item.eventType === "feedback"
 									? "black"
-									: CustomTheme["color-primary-500"],
+									: colorTheme[props.colorThemeIndex].source["color-primary-500"],
 						}}
 					>
 						{props.item.time}
@@ -89,13 +90,13 @@ const Interval = (props) => {
 							color:
 								props.theme === "dark"
 									? props.item.eventType === "break"
-										? CustomTheme["color-primary-500"]
+										? colorTheme[props.colorThemeIndex].source["color-primary-500"]
 										: "white"
 									: props.item.eventType === "break"
 									? "black"
 									: props.item.eventType === "feedback"
 									? "black"
-									: CustomTheme["color-primary-500"],
+									: colorTheme[props.colorThemeIndex].source["color-primary-500"],
 						}}
 					>
 						{props.item.title}
@@ -170,6 +171,7 @@ const getItemLayout = (data, index) => ({
 const HorizontalTimeline = (props) => {
 	const flatListRef = useRef(null);
 	const [newIndex, setNewIndex] = useState(1);
+	const colorThemeIndex = useSelector(state => state.product.colorTheme)
 	
 	const event = useSelector((state) =>
 		state.events.events.find(
@@ -251,7 +253,7 @@ const HorizontalTimeline = (props) => {
 					selected = false;
 				}
 				return (
-					<Interval item={itemData.item} theme={theme} selected={selected} />
+					<Interval item={itemData.item} theme={theme} selected={selected} colorThemeIndex={colorThemeIndex} />
 				);
 			}}
 			horizontal={true}

@@ -16,10 +16,10 @@ import HeaderButton from "../../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons"
 
 import { studyTips } from "../../data/study-tips";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
 import * as currentEventRepeatActions from "../../store/actions/currentEventRepeat";
+import { colorTheme } from "../../data/products";
 
 const repeatOptions = [
     'Monday',
@@ -38,14 +38,15 @@ if (Platform.OS === "android") {
 
 const ItemToRepeat = (props) => {
     const isSelected = props.selected
+    const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 
     return (<TouchableCmp
 		style={{ width: "75%", alignItems: "center", justifyContent: "center" }}
         onPress={() => {props.selectHandler(props.text)}}
 	>
-		<View style={isSelected ? {...styles.row, ...styles.selected, borderColor: props.theme === 'dark' ?  CustomTheme['color-primary-500'] : CustomTheme['color-primary-400']} : {...styles.row, borderColor: props.theme === 'dark' ?  CustomTheme['color-primary-500'] : CustomTheme['color-primary-400']}} >
+		<View style={isSelected ? {...styles.row, ...styles.selected, borderColor: props.theme === 'dark' ?  colorTheme[colorThemeIndex].source['color-primary-500'] : colorTheme[colorThemeIndex].source['color-primary-400']} : {...styles.row, borderColor: props.theme === 'dark' ?  colorTheme[colorThemeIndex].source['color-primary-500'] : colorTheme[colorThemeIndex].source['color-primary-400']}} >
 			<Text style={{fontSize: 16}}>{props.text}</Text>
-            {isSelected ? <Ionicons name="repeat-outline" color={props.theme === 'dark' ? 'white' : CustomTheme['color-primary-500']} size={18}/> : <View></View>}
+            {isSelected ? <Ionicons name="repeat-outline" color={props.theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']} size={18}/> : <View></View>}
 		</View>
 	</TouchableCmp>)
 	
@@ -56,6 +57,7 @@ const ChooseRepeatFrequency = (props) => {
 	const onRepeatConfig = useSelector(
 		(state) => state.currentEventRepeat.repeatConfig
 	);
+    const colorThemeIndex = useSelector((state) => state.product.colorTheme)
     const theme = useSelector((state) => state.theme.theme)
 
     const checkIfSelected = (day) => {

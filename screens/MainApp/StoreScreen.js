@@ -5,35 +5,18 @@ import {
 	TouchableOpacity,
 	TouchableNativeFeedback,
 	TouchableWithoutFeedback,
-	Alert,
 	Platform,
-	SafeAreaView,
 	ScrollView,
 	Dimensions,
 	Modal,
 } from "react-native";
-import {
-	Card,
-	Text,
-	Input,
-	TopNavigation,
-	Divider,
-	Layout,
-} from "@ui-kitten/components";
+import { Card, Text, Divider, Layout } from "@ui-kitten/components";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import LottieView from "lottie-react-native";
-import { HeaderButtons, Item } from "react-navigation-header-buttons";
-import moment from "moment";
-import * as eventsActions from "../../store/actions/events";
-import * as studyFlowActions from "../../store/actions/studyFlow";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { getIconStringBasedOnEventType } from "../../helpers/functions";
-import HeaderButton from "../../components/HeaderButton";
-import { FlatList } from "react-native-gesture-handler";
-import { timerSkins } from "../../data/products";
+import { timerSkins, themeProd, colorTheme } from "../../data/products";
 import * as walletActions from "../../store/actions/wallet";
 import * as productActions from "../../store/actions/product";
 
@@ -41,13 +24,16 @@ let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
 	TouchableCmp = TouchableNativeFeedback;
 }
-
+//import { colorTheme } from "../../data/products";
+//const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+//colorTheme[colorThemeIndex].source
 const Product = (props) => {
 	return (
 		<View
 			style={{
 				...styles.coinProduct,
-				borderColor: CustomTheme["color-primary-500"],
+				borderColor:
+					colorTheme[props.colorThemeIndex].source["color-primary-500"],
 			}}
 		>
 			<View></View>
@@ -69,25 +55,238 @@ const Product = (props) => {
 				<Text style={{ padding: 5, fontFamily: "yellow-tail", fontSize: 20 }}>
 					{timerSkins[props.id].name}
 				</Text>
-				<TouchableCmp onPress={() => props.handleProductBought(props.id)}>
+				{!props.owned ? (
+					<TouchableCmp onPress={() => props.handleProductBought(props.id)}>
+						<View
+							style={{
+								flexDirection: "row",
+								borderWidth: 1.5,
+								padding: 8,
+								borderRadius: 50,
+								borderColor:
+									colorTheme[props.colorThemeIndex].source["color-primary-500"],
+								backgroundColor: "white",
+								marginBottom: 10,
+							}}
+						>
+							<Ionicons name="wallet-outline" color="black" size={16} />
+							<Text style={{ color: "black" }}>
+								{" "}
+								{timerSkins[props.id].price}
+							</Text>
+						</View>
+					</TouchableCmp>
+				) : (
 					<View
 						style={{
 							flexDirection: "row",
-							borderWidth: 1.5,
-							padding: 8,
-							borderRadius: 50,
-							borderColor: CustomTheme["color-primary-500"],
-							backgroundColor: "white",
-							marginBottom: 10,
+							justifyContent: "space-between",
+							width: "100%",
 						}}
 					>
-						<Ionicons name="wallet-outline" color="black" size={16} />
-						<Text style={{ color: "black" }}>
-							{" "}
-							{timerSkins[props.id].price}
-						</Text>
+						<TouchableCmp
+							onPress={() => {
+								props.studyHandler(timerSkins[props.id].id);
+							}}
+						>
+							<View
+								style={{
+									flexDirection: "row",
+									borderWidth: 1.5,
+									padding: 8,
+									borderRadius: 50,
+									borderColor:
+										colorTheme[props.colorThemeIndex].source[
+											"color-primary-500"
+										],
+									backgroundColor:
+										props.theme === "dark"
+											? props.study
+												? "white"
+												: "#0000"
+											: props.study
+											? colorTheme[props.colorThemeIndex].source[
+													"color-primary-200"
+											  ]
+											: "#0000",
+									marginBottom: 10,
+									alignItems: "center",
+								}}
+							>
+								<Ionicons
+									name="school-outline"
+									color={
+										props.study
+											? "black"
+											: props.theme == "dark"
+											? "white"
+											: "black"
+									}
+									size={17}
+								/>
+								{props.study && (
+									<Ionicons name="checkmark-outline" color="black" size={12} />
+								)}
+							</View>
+						</TouchableCmp>
+						<TouchableCmp
+							onPress={() => {
+								props.breakHandler(timerSkins[props.id].id);
+							}}
+						>
+							<View
+								style={{
+									flexDirection: "row",
+									borderWidth: 1.5,
+									padding: 8,
+									borderRadius: 50,
+									borderColor:
+										colorTheme[props.colorThemeIndex].source[
+											"color-primary-500"
+										],
+									backgroundColor:
+										props.theme === "dark"
+											? props.break
+												? "white"
+												: "#0000"
+											: props.break
+											? colorTheme[props.colorThemeIndex].source[
+													"color-primary-200"
+											  ]
+											: "#0000",
+									marginBottom: 10,
+									alignItems: "center",
+								}}
+							>
+								<Ionicons
+									name="cafe-outline"
+									color={
+										props.break
+											? "black"
+											: props.theme == "dark"
+											? "white"
+											: "black"
+									}
+									size={17}
+								/>
+								{props.break && (
+									<Ionicons name="checkmark-outline" color="black" size={12} />
+								)}
+							</View>
+						</TouchableCmp>
 					</View>
-				</TouchableCmp>
+				)}
+			</View>
+		</View>
+	);
+};
+
+const ProductColorTheme = (props) => {
+	return (
+		<View
+			style={{
+				...styles.coinProduct,
+				borderColor:
+					colorTheme[props.colorThemeIndex].source["color-primary-500"],
+			}}
+		>
+			<View></View>
+			<LottieView
+				style={colorTheme[props.index].styleShopConfig}
+				source={colorTheme[props.index].storeAnimation}
+				autoPlay={true}
+				loop={true}
+				speed={0.5}
+			/>
+			<View
+				style={{
+					alignItems: "flex-start",
+					justifyContent: "space-between",
+					height: "100%",
+					width: Dimensions.get("window").width / 3,
+				}}
+			>
+				<Text style={{ padding: 5, fontFamily: "yellow-tail", fontSize: 20 }}>
+					{colorTheme[props.index].name}
+				</Text>
+				{!props.owned ? (
+					<TouchableCmp
+						onPress={() => props.handleColorThemeBought(props.index)}
+					>
+						<View
+							style={{
+								flexDirection: "row",
+								borderWidth: 1.5,
+								padding: 8,
+								borderRadius: 50,
+								borderColor:
+									colorTheme[props.colorThemeIndex].source["color-primary-500"],
+								backgroundColor: "white",
+								marginBottom: 10,
+							}}
+						>
+							<Ionicons name="wallet-outline" color="black" size={16} />
+							<Text style={{ color: "black" }}>
+								{" "}
+								{colorTheme[props.index].price}
+							</Text>
+						</View>
+					</TouchableCmp>
+				) : (
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							width: "100%",
+						}}
+					>
+						<TouchableCmp
+							onPress={() => {
+								props.selectionHandler(props.index);
+							}}
+						>
+							<View
+								style={{
+									flexDirection: "row",
+									borderWidth: 1.5,
+									padding: 8,
+									borderRadius: 50,
+									borderColor:
+										colorTheme[props.colorThemeIndex].source[
+											"color-primary-500"
+										],
+									backgroundColor:
+										props.theme === "dark"
+											? props.selected
+												? "white"
+												: "#0000"
+											: props.selected
+											? colorTheme[props.colorThemeIndex].source[
+													"color-primary-200"
+											  ]
+											: "#0000",
+									marginBottom: 10,
+									alignItems: "center",
+								}}
+							>
+								<Ionicons
+									name="color-palette-outline"
+									color={
+										props.selected
+											? "black"
+											: props.theme == "dark"
+											? "white"
+											: "black"
+									}
+									size={17}
+								/>
+								{props.selected && (
+									<Ionicons name="checkmark-outline" color="black" size={12} />
+								)}
+							</View>
+						</TouchableCmp>
+					</View>
+				)}
 			</View>
 		</View>
 	);
@@ -96,26 +295,82 @@ const Product = (props) => {
 const StoreScreen = (props) => {
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
+	const dispatch3 = useDispatch();
+	const dispatch4 = useDispatch();
+	const dispatch5 = useDispatch();
+	const dispatch6 = useDispatch();
+	const dispatch7 = useDispatch();
+	const dispatch8 = useDispatch();
+	const dispatch9 = useDispatch();
+
 	const theme = useSelector((state) => state.theme.theme);
 	const balance = useSelector((state) => state.wallet.amount);
 	const ownedProducts = useSelector((state) => state.product.owned);
+	const ownedColorThemes = useSelector(
+		(state) => state.product.ownedColorThemes
+	);
+	const themeBought = useSelector((state) => state.product.theme);
+	const studyTimerSelected = useSelector(
+		(state) => state.product.studyTimerSkin
+	);
+	const breakTimerSelected = useSelector(
+		(state) => state.product.breakTimerSkin
+	);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 
 	const [modalVisible, setModalVisible] = useState(false);
 	const [productBoughtIndex, setProductBoughtIndex] = useState(0);
 	const [coinStoreSelected, setCoinStoreSelected] = useState(true);
 	const [timerSkinsVisible, setTimerSkinsVisible] = useState(false);
+	const [colorThemesVisible, setColorThemesVisible] = useState(false);
 
 	const handleProductBought = (index) => {
 		const productId = timerSkins[index].id;
 		const productPrice = timerSkins[index].price;
-		if (productPrice <= balance && !(ownedProducts.includes(productId))) {
+		if (productPrice <= balance && !ownedProducts.includes(productId)) {
 			setProductBoughtIndex(index);
 			setModalVisible(true);
 			dispatch(productActions.buyProduct(productId));
 			dispatch2(walletActions.substractCoins(productPrice));
 		} else {
-			console.log('reject')
+			console.log("reject");
 		}
+	};
+
+	const handleThemeBought = () => {
+		if (themeProd.price <= balance) {
+			dispatch5(productActions.setTheme(true));
+			dispatch6(walletActions.substractCoins(themeProd.price));
+		} else {
+			console.log("reject");
+		}
+	};
+
+	const handleColorThemeBought = (index) => {
+		const productPrice = colorTheme[index].price;
+		if (
+			colorTheme[index].price <= balance &&
+			!ownedColorThemes.includes(index)
+		) {
+			//setProductBoughtIndex(index);
+			//setModalVisible(true);
+			dispatch7(productActions.buyColorTheme(index));
+			dispatch8(walletActions.substractCoins(productPrice));
+		} else {
+			console.log("reject");
+		}
+	};
+
+	const handleStudyTimerSkinSelection = (id) => {
+		dispatch3(productActions.setStudyTimer(id));
+	};
+
+	const handleBreakTimerSkinSelection = (id) => {
+		dispatch4(productActions.setBreakTimer(id));
+	};
+
+	const handleColorThemeSelection = (index) => {
+		dispatch9(productActions.setColorTheme(index));
 	};
 
 	useEffect(() => {
@@ -131,7 +386,8 @@ const StoreScreen = (props) => {
 						marginRight: Dimensions.get("window").width / 40,
 						borderRadius: 12,
 						paddingLeft: Dimensions.get("window").width / 50,
-						borderColor: CustomTheme["color-primary-500"],
+						borderColor:
+							colorTheme[colorThemeIndex].source["color-primary-500"],
 					}}
 				>
 					<Ionicons
@@ -143,7 +399,7 @@ const StoreScreen = (props) => {
 				</Layout>
 			),
 		});
-	}, [balance]);
+	}, [balance, colorThemeIndex]);
 
 	return (
 		<Layout level="2" style={styles.screen}>
@@ -171,12 +427,14 @@ const StoreScreen = (props) => {
 						<View
 							style={{
 								...styles.modal,
+								shadowColor:
+									colorTheme[colorThemeIndex].source["color-primary-500"],
 								backgroundColor:
 									theme === "dark"
 										? timerSkins[productBoughtIndex].modalBackground
 											? "white"
-											: CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-200"],
+											: colorTheme[colorThemeIndex].source["color-primary-500"]
+										: colorTheme[colorThemeIndex].source["color-primary-200"],
 							}}
 						>
 							<Text
@@ -187,7 +445,9 @@ const StoreScreen = (props) => {
 									color:
 										theme == "dark"
 											? timerSkins[productBoughtIndex].modalBackground
-												? CustomTheme["color-primary-500"]
+												? colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ]
 												: "white"
 											: "white",
 								}}
@@ -232,7 +492,8 @@ const StoreScreen = (props) => {
 					<View
 						style={{
 							...styles.toggleOption,
-							backgroundColor: CustomTheme["color-primary-500"],
+							backgroundColor:
+								colorTheme[colorThemeIndex].source["color-primary-500"],
 							borderBottomLeftRadius: 12,
 							borderTopLeftRadius: 12,
 							borderRightWidth: 0.5,
@@ -254,7 +515,8 @@ const StoreScreen = (props) => {
 					<View
 						style={{
 							...styles.toggleOption,
-							backgroundColor: CustomTheme["color-primary-500"],
+							backgroundColor:
+								colorTheme[colorThemeIndex].source["color-primary-500"],
 							borderBottomRightRadius: 12,
 							borderTopRightRadius: 12,
 							borderLeftWidth: 0.5,
@@ -272,7 +534,9 @@ const StoreScreen = (props) => {
 			<Divider
 				style={{
 					backgroundColor:
-						theme === "dark" ? "white" : CustomTheme["color-primary-500"],
+						theme === "dark"
+							? "white"
+							: colorTheme[colorThemeIndex].source["color-primary-500"],
 					height: 0.5,
 					alignSelf: "stretch",
 				}}
@@ -293,6 +557,70 @@ const StoreScreen = (props) => {
 						paddingHorizontal: 20,
 					}}
 				>
+					{!themeBought && (
+						<View
+							style={{
+								...styles.coinProduct,
+								borderColor:
+									colorTheme[colorThemeIndex].source["color-primary-500"],
+							}}
+						>
+							<View></View>
+							<LottieView
+								style={themeProd.styleBuyModal}
+								source={themeProd.source}
+								autoPlay={true}
+								loop={true}
+								speed={0.5}
+							/>
+							<View
+								style={{
+									alignItems: "flex-start",
+									justifyContent: "space-between",
+									height: "100%",
+									width: Dimensions.get("window").width / 3,
+								}}
+							>
+								<Text
+									style={{
+										padding: 5,
+										fontFamily: "yellow-tail",
+										fontSize: 24,
+									}}
+								>
+									{theme === "dark" ? "Light Theme" : "Dark Theme"}
+								</Text>
+								<TouchableCmp onPress={() => handleThemeBought(props.id)}>
+									<View
+										style={{
+											flexDirection: "row",
+											borderWidth: 1.5,
+											padding: 8,
+											borderRadius: 50,
+											borderColor:
+												colorTheme[colorThemeIndex].source["color-primary-500"],
+											backgroundColor: "white",
+											marginBottom: 10,
+										}}
+									>
+										<Ionicons name="wallet-outline" color="black" size={16} />
+										<Text style={{ color: "black" }}> {themeProd.price}</Text>
+									</View>
+								</TouchableCmp>
+							</View>
+						</View>
+					)}
+					<Divider
+						style={{
+							backgroundColor:
+								theme === "dark"
+									? "white"
+									: colorTheme[colorThemeIndex].source["color-primary-500"],
+							height: 1,
+							alignSelf: "stretch",
+							marginBottom: Dimensions.get("window").height / 40,
+						}}
+					/>
 					<TouchableCmp
 						onPress={() => {
 							setTimerSkinsVisible((prev) => !prev);
@@ -344,15 +672,114 @@ const StoreScreen = (props) => {
 					</TouchableCmp>
 					{timerSkinsVisible && (
 						<View>
-							<Product id={0} handleProductBought={handleProductBought} />
-							<Product id={4} handleProductBought={handleProductBought} />
-							<Product id={1} handleProductBought={handleProductBought} />
-							<Product id={5} handleProductBought={handleProductBought} />
-							<Product id={6} handleProductBought={handleProductBought} />
-							<Product id={2} handleProductBought={handleProductBought} />
-							<Product id={3} handleProductBought={handleProductBought} />
+							{timerSkins.map((timerSkin, index) => {
+								return (
+									<Product
+										key={index}
+										theme={theme}
+										id={index}
+										handleProductBought={handleProductBought}
+										owned={ownedProducts.includes(timerSkin.id)}
+										study={studyTimerSelected === timerSkin.id}
+										break={breakTimerSelected === timerSkin.id}
+										studyHandler={handleStudyTimerSkinSelection}
+										breakHandler={handleBreakTimerSkinSelection}
+										colorThemeIndex={colorThemeIndex}
+									/>
+								);
+							})}
 						</View>
 					)}
+					<Divider
+						style={{
+							backgroundColor:
+								theme === "dark"
+									? "white"
+									: colorTheme[colorThemeIndex].source["color-primary-500"],
+							height: 1,
+							alignSelf: "stretch",
+							marginBottom: Dimensions.get("window").height / 40,
+						}}
+					/>
+					<TouchableCmp
+						onPress={() => {
+							setColorThemesVisible((prev) => !prev);
+						}}
+					>
+						<View
+							style={{
+								flexDirection: "row",
+								alignItems: "center",
+								justifyContent: "space-between",
+								paddingBottom: 30,
+								paddingTop: 5,
+								width: "100%",
+							}}
+						>
+							<View
+								style={{
+									flexDirection: "row",
+									alignItems: "center",
+								}}
+							>
+								<Ionicons
+									name="color-palette-outline"
+									color={theme === "dark" ? "white" : "black"}
+									size={20}
+								/>
+								<Text
+									style={{
+										fontSize: 22,
+										fontFamily: "roboto-bold",
+									}}
+								>
+									{" "}
+									Color Themes
+								</Text>
+							</View>
+							<View>
+								<Ionicons
+									name={
+										colorThemesVisible
+											? "chevron-down-outline"
+											: "chevron-forward-outline"
+									}
+									size={20}
+									color={theme === "dark" ? "white" : "black"}
+								/>
+							</View>
+						</View>
+					</TouchableCmp>
+
+					{colorThemesVisible && (
+						<View>
+							{colorTheme.map((colorTheme, index) => {
+								return (
+									<ProductColorTheme
+										key={index}
+										theme={theme}
+										index={index}
+										handleColorThemeBought={handleColorThemeBought}
+										owned={ownedColorThemes.includes(index)}
+										selected={colorThemeIndex === index}
+										selectionHandler={handleColorThemeSelection}
+										colorThemeIndex={colorThemeIndex}
+									/>
+								);
+							})}
+						</View>
+					)}
+					<Divider
+						style={{
+							backgroundColor:
+								theme === "dark"
+									? "white"
+									: colorTheme[colorThemeIndex].source["color-primary-500"],
+							height: 1,
+							alignSelf: "stretch",
+							marginBottom: Dimensions.get("window").height / 40,
+						}}
+					/>
 				</View>
 			</ScrollView>
 		</Layout>

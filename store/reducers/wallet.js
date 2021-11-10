@@ -1,7 +1,7 @@
 import { SUBSTRACT_COINS, ADD_COINS } from "../actions/wallet";
 
 const initialState = {
-	amount: 15000,
+	amount: 999999,
 };
 
 export default (state = initialState, action) => {
@@ -12,7 +12,6 @@ export default (state = initialState, action) => {
 				amount: state.amount + action.amount,
 			};
 		case SUBSTRACT_COINS:
-			console.log('executed')
 			return {
 				...state,
 				amount: state.amount - action.amount,

@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import BackgroundButton from "../components/BackgroundButton";
-import CustomTheme from "../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../data/products";
+
 
 /*
       https://dev.to/onmyway133/how-to-make-tag-selection-view-in-react-native-24j
@@ -25,6 +26,7 @@ if (Platform.OS === "android") {
 const TagsView = (props) => {
 	//const [selectedItems, setSelectedItems] = useState(props.selected);
 	const theme = useSelector((state) => state.theme.theme);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 
 	let selectedItems = props.selected;
 	let setSelectedItems = props.setSelectedItems;
@@ -53,18 +55,18 @@ const TagsView = (props) => {
 					style={{
 						...styles.view,
 						backgroundColor: theme === "dark" ? "black" : "white",
-						borderColor: CustomTheme["color-primary-500"],
+						borderColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 					}}
 				>
 					<Ionicons
 						name={props.showingAll ? 'eye-off-outline' :  "eye-outline"}
 						size={18}
-						color={CustomTheme["color-primary-500"]}
+						color={colorTheme[colorThemeIndex].source["color-primary-500"]}
 					/>
 					<Text
 						style={{
 							...styles.text,
-							color: CustomTheme["color-primary-500"],
+							color: colorTheme[colorThemeIndex].source["color-primary-500"],
 						}}
 					>
 						{props.showingAll ? ' Hide non-assigned' :  " Show non-assigned"}
@@ -78,18 +80,18 @@ const TagsView = (props) => {
 					style={{
 						...styles.view,
 						backgroundColor: theme === "dark" ? "black" : "white",
-						borderColor: CustomTheme["color-primary-500"],
+						borderColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 					}}
 				>
 					<Ionicons
 						name="add-outline"
 						size={18}
-						color={CustomTheme["color-primary-500"]}
+						color={colorTheme[colorThemeIndex].source["color-primary-500"]}
 					/>
 					<Text
 						style={{
 							...styles.text,
-							color: CustomTheme["color-primary-500"],
+							color: colorTheme[colorThemeIndex].source["color-primary-500"],
 						}}
 					>
 						{" "}

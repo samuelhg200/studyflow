@@ -26,6 +26,7 @@ import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
 import * as studyFlowActions from "../../store/actions/studyFlow";
 import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getIconStringBasedOnEventType } from "../../helpers/functions";
@@ -130,6 +131,7 @@ const getRange = (date, duration) => {
 };
 
 const Header = (props) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	return (
 		<View {...props} style={[props.style, styles.headerContainer]}>
 			<View
@@ -166,7 +168,9 @@ const Header = (props) => {
 				<Ionicons
 					name="repeat-outline"
 					color={
-						props.theme === "dark" ? "white" : CustomTheme["color-primary-500"]
+						props.theme === "dark"
+							? "white"
+							: colorTheme[colorThemeIndex].source["color-primary-500"]
 					}
 				/>
 			) : (
@@ -181,6 +185,7 @@ const StartFlowScreen = (props) => {
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
 	const dispatch3 = useDispatch();
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	const theme = useSelector((state) => state.theme.theme);
 	const eventsToday = useSelector((state) =>
 		state.events.events.length > 0
@@ -259,7 +264,8 @@ const StartFlowScreen = (props) => {
 								style={{
 									fontFamily: "yellow-tail",
 									fontSize: 32,
-									color: CustomTheme["color-primary-500"],
+									color:
+										colorTheme[colorThemeIndex].source["color-primary-500"],
 									flex: 1,
 									paddingHorizontal: 2,
 								}}
@@ -272,15 +278,15 @@ const StartFlowScreen = (props) => {
 						<TouchableCmp
 							style={{ paddingHorizontal: 4 }}
 							onPress={() => {
-								props.navigation.navigate('Store')
+								props.navigation.navigate("Store");
 							}}
 						>
 							<Ionicons
 								name="wallet-outline"
 								color={
 									theme === "dark"
-										? CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-500"]
+										? colorTheme[colorThemeIndex].source["color-primary-500"]
+										: colorTheme[colorThemeIndex].source["color-primary-500"]
 								}
 								size={32}
 							/>
@@ -311,7 +317,8 @@ const StartFlowScreen = (props) => {
 									alignItems: "center",
 									justifyContent: "center",
 									width: "100%",
-									backgroundColor: CustomTheme["color-primary-500"],
+									backgroundColor:
+										colorTheme[colorThemeIndex].source["color-primary-500"],
 									padding: 7,
 									borderRadius: 8,
 								}}
@@ -329,15 +336,57 @@ const StartFlowScreen = (props) => {
 									marginTop: -38,
 								}}
 							>
-								<LottieView
-									style={styles.buttonAnimationLottie}
-									source={require("../../assets/lottie/addEventRed.json")}
-									autoPlay={true}
-									loop={true}
-									speed={0.5}
-								/>
+								
+								{colorThemeIndex === 0 && (
+									<LottieView
+										style={styles.buttonAnimationLottie}
+										source={colorTheme[colorThemeIndex].addAnimationSource}
+										autoPlay={true}
+										loop={true}
+										speed={0.5}
+									/>
+								)}
+								{colorThemeIndex === 1 && (
+									<LottieView
+										style={styles.buttonAnimationLottie}
+										source={colorTheme[colorThemeIndex].addAnimationSource}
+										autoPlay={true}
+										loop={true}
+										speed={0.5}
+									/>
+								)}
+								{colorThemeIndex === 2 && (
+									<LottieView
+										style={styles.buttonAnimationLottie}
+										source={colorTheme[colorThemeIndex].addAnimationSource}
+										autoPlay={true}
+										loop={true}
+										speed={0.5}
+									/>
+								)}
+								{colorThemeIndex === 3 && (
+									<LottieView
+										style={styles.buttonAnimationLottie}
+										source={colorTheme[colorThemeIndex].addAnimationSource}
+										autoPlay={true}
+										loop={true}
+										speed={0.5}
+									/>
+								)}
+								{colorThemeIndex === 4 && (
+									<LottieView
+										style={styles.buttonAnimationLottie}
+										source={colorTheme[colorThemeIndex].addAnimationSource}
+										autoPlay={true}
+										loop={true}
+										speed={0.5}
+									/>
+								)}
 								<Text
-									style={{ color: CustomTheme["color-primary-600"] }}
+									style={{
+										color:
+											colorTheme[colorThemeIndex].source["color-primary-600"],
+									}}
 									category={"h5"}
 								>
 									ADD NEW EVENT
@@ -360,7 +409,8 @@ const StartFlowScreen = (props) => {
 								style={{
 									fontFamily: "yellow-tail",
 									fontSize: 32,
-									color: CustomTheme["color-primary-500"],
+									color:
+										colorTheme[colorThemeIndex].source["color-primary-500"],
 									flex: 1,
 									paddingHorizontal: 2,
 								}}
@@ -373,15 +423,15 @@ const StartFlowScreen = (props) => {
 						<TouchableCmp
 							style={{ paddingHorizontal: 4 }}
 							onPress={() => {
-								props.navigation.navigate('Store')
+								props.navigation.navigate("Store");
 							}}
 						>
 							<Ionicons
 								name="wallet-outline"
 								color={
 									theme === "dark"
-										? CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-500"]
+										? colorTheme[colorThemeIndex].source["color-primary-500"]
+										: colorTheme[colorThemeIndex].source["color-primary-500"]
 								}
 								size={32}
 							/>
@@ -396,7 +446,9 @@ const StartFlowScreen = (props) => {
 					<View style={{ marginTop: 12 }}>
 						<Text
 							category={"h5"}
-							style={{ color: CustomTheme["color-primary-600"] }}
+							style={{
+								color: colorTheme[colorThemeIndex].source["color-primary-600"],
+							}}
 						>
 							Events for Today
 						</Text>
@@ -451,7 +503,11 @@ const StartFlowScreen = (props) => {
 												>
 													<Ionicons
 														name={iconName}
-														color={CustomTheme["color-primary-500"]}
+														color={
+															colorTheme[colorThemeIndex].source[
+																"color-primary-500"
+															]
+														}
 														size={24}
 													/>
 													<Text category="h5">{" " + itemData.item.title}</Text>
@@ -469,7 +525,11 @@ const StartFlowScreen = (props) => {
 													<Ionicons
 														name="play-circle-outline"
 														size={40}
-														color={CustomTheme["color-primary-500"]}
+														color={
+															colorTheme[colorThemeIndex].source[
+																"color-primary-500"
+															]
+														}
 													/>
 												</TouchableCmp>
 											</View>
@@ -502,6 +562,7 @@ const StartFlowScreen = (props) => {
 export default StartFlowScreen;
 
 export const screenOptions = (navData) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	return {
 		headerTitle: () => (
 			<View style={{ flex: 1 }}>
@@ -509,7 +570,7 @@ export const screenOptions = (navData) => {
 					style={{
 						fontFamily: "yellow-tail",
 						fontSize: 30,
-						color: CustomTheme["color-primary-500"],
+						color: colorTheme[colorThemeIndex].source["color-primary-500"],
 						flex: 1,
 						minWidth: 117,
 					}}

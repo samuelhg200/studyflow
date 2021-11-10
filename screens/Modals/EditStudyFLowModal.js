@@ -11,10 +11,10 @@ import LabelsList from "../../components/LabelsList";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import * as studyFlowActions from '../../store/actions/studyFlow'
 import HeaderButton from "../../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import { colorTheme } from "../../data/products";
 
 const EditStudyFLowModal = (props) => {
     const dispatch = useDispatch()
@@ -23,6 +23,7 @@ const EditStudyFLowModal = (props) => {
 	const studyFlowConfig = useSelector((state) => state.studyFlow.config);
 	const theme = useSelector((state) => state.theme.theme);
 	const eventConfig = useSelector((state) => state.studyFlow.eventConfig);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 
 	//times - local states
 	const [studyTimeDuration, setStudyTimeDuration] = useState(
@@ -100,11 +101,11 @@ const EditStudyFLowModal = (props) => {
 						alignItems: "center",
 						borderRightWidth: 1,
 						paddingRight: 15,
-						borderColor: theme === "dark" ? "white" : CustomTheme['color-primary-500'],
+						borderColor: theme === "dark" ? "white" : colorTheme[colorThemeIndex].source['color-primary-500'],
 					}}
 				>
 					<View style={{ alignItems: "center", flexDirection: "column" }}>
-						<Text style={{...styles.title, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500']}}>Study</Text>
+						<Text style={{...styles.title, color: theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']}}>Study</Text>
 						<DateTimePicker
 							style={{ minWidth: 100 }}
 							value={studyTimeDuration}
@@ -114,7 +115,7 @@ const EditStudyFLowModal = (props) => {
 							display={Platform.OS === "android" ? "spinner" : "spinner"}
 							onChange={handleStudyTime}
 							themeVariant={theme}
-                            textColor={theme === 'dark' ? 'white' : CustomTheme['color-primary-500']}
+                            textColor={theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']}
 						/>
 					</View>
 					<View
@@ -129,7 +130,7 @@ const EditStudyFLowModal = (props) => {
 						<Ionicons
 							name={"glasses-outline"}
 							size={24}
-							color={theme === "dark" ? "white" : CustomTheme['color-primary-600']}
+							color={theme === "dark" ? "white" : colorTheme[colorThemeIndex].source['color-primary-600']}
 						/>
 					</View>
 				</View>
@@ -140,7 +141,7 @@ const EditStudyFLowModal = (props) => {
 						alignItems: "center",
 						borderLeftWidth: 1,
 						paddingLeft: 15,
-						borderColor: theme === "dark" ? "white" : CustomTheme['color-primary-500'],
+						borderColor: theme === "dark" ? "white" : colorTheme[colorThemeIndex].source['color-primary-500'],
 					}}
 				>
 					<View
@@ -155,11 +156,11 @@ const EditStudyFLowModal = (props) => {
 						<Ionicons
 							name={"cafe-outline"}
 							size={22}
-							color={theme === "dark" ? "white" : CustomTheme['color-primary-600']}
+							color={theme === "dark" ? "white" : colorTheme[colorThemeIndex].source['color-primary-600']}
 						/>
 					</View>
 					<View style={{ alignItems: "center", flexDirection: "column" }}>
-						<Text style={{...styles.title, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500']}}>Break</Text>
+						<Text style={{...styles.title, color: theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']}}>Break</Text>
 						<DateTimePicker
 							style={{ minWidth: 100 }}
 							value={breakTimeDuration}
@@ -169,7 +170,7 @@ const EditStudyFLowModal = (props) => {
 							display={Platform.OS === "android" ? "spinner" : "spinner"}
 							onChange={handleBreakTime}
 							themeVariant={theme}
-                            textColor={theme === 'dark' ? 'white' : CustomTheme['color-primary-500']}
+                            textColor={theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-500']}
 						/>
 					</View>
 				</View>
@@ -184,7 +185,7 @@ const EditStudyFLowModal = (props) => {
 						<Text
 							style={{
 								color: checkStudySession
-									? CustomTheme["color-primary-600"]
+									? colorTheme[colorThemeIndex].source["color-primary-600"]
 									: theme === "dark"
 									? "white"
 									: "black",
@@ -205,7 +206,7 @@ const EditStudyFLowModal = (props) => {
 						<Text
 							style={{
 								color: checkHomework
-									? CustomTheme["color-primary-600"]
+									? colorTheme[colorThemeIndex].source["color-primary-600"]
 									: theme === "dark"
 									? "white"
 									: "black",
@@ -226,7 +227,7 @@ const EditStudyFLowModal = (props) => {
 						<Text
 							style={{
 								color: checkAssessment
-									? CustomTheme["color-primary-600"]
+									? colorTheme[colorThemeIndex].source["color-primary-600"]
 									: theme === "dark"
 									? "white"
 									: "black",
@@ -247,7 +248,7 @@ const EditStudyFLowModal = (props) => {
 						<Text
 							style={{
 								color: checkLecture
-									? CustomTheme["color-primary-600"]
+									? colorTheme[colorThemeIndex].source["color-primary-600"]
 									: theme === "dark"
 									? "white"
 									: "black",
@@ -268,7 +269,7 @@ const EditStudyFLowModal = (props) => {
 						<Text
 							style={{
 								color: checkOther
-									? CustomTheme["color-primary-600"]
+									? colorTheme[colorThemeIndex].source["color-primary-600"]
 									: theme === "dark"
 									? "white"
 									: "black",

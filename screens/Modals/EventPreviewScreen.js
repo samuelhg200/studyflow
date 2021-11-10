@@ -24,11 +24,12 @@ import LottieView from "lottie-react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import Timeline from 'react-native-timeline-flatlist'
 import { generateTimeline, getStudyFlow } from "../../helpers/functions";
+import { colorTheme } from "../../data/products";
 
 const EventPreviewScreen = (props) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
     const event = useSelector(state => state.events.events.find((event) =>  event.id.toString() === props.route.params.id))
 	const studyFlowConfig = useSelector(state => state.studyFlow.config)
 	const theme = useSelector(state => state.theme.theme)
@@ -43,9 +44,9 @@ const EventPreviewScreen = (props) => {
 				separatorStyle={ {backgroundColor: theme === 'dark' ? 'white' : 'gray'}}
 				innerCircle={'icon'}
 				circleSize={32}
-				circleColor={CustomTheme['color-primary-500']}
-				lineColor={ theme === 'dark' ? 'white' : CustomTheme['color-primary-200']}
-				timeStyle={{textAlign: 'center', color:CustomTheme['color-primary-500'],  borderRadius:13}}
+				circleColor={colorTheme[colorThemeIndex].source['color-primary-500']}
+				lineColor={ theme === 'dark' ? 'white' : colorTheme[colorThemeIndex].source['color-primary-200']}
+				timeStyle={{textAlign: 'center', color:colorTheme[colorThemeIndex].source['color-primary-500'],  borderRadius:13}}
 				titleStyle={{color: theme === 'dark' ? 'white' : 'black'}}
 				descriptionStyle={{color: theme === 'dark' ? '#D9D2D2' : 'gray'}}
 				options={{

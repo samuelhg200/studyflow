@@ -30,7 +30,7 @@ import LottieView from "lottie-react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import moment from "moment";
 import * as eventsActions from "../../store/actions/events";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 import * as studyFlowActions from "../../store/actions/studyFlow";
 import * as themeActions from "../../store/actions/theme";
 
@@ -44,6 +44,8 @@ const ManagerScreen = (props) => {
 	const subjects = useSelector((state) => state.subject.subjects);
 	const theme = useSelector((state) => state.theme.theme);
 	const timeConfig = useSelector((state) => state.studyFlow.config);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
+	const themeBought = useSelector((state) => state.product.theme);
 
 	const studyTimeRepresentation = moment(
 		new Date(0, 0, 0, 0, timeConfig.studyTime, 0)
@@ -67,10 +69,16 @@ const ManagerScreen = (props) => {
 	const colorsModule = {
 		backgroundColor:
 			theme === "dark"
-				? CustomTheme["color-primary-600"]
-				: CustomTheme["color-primary-100"],
-		borderColor: theme === "dark" ? "white" : CustomTheme["color-primary-600"],
-		shadowColor: theme === "dark" ? CustomTheme["color-primary-600"] : "#bbb",
+				? colorTheme[colorThemeIndex].source["color-primary-600"]
+				: colorTheme[colorThemeIndex].source["color-primary-100"],
+		borderColor:
+			theme === "dark"
+				? "white"
+				: colorTheme[colorThemeIndex].source["color-primary-600"],
+		shadowColor:
+			theme === "dark"
+				? colorTheme[colorThemeIndex].source["color-primary-600"]
+				: "#bbb",
 	};
 
 	return (
@@ -84,7 +92,7 @@ const ManagerScreen = (props) => {
 							style={{
 								fontFamily: "yellow-tail",
 								fontSize: 32,
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 								flex: 1,
 								paddingHorizontal: 2,
 							}}
@@ -100,101 +108,130 @@ const ManagerScreen = (props) => {
 					<TouchableCmp
 						style={{ ...colorsModule, ...styles.module }}
 						onPress={onClickSubjects}
-					><View style={Platform.OS === 'android' ? {flexDirection: 'row', ...colorsModule, ...styles.module} : {flexDirection: 'row'}}>
-						
+					>
 						<View
-							style={{
-								...styles.leftColumn,
-								borderColor:
-									theme === "dark" ? "white" : CustomTheme["color-primary-500"],
-							}}
+							style={
+								Platform.OS === "android"
+									? { flexDirection: "row", ...colorsModule, ...styles.module }
+									: { flexDirection: "row" }
+							}
 						>
-							<Text
+							<View
 								style={{
-									...styles.title,
-									color:
+									...styles.leftColumn,
+									borderColor:
 										theme === "dark"
 											? "white"
-											: CustomTheme["color-primary-500"],
+											: colorTheme[colorThemeIndex].source["color-primary-500"],
 								}}
 							>
-								Subjects
-							</Text>
-							<LottieView
-								style={styles.booksAnimation}
-								source={require("../../assets/lottie/bookAnimationRed.json")}
-								autoPlay={true}
-								loop={true}
-								speed={1}
-							/>
-						</View>
-						<View
-							style={{
-								//flexDirection: "row",
-								//flexWrap: "wrap",
-								margin: 1,
-								flex: 1,
-								padding: 14,
-							}}
-						>
-							{subjects.length > 0 ? (
-								// 	<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-								// 	<Text style={{fontFamily: 'yellow-tail', fontSize: 110, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500'], textAlign: 'center', paddingHorizontal: 22}}>{subjects.length}</Text>
-								// </View>
-								subjects.slice(0, 6).map((subject) => {
-									return (
-										<View
-											key={subject.id}
-											style={{
-												padding: 3,
-												margin: 2,
-												//backgroundColor: 'black',
-												borderRadius: 10,
-												alignContent: "center",
-												alignItems: "center",
-												backgroundColor:
-													theme === "dark"
-														? "#224"
-														: CustomTheme["color-primary-200"],
-												borderRightWidth: 5,
-												borderLeftWidth: 5,
-												// borderTopWidth:1,
-												// borderBottomWidth: 1,
-												borderColor: subject.color,
-											}}
-										>
-											<Text style={{...styles.subjectText, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-700']}}>{subject.title}</Text>
-										</View>
-									);
-								})
-							) : (
-								<View
+								<Text
 									style={{
-										flex: 1,
-										alignItems: "center",
-										justifyContent: "center",
+										...styles.title,
+										color:
+											theme === "dark"
+												? "white"
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ],
 									}}
 								>
-									<Text
+									Subjects
+								</Text>
+								<LottieView
+									style={styles.booksAnimation}
+									source={require("../../assets/lottie/bookAnimationRed.json")}
+									autoPlay={true}
+									loop={true}
+									speed={1}
+								/>
+							</View>
+							<View
+								style={{
+									//flexDirection: "row",
+									//flexWrap: "wrap",
+									margin: 1,
+									flex: 1,
+									padding: 14,
+								}}
+							>
+								{subjects.length > 0 ? (
+									// 	<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+									// 	<Text style={{fontFamily: 'yellow-tail', fontSize: 110, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500'], textAlign: 'center', paddingHorizontal: 22}}>{subjects.length}</Text>
+									// </View>
+									subjects.slice(0, 6).map((subject) => {
+										return (
+											<View
+												key={subject.id}
+												style={{
+													padding: 3,
+													margin: 2,
+													//backgroundColor: 'black',
+													borderRadius: 10,
+													alignContent: "center",
+													alignItems: "center",
+													backgroundColor:
+														theme === "dark"
+															? "#224"
+															: colorTheme[colorThemeIndex].source[
+																	"color-primary-200"
+															  ],
+													borderRightWidth: 5,
+													borderLeftWidth: 5,
+													// borderTopWidth:1,
+													// borderBottomWidth: 1,
+													borderColor: subject.color,
+												}}
+											>
+												<Text
+													style={{
+														...styles.subjectText,
+														color:
+															theme === "dark"
+																? "white"
+																: colorTheme[colorThemeIndex].source[
+																		"color-primary-700"
+																  ],
+													}}
+												>
+													{subject.title}
+												</Text>
+											</View>
+										);
+									})
+								) : (
+									<View
 										style={{
-											fontFamily: "yellow-tail",
-											fontSize: 26,
-											color: "white",
-											textAlign: "center",
-											paddingHorizontal: 4,
+											flex: 1,
+											alignItems: "center",
+											justifyContent: "center",
 										}}
 									>
-										Click to start adding your subjects!
-									</Text>
-								</View>
-							)}
+										<Text
+											style={{
+												fontFamily: "yellow-tail",
+												fontSize: 26,
+												color: "white",
+												textAlign: "center",
+												paddingHorizontal: 4,
+											}}
+										>
+											Click to start adding your subjects!
+										</Text>
+									</View>
+								)}
+							</View>
 						</View>
-					</View></TouchableCmp>
+					</TouchableCmp>
 					<TouchableCmp
 						onPress={() => {
 							props.navigation.navigate("EditStudyFlow");
 						}}
-						style={{ ...styles.modulePomodoro, ...colorsModule }}
+						style={{
+							...styles.modulePomodoro,
+							...colorsModule,
+							
+						}}
 					>
 						<View style={{}}>
 							<View style={{ alignItems: "center" }}>
@@ -204,7 +241,9 @@ const ManagerScreen = (props) => {
 										color:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-500"],
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ],
 									}}
 								>
 									StudyFlow
@@ -215,7 +254,9 @@ const ManagerScreen = (props) => {
 										backgroundColor:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-600"],
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-600"
+												  ],
 										margin: 5,
 										marginBottom: 20,
 									}}
@@ -229,7 +270,13 @@ const ManagerScreen = (props) => {
 								>
 									<Ionicons
 										name="glasses-outline"
-										color={theme === "dark" ? "white" : CustomTheme['color-primary-500']}
+										color={
+											theme === "dark"
+												? "white"
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ]
+										}
 										size={18}
 									>
 										{" "}
@@ -238,7 +285,13 @@ const ManagerScreen = (props) => {
 									<Ionicons
 										name="cafe-outline"
 										size={18}
-										color={theme === "dark" ? "white" : CustomTheme['color-primary-500']}
+										color={
+											theme === "dark"
+												? "white"
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ]
+										}
 									>
 										{" "}
 										{breakTimeRepresentation}
@@ -264,7 +317,9 @@ const ManagerScreen = (props) => {
 										color:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-500"],
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-500"
+												  ],
 									}}
 								>
 									Dark Theme
@@ -275,7 +330,9 @@ const ManagerScreen = (props) => {
 										backgroundColor:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-600"],
+												: colorTheme[colorThemeIndex].source[
+														"color-primary-600"
+												  ],
 										margin: 5,
 										marginBottom: 15,
 									}}
@@ -285,6 +342,7 @@ const ManagerScreen = (props) => {
 									checked={theme === "dark"}
 									onChange={onToggleTheme}
 									style={styles.checkbox}
+									disabled={!themeBought}
 								></Toggle>
 							</View>
 						</View>
@@ -311,8 +369,8 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontFamily: "yellow-tail",
 		paddingHorizontal: 2,
-		alignItems: 'center',
-		justifyContent: 'center'
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	module: {
 		flexDirection: "row",
@@ -338,8 +396,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 5,
 		elevation: 4,
 		padding: 6,
-		backgroundColor: CustomTheme["color-primary-200"],
-		borderColor: CustomTheme["color-primary-600"],
+		
 		borderLeftWidth: 3,
 		borderRightWidth: 3,
 		marginBottom: 25,
@@ -347,7 +404,6 @@ const styles = StyleSheet.create({
 	title: {
 		fontFamily: "roboto-bold",
 		fontSize: 20,
-		color: CustomTheme["color-primary-600"],
 	},
 	leftColumn: {
 		flex: 0.9,
@@ -355,7 +411,6 @@ const styles = StyleSheet.create({
 		justifyContent: "space-around",
 		alignItems: "flex-start",
 		borderRightWidth: 1,
-		borderColor: CustomTheme["color-primary-600"],
 	},
 	booksAnimation: {
 		width: "100%",

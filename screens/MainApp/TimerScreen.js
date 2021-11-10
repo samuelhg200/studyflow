@@ -10,17 +10,11 @@ import {
 	Alert,
 	SafeAreaView,
 } from "react-native";
-import {
-	Text,
-	Layout,
-	Divider,
-	TopNavigation,
-} from "@ui-kitten/components";
-//import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { Text, Layout, Divider, TopNavigation } from "@ui-kitten/components";
 import LabelsList from "../../components/LabelsList";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import CustomTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 import * as eventsActions from "../../store/actions/events";
 import * as eventHistoryActions from "../../store/actions/eventHistory";
 import moment from "moment";
@@ -30,7 +24,11 @@ import BottomSheet from "reanimated-bottom-sheet";
 import { convertActivityToTimeline } from "../../helpers/functions";
 import HorizontalTimeline from "../../components/HorizontalTimeline";
 import TagsView from "../../components/TagsView";
-import { getStudyFlow, generateTimeline, getSubjectStudyTime } from "../../helpers/functions";
+import {
+	getStudyFlow,
+	generateTimeline,
+	getSubjectStudyTime,
+} from "../../helpers/functions";
 import {
 	getFormattedEventType,
 	getFormattedActivityType,
@@ -40,10 +38,15 @@ import { AppState } from "react-native";
 import { differenceInSeconds } from "date-fns";
 import Activity from "../../models/activity";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
+import { timerSkins } from "../../data/products";
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
 	TouchableCmp = TouchableNativeFeedback;
+}
+
+function fetchTimerIndex(id) {
+	return timerSkins.findIndex((timerSkin) => timerSkin.id === id);
 }
 
 const getCurrentMiniSession = (activity) => {
@@ -70,29 +73,29 @@ const themeStylesLight = {
 	},
 };
 
-const themeStylesDark = {
-	divider: {
-		height: 0.5,
-		alignSelf: "stretch",
-		backgroundColor: CustomTheme["color-primary-800"],
-	},
-};
 
 const TimerScreen = (props) => {
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
 	//states
 	const timeConfig = useSelector((state) => state.studyFlow.config);
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 	const theme = useSelector((state) => state.theme.theme);
 	const events = useSelector((state) => state.events.events);
 	const currentActivity = useSelector(
 		(state) =>
 			state.events.activities.filter(
-				(activity) =>
-					activity.eventId.toString() === props.route.params.eventId
+				(activity) => activity.eventId.toString() === props.route.params.eventId
 			)[0]
 	);
 	const subjects = useSelector((state) => state.subject.subjects);
+	//timer skins
+	const studyTimerSelected = useSelector(
+		(state) => state.product.studyTimerSkin
+	);
+	const breakTimerSelected = useSelector(
+		(state) => state.product.breakTimerSkin
+	);
 
 	const [currentEvent, setCurrentEvent] = useState(
 		events.filter(
@@ -107,6 +110,20 @@ const TimerScreen = (props) => {
 	const [blurBackground, setBlurBackground] = useState(true);
 	const [miniSession, setMiniSession] = useState(null);
 	const [studyLog, setStudyLog] = useState([]);
+
+	//pausing functionality
+	const [paused, setPaused] = useState(false);
+
+
+	//console.log(studyTimerSelected)
+
+	const themeStylesDark = {
+		divider: {
+			height: 0.5,
+			alignSelf: "stretch",
+			backgroundColor: colorTheme[colorThemeIndex].source["color-primary-800"],
+		},
+	};
 
 	//Subjects modal renderer function
 	const renderSubjectsContent = () => {
@@ -125,20 +142,24 @@ const TimerScreen = (props) => {
 			>
 				<Text
 					category={"h6"}
-					style={{ color: CustomTheme["color-primary-500"], fontSize: 22 }}
+					style={{ color: colorTheme[colorThemeIndex].source["color-primary-500"], fontSize: 22 }}
 				>{`Block #${
 					currentMiniSession ? Math.ceil(currentMiniSession.id / 2) : "1"
 				}`}</Text>
 				{timeline && currentMiniSession && (
 					<Text
 						style={{
-							color: CustomTheme["color-primary-500"],
+							color: colorTheme[colorThemeIndex].source["color-primary-500"],
 							fontSize: 18,
 							padding: 4,
 						}}
-					>{currentMiniSession.type !== 'feedback' ? `${timeline[currentMiniSession.id - 1].time} - ${
-						timeline[currentMiniSession.id].time
-					}` : ''}</Text>
+					>
+						{currentMiniSession.type !== "feedback"
+							? `${timeline[currentMiniSession.id - 1].time} - ${
+									timeline[currentMiniSession.id].time
+							  }`
+							: ""}
+					</Text>
 				)}
 				<Divider
 					style={
@@ -146,7 +167,7 @@ const TimerScreen = (props) => {
 							? {
 									...themeStylesDark.divider,
 									marginTop: Dimensions.get("window").height / 50,
-									backgroundColor: CustomTheme["color-primary-500"],
+									backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 							  }
 							: {
 									...themeStylesLight.divider,
@@ -177,7 +198,7 @@ const TimerScreen = (props) => {
 										color:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-700"],
+												: colorTheme[colorThemeIndex].source["color-primary-700"],
 										fontSize: 14.5,
 									}}
 								>{`Choose subject you will be working on`}</Text>
@@ -200,7 +221,7 @@ const TimerScreen = (props) => {
 			</Layout>
 		);
 	};
-	
+
 	//Topics modal render function
 	const renderTopicsContent = () => {
 		const currentMiniSession = currentActivity
@@ -218,20 +239,24 @@ const TimerScreen = (props) => {
 			>
 				<Text
 					category={"h6"}
-					style={{ color: CustomTheme["color-primary-500"], fontSize: 22 }}
+					style={{ color: colorTheme[colorThemeIndex].source["color-primary-500"], fontSize: 22 }}
 				>{`Block #${
 					currentMiniSession ? Math.ceil(currentMiniSession.id / 2) : "1"
 				}`}</Text>
 				{timeline && currentMiniSession && (
 					<Text
 						style={{
-							color: CustomTheme["color-primary-500"],
+							color: colorTheme[colorThemeIndex].source["color-primary-500"],
 							fontSize: 18,
 							padding: 4,
 						}}
-					>{currentMiniSession.type !== 'feedback' ? `${timeline[currentMiniSession.id - 1].time} - ${
-						timeline[currentMiniSession.id].time
-					}` : ''}</Text>
+					>
+						{currentMiniSession.type !== "feedback"
+							? `${timeline[currentMiniSession.id - 1].time} - ${
+									timeline[currentMiniSession.id].time
+							  }`
+							: ""}
+					</Text>
 				)}
 				<Divider
 					style={
@@ -239,7 +264,7 @@ const TimerScreen = (props) => {
 							? {
 									...themeStylesDark.divider,
 									marginTop: Dimensions.get("window").height / 50,
-									backgroundColor: CustomTheme["color-primary-500"],
+									backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 							  }
 							: {
 									...themeStylesLight.divider,
@@ -271,7 +296,7 @@ const TimerScreen = (props) => {
 										color:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-700"],
+												: colorTheme[colorThemeIndex].source["color-primary-700"],
 										fontSize: 14.5,
 										textAlign: "center",
 									}}
@@ -365,8 +390,8 @@ const TimerScreen = (props) => {
 				return {
 					id: index + 1,
 					type: miniSession.eventType,
-					duration: null
-				}
+					duration: null,
+				};
 			}
 		});
 		const cleanMiniSessions = miniSessions.filter(
@@ -420,7 +445,6 @@ const TimerScreen = (props) => {
 					setMiniSession(temp);
 				} else if (miniSession.id !== temp.id) {
 					setMiniSession(temp);
-
 				}
 			}
 		};
@@ -444,9 +468,7 @@ const TimerScreen = (props) => {
 		AppState.addEventListener("change", handleAppStateChange);
 		return () => AppState.removeEventListener("change", handleAppStateChange);
 	}, []);
-	
-	
-	
+
 	useEffect(() => {
 		if (miniSession?.type === "study") {
 			setTimeout(() => {
@@ -455,7 +477,10 @@ const TimerScreen = (props) => {
 				sheetRef.current.snapTo(0);
 			}, 100);
 			//should also account for end of study session
-		} else if (miniSession?.type === "break" || miniSession?.type === 'feedback') {
+		} else if (
+			miniSession?.type === "break" ||
+			miniSession?.type === "feedback"
+		) {
 			//add null record to signify break to the study log (for easier calculation)
 			setStudyLog(() =>
 				studyLog.concat({
@@ -464,10 +489,9 @@ const TimerScreen = (props) => {
 				})
 			);
 		}
-		if (miniSession?.type === 'feedback'){
-			endSession()
+		if (miniSession?.type === "feedback") {
+			endSession();
 		}
-		
 	}, [miniSession]);
 
 	useEffect(() => {
@@ -518,11 +542,11 @@ const TimerScreen = (props) => {
 	};
 
 	//when session ends handle navigation to feedback screen and calculate stats
-	function endSession () {
+	function endSession() {
 		//calculate and submit stats for current session
-		const subjectStudyTime = getSubjectStudyTime(studyLog, Date.now())
+		const subjectStudyTime = getSubjectStudyTime(studyLog, Date.now());
 		//console.log(new Date(currentActivity.startTime).toISOString())
-		const currST = currentActivity.startTime//avoid accessing data on an already closed screen
+		const currST = currentActivity.startTime; //avoid accessing data on an already closed screen
 		//dispatch current event history to state
 		dispatch2(
 			eventHistoryActions.addEventHistory(
@@ -535,17 +559,29 @@ const TimerScreen = (props) => {
 		);
 
 		//navigate to feedback page and pass stats
-		props.navigation.pop()
-		props.navigation.navigate('SessionFeedback', {
+		props.navigation.pop();
+		props.navigation.navigate("SessionFeedback", {
 			subjectStudyTime: subjectStudyTime,
 			startTime: currST,
 			endTime: Date.now(),
-		})
+		});
 	}
 
-	
+	function stopTimer(){
+		//console.log()
+	}
 
-	
+	function toggleTimer(){
+		console.log(paused);
+		if(paused){
+		  paused = false;
+		  startTimer();
+		} else {
+		  paused = true;
+		  stopTimer();
+		}
+	  }
+
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
 			<TopNavigation
@@ -560,15 +596,11 @@ const TimerScreen = (props) => {
 							flex: 1,
 						}}
 					>
-						{/* <Ionicons
-								name={getIconStringBasedOnEventType(currentEvent.type)}
-								size={30}
-								color={CustomTheme['color-primary-500']}
-							/> */}
+						
 						<Text
 							style={{
 								...styles.title,
-								color: CustomTheme["color-primary-500"],
+								color: colorTheme[colorThemeIndex].source["color-primary-500"],
 							}}
 						>
 							{" "}
@@ -599,7 +631,7 @@ const TimerScreen = (props) => {
 											// 	)
 											// );
 											// props.navigation.goBack();
-											endSession()
+											endSession();
 										},
 									},
 									{ text: "Stay" },
@@ -608,7 +640,7 @@ const TimerScreen = (props) => {
 						>
 							<Ionicons
 								name="close-circle"
-								color={CustomTheme["color-primary-500"]}
+								color={colorTheme[colorThemeIndex].source["color-primary-500"]}
 								size={32}
 							/>
 						</TouchableCmp>
@@ -635,8 +667,8 @@ const TimerScreen = (props) => {
 								name="pulse"
 								color={
 									theme === "dark"
-										? CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-500"]
+										? colorTheme[colorThemeIndex].source["color-primary-500"]
+										: colorTheme[colorThemeIndex].source["color-primary-500"]
 								}
 								size={32}
 							/>
@@ -661,8 +693,8 @@ const TimerScreen = (props) => {
 								name="bulb-outline"
 								color={
 									theme === "dark"
-										? CustomTheme["color-primary-500"]
-										: CustomTheme["color-primary-500"]
+										? colorTheme[colorThemeIndex].source["color-primary-500"]
+										: colorTheme[colorThemeIndex].source["color-primary-500"]
 								}
 								size={30}
 							/>
@@ -697,8 +729,14 @@ const TimerScreen = (props) => {
 					>
 						{miniSession && miniSession.type === "study" && (
 							<LottieView
-								style={styles.catLoaderLottie}
-								source={require("../../assets/lottie/catLoader.json")}
+								style={
+									timerSkins[fetchTimerIndex(studyTimerSelected)]
+										.styleTimerConfig
+								}
+								source={timerSkins[fetchTimerIndex(studyTimerSelected)].source}
+								resizeMode={
+									timerSkins[fetchTimerIndex(studyTimerSelected)].resizeMode
+								}
 								autoPlay={true}
 								loop={true}
 								speed={0.5}
@@ -706,14 +744,20 @@ const TimerScreen = (props) => {
 						)}
 						{miniSession && miniSession.type === "break" && (
 							<LottieView
-								style={styles.coffeeLottie}
-								source={require("../../assets/lottie/chillGuyRed.json")}
+								style={
+									timerSkins[fetchTimerIndex(breakTimerSelected)]
+										.styleTimerConfig
+								}
+								source={timerSkins[fetchTimerIndex(breakTimerSelected)].source}
+								resizeMode={
+									timerSkins[fetchTimerIndex(breakTimerSelected)].resizeMode
+								}
 								autoPlay={true}
 								loop={true}
 								speed={0.5}
 							/>
 						)}
-						<View style={{ flexDirection: "row", alignItems: "center" }}>
+						<View style={{ flexDirection: "row", alignItems: "center", paddingLeft:  Dimensions.get('window').width / 35}}>
 							<Text
 								style={{
 									...styles.countdownNumber,
@@ -721,7 +765,7 @@ const TimerScreen = (props) => {
 									color:
 										theme === "dark"
 											? "white"
-											: CustomTheme["color-primary-500"],
+											: colorTheme[colorThemeIndex].source["color-primary-500"],
 								}}
 							>
 								{countdown > 0
@@ -734,13 +778,13 @@ const TimerScreen = (props) => {
 							<Text
 								style={{
 									...styles.countdownNumber,
-									fontSize: 15,
+									fontSize: 14,
 									paddingBottom: Dimensions.get("window").height / 100,
 									opacity: 0.5,
 									color:
 										theme === "dark"
 											? "white"
-											: CustomTheme["color-primary-500"],
+											: colorTheme[colorThemeIndex].source["color-primary-500"],
 								}}
 							>
 								{countdown > 0
@@ -786,7 +830,7 @@ const TimerScreen = (props) => {
 						{/* <View style={{ width: "100%", paddingLeft: 10, paddingTop: 6 }}>
 							<Ionicons
 							name="close-circle"
-							color={CustomTheme["color-primary-500"]}
+							color={colorTheme[colorThemeIndex].source["color-primary-500"]}
 							size={32}
 						/>
 						</View> */}
@@ -802,7 +846,7 @@ const TimerScreen = (props) => {
 							<Ionicons
 								name={getIconStringBasedOnEventType(currentEvent.type)}
 								size={30}
-								color={CustomTheme["color-primary-500"]}
+								color={colorTheme[colorThemeIndex].source["color-primary-500"]}
 							/>
 							<Text
 								style={{
@@ -810,7 +854,7 @@ const TimerScreen = (props) => {
 									color:
 										theme === "dark"
 											? "white"
-											: CustomTheme["color-primary-500"],
+											: colorTheme[colorThemeIndex].source["color-primary-500"],
 								}}
 							>
 								{" "}
@@ -853,7 +897,7 @@ const TimerScreen = (props) => {
 														? selectedSubjects[0].color
 														: theme === "dark"
 														? "white"
-														: CustomTheme["color-primary-400"]
+														: colorTheme[colorThemeIndex].source["color-primary-400"]
 												}
 												size={Dimensions.get("window").width / 12}
 											/>
@@ -863,7 +907,7 @@ const TimerScreen = (props) => {
 														? selectedSubjects[0].color
 														: theme === "dark"
 														? "white"
-														: CustomTheme["color-primary-400"],
+														: colorTheme[colorThemeIndex].source["color-primary-400"],
 													padding: 4,
 													borderRadius: 10,
 													marginLeft: Dimensions.get("window").width / 50,
@@ -879,7 +923,7 @@ const TimerScreen = (props) => {
 														color: selectedSubjects[0]?.color
 															? "white"
 															: theme === "dark"
-															? CustomTheme["color-primary-500"]
+															? colorTheme[colorThemeIndex].source["color-primary-500"]
 															: "white",
 													}}
 												>
@@ -902,11 +946,11 @@ const TimerScreen = (props) => {
 													color:
 														selectedSubjects.length === 0
 															? theme === "dark"
-																? CustomTheme["color-primary-500"]
-																: CustomTheme["color-primary-400"]
+																? colorTheme[colorThemeIndex].source["color-primary-500"]
+																: colorTheme[colorThemeIndex].source["color-primary-400"]
 															: theme === "dark"
 															? "white"
-															: CustomTheme["color-primary-400"],
+															: colorTheme[colorThemeIndex].source["color-primary-400"],
 												}}
 											>
 												Update
@@ -916,11 +960,11 @@ const TimerScreen = (props) => {
 												color={
 													selectedSubjects.length === 0
 														? theme === "dark"
-															? CustomTheme["color-primary-500"]
-															: CustomTheme["color-primary-400"]
+															? colorTheme[colorThemeIndex].source["color-primary-500"]
+															: colorTheme[colorThemeIndex].source["color-primary-400"]
 														: theme === "dark"
 														? "white"
-														: CustomTheme["color-primary-400"]
+														: colorTheme[colorThemeIndex].source["color-primary-400"]
 												}
 												size={Dimensions.get("window").width / 14}
 											/>
@@ -970,7 +1014,7 @@ const TimerScreen = (props) => {
 														? selectedSubjects[0].color
 														: theme === "dark"
 														? "white"
-														: CustomTheme["color-primary-400"]
+														: colorTheme[colorThemeIndex].source["color-primary-400"]
 												}
 												size={Dimensions.get("window").width / 12}
 											/>
@@ -981,7 +1025,7 @@ const TimerScreen = (props) => {
 															? selectedSubjects[0].color
 															: theme === "dark"
 															? "white"
-															: CustomTheme["color-primary-400"],
+															: colorTheme[colorThemeIndex].source["color-primary-400"],
 													padding: 4,
 													borderRadius: 10,
 													marginLeft: Dimensions.get("window").width / 50,
@@ -998,7 +1042,7 @@ const TimerScreen = (props) => {
 															selectedTopics.length > 0
 																? "white"
 																: theme === "dark"
-																? CustomTheme["color-primary-500"]
+																? colorTheme[colorThemeIndex].source["color-primary-500"]
 																: "white",
 													}}
 												>
@@ -1023,11 +1067,11 @@ const TimerScreen = (props) => {
 													color:
 														selectedTopics.length === 0
 															? theme === "dark"
-																? CustomTheme["color-primary-500"]
-																: CustomTheme["color-primary-400"]
+																? colorTheme[colorThemeIndex].source["color-primary-500"]
+																: colorTheme[colorThemeIndex].source["color-primary-400"]
 															: theme === "dark"
 															? "white"
-															: CustomTheme["color-primary-400"],
+															: colorTheme[colorThemeIndex].source["color-primary-400"],
 												}}
 											>
 												Update
@@ -1037,11 +1081,11 @@ const TimerScreen = (props) => {
 												color={
 													selectedTopics.length === 0
 														? theme === "dark"
-															? CustomTheme["color-primary-500"]
-															: CustomTheme["color-primary-400"]
+															? colorTheme[colorThemeIndex].source["color-primary-500"]
+															: colorTheme[colorThemeIndex].source["color-primary-400"]
 														: theme === "dark"
 														? "white"
-														: CustomTheme["color-primary-400"]
+														: colorTheme[colorThemeIndex].source["color-primary-400"]
 												}
 												size={Dimensions.get("window").width / 14}
 											/>
@@ -1086,7 +1130,7 @@ const TimerScreen = (props) => {
 								onPress={handleStudyFlowPress}
 								style={{
 									...styles.iconContainer,
-									backgroundColor: CustomTheme["color-primary-500"],
+									backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 								}}
 							>
 								<Text
@@ -1112,7 +1156,7 @@ const TimerScreen = (props) => {
 						style={{
 							...styles.shadow,
 							shadowColor:
-								theme === "dark" ? CustomTheme["color-primary-600"] : "#bbb",
+								theme === "dark" ? colorTheme[colorThemeIndex].source["color-primary-600"] : "#bbb",
 							flex: 1,
 							alignItems: "center",
 							justifyContent: "center",
@@ -1124,7 +1168,7 @@ const TimerScreen = (props) => {
 								borderRadius: 10,
 								alignItems: "center",
 								justifyContent: "center",
-								backgroundColor: CustomTheme["color-primary-500"],
+								backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
 								marginVertical: Dimensions.get("window").height / 40,
 							}}
 						>
@@ -1172,7 +1216,7 @@ const TimerScreen = (props) => {
 										backgroundColor:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-500"],
+												: colorTheme[colorThemeIndex].source["color-primary-500"],
 										width: 50,
 										height: 4,
 										borderRadius: 5,
@@ -1211,7 +1255,7 @@ const TimerScreen = (props) => {
 										backgroundColor:
 											theme === "dark"
 												? "white"
-												: CustomTheme["color-primary-500"],
+												: colorTheme[colorThemeIndex].source["color-primary-500"],
 										width: 50,
 										height: 4,
 										borderRadius: 5,

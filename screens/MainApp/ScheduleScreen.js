@@ -18,52 +18,11 @@ import { getIconStringBasedOnEventType } from "../../helpers/functions";
 import { Ionicons } from "@expo/vector-icons";
 import * as eventsActions from "../../store/actions/events";
 import * as studyFlowActions from "../../store/actions/studyFlow";
-import customTheme from "../../assets/UIkitten/custom-theme.json";
+import { colorTheme } from "../../data/products";
 import HeaderButton from "../../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 
-const actions = [
-	{
-		text: "Other",
-		icon: require("../../assets/icons/other.png"),
-		name: "other",
-		position: 1,
-		color: customTheme["color-primary-500"],
-		iconName: "ellipsis-horizontal-outline",
-	},
-	{
-		text: "Lecture",
-		icon: require("../../assets/icons/book.png"),
-		name: "lecture",
-		position: 2,
-		color: customTheme["color-primary-500"],
-		iconName: "book-outline",
-	},
-	{
-		text: "Homework",
-		icon: require("../../assets/icons/reader.png"),
-		name: "homework",
-		position: 3,
-		color: customTheme["color-primary-500"],
-		iconName: "reader-outline",
-	},
-	{
-		text: "Assessment",
-		icon: require("../../assets/icons/school.png"),
-		name: "assessment",
-		position: 4,
-		color: customTheme["color-primary-500"],
-		iconName: "school-outline",
-	},
-	{
-		text: "Study Session",
-		icon: require("../../assets/icons/glasses.png"),
-		name: "studySession",
-		position: 5,
-		color: customTheme["color-primary-500"],
-		iconName: "glasses-outline",
-	},
-];
+
 
 // const timeToString = (time) => {
 // 	const date = new Date(time);
@@ -241,7 +200,7 @@ const Header = (props) => {
 				<Ionicons
 					name="repeat-outline"
 					color={
-						props.theme === "dark" ? "white" : customTheme["color-primary-500"]
+						props.theme === "dark" ? "white" : colorTheme[props.colorThemeIndex].source["color-primary-500"]
 					}
 				/>
 			) : (
@@ -284,18 +243,54 @@ function getItems(eventsCopy, date = new Date()) {
 	return allItems;
 }
 
-const DayDisplayer = ({ day }) => {
-	return (
-		<View style={styles.dateDisplayer}>
-			<Text category={"h6"} style={styles.dayNumber}>
-				{moment(day).format("D")}
-			</Text>
-			<Text style={styles.writtenDay}>{moment(day).format("ddd")}</Text>
-		</View>
-	);
-};
+
 
 const ScheduleScreen = (props) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+
+	const actions = [
+		{
+			text: "Other",
+			icon: require("../../assets/icons/other.png"),
+			name: "other",
+			position: 1,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+			iconName: "ellipsis-horizontal-outline",
+		},
+		{
+			text: "Lecture",
+			icon: require("../../assets/icons/book.png"),
+			name: "lecture",
+			position: 2,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+			iconName: "book-outline",
+		},
+		{
+			text: "Homework",
+			icon: require("../../assets/icons/reader.png"),
+			name: "homework",
+			position: 3,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+			iconName: "reader-outline",
+		},
+		{
+			text: "Assessment",
+			icon: require("../../assets/icons/school.png"),
+			name: "assessment",
+			position: 4,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+			iconName: "school-outline",
+		},
+		{
+			text: "Study Session",
+			icon: require("../../assets/icons/glasses.png"),
+			name: "studySession",
+			position: 5,
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
+			iconName: "glasses-outline",
+		},
+	];
+
 	// const subjects = useSelector((state) => state.subject.subjects);
 	// const events = useSelector((state) => state.events.events);
 	// //const [loadedEvents, setLoadedEvents] = useState([]);
@@ -350,6 +345,18 @@ const ScheduleScreen = (props) => {
 	const loadingHandler = (bool) => {
 		setLoading(bool);
 	};
+
+	const DayDisplayer = ({ day }) => {
+		return (
+			<View style={styles.dateDisplayer}>
+				<Text category={"h6"} style={{...styles.dayNumber, color: colorTheme[colorThemeIndex].source["color-primary-500"],}}>
+					{moment(day).format("D")}
+				</Text>
+				<Text style={styles.writtenDay}>{moment(day).format("ddd")}</Text>
+			</View>
+		);
+	};
+
 	useEffect(() => {
 		const items = getItems(events.slice(), dateToLoad);
 		setItems(items);
@@ -519,7 +526,7 @@ const ScheduleScreen = (props) => {
 						style={{
 							flex: 1,
 							borderLeftWidth: 1,
-							borderColor: customTheme["color-primary-400"],
+							borderColor: colorTheme[colorThemeIndex].source["color-primary-400"],
 							paddingLeft: 15,
 						}}
 					>
@@ -535,12 +542,12 @@ const ScheduleScreen = (props) => {
 								justifyContent: "center",
 								backgroundColor:
 									theme === "dark"
-										? customTheme["color-primary-600"]
-										: customTheme["color-primary-300"],
+										? colorTheme[colorThemeIndex].source["color-primary-600"]
+										: colorTheme[colorThemeIndex].source["color-primary-300"],
 								borderColor:
 									theme === "dark"
-										? customTheme["color-primary-400"]
-										: customTheme["color-primary-600"],
+										? colorTheme[colorThemeIndex].source["color-primary-400"]
+										: colorTheme[colorThemeIndex].source["color-primary-600"],
 								borderWidth: 1,
 								marginBottom: 5,
 							}}
@@ -653,7 +660,7 @@ const ScheduleScreen = (props) => {
 														color={
 															theme === "dark"
 																? "white"
-																: customTheme["color-primary-300"]
+																: colorTheme[colorThemeIndex].source["color-primary-300"]
 														}
 														studyFlowActive={studyFlowActive}
 														toggleStudyFlow={toggleStudyFlow}
@@ -664,11 +671,12 @@ const ScheduleScreen = (props) => {
 												header={(props) => (
 													<Header
 														{...props}
+														colorThemeIndex={colorThemeIndex}
 														item={itemData.item}
 														color={
 															theme === "dark"
 																? "white"
-																: customTheme["color-primary-300"]
+																: colorTheme[colorThemeIndex].source["color-primary-300"]
 														}
 													/>
 												)}
@@ -678,7 +686,7 @@ const ScheduleScreen = (props) => {
 												>
 													<Ionicons
 														name={iconName}
-														color={customTheme["color-primary-600"]}
+														color={colorTheme[colorThemeIndex].source["color-primary-600"]}
 														size={24}
 													/>
 													<Text
@@ -687,7 +695,7 @@ const ScheduleScreen = (props) => {
 															color:
 																theme === "dark"
 																	? "white"
-																	: customTheme["color-primary-600"],
+																	: colorTheme[colorThemeIndex].source["color-primary-600"],
 														}}
 													>
 														{" " + itemData.item.title}
@@ -720,7 +728,7 @@ const ScheduleScreen = (props) => {
 				scrollEnabled={scrollingEnabled}
 			/>
 			<FloatingAction
-				color={customTheme["color-primary-600"]}
+				color={colorTheme[colorThemeIndex].source["color-primary-600"]}
 				ref={animation}
 				actions={actions}
 				onClose={() => setDayPressed(new Date())}
@@ -736,12 +744,13 @@ const ScheduleScreen = (props) => {
 };
 
 export const screenOptions = (navData) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
 	return {
 		headerTitle: navData.route.params
 			? navData.route.params.currentMonth
 			: moment().format("MMMM"),
 		headerTitleStyle: {
-			color: customTheme["color-primary-500"],
+			color: colorTheme[colorThemeIndex].source["color-primary-500"],
 			fontFamily: "yellow-tail",
 			fontSize: 30,
 			paddingHorizontal: 4,
@@ -815,7 +824,6 @@ const styles = StyleSheet.create({
 		fontSize: 19,
 	},
 	dayNumber: {
-		color: customTheme["color-primary-500"],
 		fontSize: 22,
 	},
 	indicator: {
