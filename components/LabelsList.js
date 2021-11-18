@@ -35,14 +35,14 @@ const Label = (props) => {
 	const topics = useSelector((state) =>
 		state.subject.topics.filter((topic) => topic.subjectId === props.item.id)
 	);
-	const colorThemeIndex = useSelector(state => state.product.colorTheme)
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	const isSelected = (topicId) => {
-		if (props.selectedTopics.find(topic => topic.id === topicId)){
+		if (props.selectedTopics.find((topic) => topic.id === topicId)) {
 			return true;
 		} else {
-			return false
+			return false;
 		}
-	}
+	};
 
 	return (
 		<View style={{ alignItems: "flex-end" }}>
@@ -89,16 +89,33 @@ const Label = (props) => {
 			</TouchableCmp>
 			{showTopics &&
 				topics.map((topic) => {
-					
-					const selected = props.selectableMode ? isSelected(topic.id) : false
-					
+					const selected = props.selectableMode ? isSelected(topic.id) : false;
+
 					return (
-						<TouchableCmp key={topic.id} disabled={!props.selectableMode} onPress={() => props.onTopicPress(topic)}>
+						<TouchableCmp
+							key={topic.id}
+							disabled={!props.selectableMode}
+							onPress={() => props.onTopicPress(topic)}
+						>
 							<View
-								
-								style={{ ...styles.topic, backgroundColor: selected ? colorTheme[colorThemeIndex].source['color-primary-500'] : props.item.color }}
+								style={{
+									...styles.topic,
+									backgroundColor: selected
+										? colorTheme[colorThemeIndex].source["color-primary-500"]
+										: props.item.color,
+								}}
 							>
-								<Ionicons name={props.selectableMode ? (selected ? 'checkbox-outline'  : "square-outline") : 'book-outline' }size={12.8} color={"white"}>
+								<Ionicons
+									name={
+										props.selectableMode
+											? selected
+												? "checkbox-outline"
+												: "square-outline"
+											: "book-outline"
+									}
+									size={12.8}
+									color={"white"}
+								>
 									<Text style={{ color: "white", fontSize: 14 }}>
 										{" "}
 										{topic.title}
@@ -130,7 +147,7 @@ const LabelsList = ({
 	disableInput,
 	selectableTopics,
 	selectedTopics,
-	onTopicPressHandler
+	onTopicPressHandler,
 }) => {
 	const theme = useSelector((state) => state.theme.theme);
 	const [newSubject, setNewSubject] = useState("");

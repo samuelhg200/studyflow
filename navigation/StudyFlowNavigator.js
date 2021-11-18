@@ -32,17 +32,19 @@ import MeditationModal from "../screens/Modals/MeditationModal";
 import SessionFeedbackScreen from "../screens/MainApp/SessionFeedbackScreen";
 import StudyTipsPopUp from "../screens/PopUp/StudyTipsPopUp";
 import ChooseRepeatFrequency from "../screens/Modals/ChooseRepeatFrequency";
+import CreateQuestion from "../screens/Modals/CreateQuestion";
+import QuestionCards from "../screens/Modals/QuestionCards";
+import PracticeQuestionsConfig from "../screens/Modals/PracticeQuestionsConfig";
+import ModulesStarterPage from "../screens/MainApp/ModulesStarterPage";
 
 import HeaderButton from "../components/HeaderButton";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
-
 
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as subjectActions from "../store/actions/subject";
 import * as studyFlowActions from "../store/actions/studyFlow";
-import {  colorTheme } from "../data/products";
-
+import { colorTheme } from "../data/products";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -55,8 +57,8 @@ const MetricsNavigator = () => (
 
 const ManagerStackNavigator = createStackNavigator();
 const ManagerNavigator = () => {
-	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
-		
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
+
 	const dispatch = useDispatch();
 	const dispatch2 = useDispatch();
 	return (
@@ -71,7 +73,8 @@ const ManagerNavigator = () => {
 				component={SubjectsModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Subjects",
 					headerBackTitle: "Manager",
 				}}
@@ -81,7 +84,8 @@ const ManagerNavigator = () => {
 				component={TopicsModal}
 				options={(navData) => ({
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: navData.route.params.subjectTitle,
 					headerBackTitle: "Subjects",
 					headerRight: () => {
@@ -121,9 +125,43 @@ const ManagerNavigator = () => {
 				component={EditStudyFLowModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Edit StudyFlow",
 					headerBackTitle: "Manager",
+				}}
+			/>
+			<ManagerStackNavigator.Screen
+				name="PracticeQuestionsConfig"
+				component={PracticeQuestionsConfig}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Practice Questions",
+					headerBackTitle: " ",
+				}}
+			/>
+			<ManagerStackNavigator.Screen
+				name="CreateQuestion"
+				component={CreateQuestion}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Create Question",
+					headerBackTitle: " ",
+				}}
+			/>
+			<ManagerStackNavigator.Screen
+				name="QuestionCards"
+				component={QuestionCards}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Questions",
+					headerBackTitle: " ",
 				}}
 			/>
 		</ManagerStackNavigator.Navigator>
@@ -132,7 +170,7 @@ const ManagerNavigator = () => {
 
 const StartFlowStackNavigator = createStackNavigator();
 const StartFlowNavigator = () => {
-	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	return (
 		<StartFlowStackNavigator.Navigator>
 			<StartFlowStackNavigator.Screen
@@ -146,7 +184,8 @@ const StartFlowNavigator = () => {
 				component={StoreScreen}
 				//options={startFlowScreenOptions}
 				options={{
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Store",
 					headerBackTitle: "Home",
 				}}
@@ -156,7 +195,8 @@ const StartFlowNavigator = () => {
 				component={ChooseEventTypeScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "",
 					headerBackTitle: "Home",
 				}}
@@ -166,7 +206,8 @@ const StartFlowNavigator = () => {
 				component={AddItemToCalendarScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "",
 					headerBackTitle: "Home",
 				}}
@@ -176,7 +217,8 @@ const StartFlowNavigator = () => {
 				component={SubjectsModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Subjects",
 					headerBackTitle: "Manager",
 				}}
@@ -186,7 +228,8 @@ const StartFlowNavigator = () => {
 				component={TopicsModal}
 				options={(navData) => ({
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: navData.route.params.subjectTitle,
 					headerBackTitle: "Subjects",
 					headerRight: () => {
@@ -228,18 +271,20 @@ const StartFlowNavigator = () => {
 				component={EventPreviewScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Event Info",
 					headerBackTitle: "Home",
 				}}
 			/>
-			
+
 			<StartFlowStackNavigator.Screen
 				name="EditStudyFlow"
 				component={EditStudyFLowModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Edit StudyFlow",
 					headerBackTitle: "Event",
 				}}
@@ -259,7 +304,8 @@ const StartFlowNavigator = () => {
 				component={StudyTipsPopUp}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Study Tip",
 					headerBackTitle: " ",
 				}}
@@ -269,7 +315,8 @@ const StartFlowNavigator = () => {
 				component={MeditationModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Meditation",
 					headerBackTitle: " ",
 				}}
@@ -279,7 +326,8 @@ const StartFlowNavigator = () => {
 				component={SessionFeedbackScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Feedback",
 					headerBackTitle: "Home",
 				}}
@@ -289,25 +337,57 @@ const StartFlowNavigator = () => {
 				component={ChooseRepeatFrequency}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Repeat",
 					headerBackTitle: "Event",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="CreateQuestion"
+				component={CreateQuestion}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Create Question",
+					headerBackTitle: " ",
+				}}
+			/>
+			<StartFlowStackNavigator.Screen
+				name="QuestionCards"
+				component={QuestionCards}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Questions",
+					headerBackTitle: " ",
 				}}
 			/>
 		</StartFlowStackNavigator.Navigator>
 	);
 };
 
-const GoalsStackNavigator = createStackNavigator();
-const GoalsNavigator = () => (
-	<GoalsStackNavigator.Navigator>
-		<GoalsStackNavigator.Screen name="Goals" component={GoalsScreen} />
-	</GoalsStackNavigator.Navigator>
-);
+const ModulesStackNavigator = createStackNavigator();
+const ModulesNavigator = () => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
+
+	return (
+		<ModulesStackNavigator.Navigator>
+			<ModulesStackNavigator.Screen
+				options={{ headerShown: false }}
+				name="ModulesStarter"
+				component={ModulesStarterPage}
+			/>
+			
+		</ModulesStackNavigator.Navigator>
+	);
+};
 
 const ScheduleStackNavigator = createStackNavigator();
 const ScheduleNavigator = () => {
-	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	return (
 		<ScheduleStackNavigator.Navigator>
 			<ScheduleStackNavigator.Screen
@@ -320,7 +400,8 @@ const ScheduleNavigator = () => {
 				component={EventPreviewScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Event Info",
 					headerBackTitle: "Agenda",
 				}}
@@ -331,7 +412,8 @@ const ScheduleNavigator = () => {
 				component={AddItemToCalendarScreen}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "",
 					headerBackTitle: "Agenda",
 					...AddItemToCalendarScreenOptions,
@@ -342,7 +424,8 @@ const ScheduleNavigator = () => {
 				component={SubjectsModal}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Subjects",
 					headerBackTitle: "Calendar",
 				}}
@@ -352,7 +435,8 @@ const ScheduleNavigator = () => {
 				component={TopicsModal}
 				options={(navData) => ({
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: navData.route.params.subjectTitle,
 					headerBackTitle: "Subjects",
 					headerRight: () => {
@@ -392,7 +476,8 @@ const ScheduleNavigator = () => {
 				component={ChooseRepeatFrequency}
 				options={{
 					presentation: "modal",
-					headerTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					headerTitle: "Repeat",
 					headerBackTitle: "Event",
 				}}
@@ -403,9 +488,11 @@ const ScheduleNavigator = () => {
 
 const StudyFlowTabNavigator = createBottomTabNavigator();
 
-const ManagerIcon = (props) => <Icon {...props} name="bulb-outline" />;
+const ManagerIcon = (props) => <Icon {...props} name="settings-outline" />;
 
-const TimerIcon = (props) => <Icon {...props} name="book-open-outline" />;
+const TimerIcon = (props) => <Icon {...props} name="home-outline" />;
+
+const ModulesIcon = (props) => <Icon {...props} name="flash-outline" />;
 
 const CalendarIcon = (props) => (
 	<Icon {...props} name="calendar-outline" animation="zoom" />
@@ -423,15 +510,16 @@ const BottomTabBar = ({ navigation, state, managerIconRef }) => {
 			selectedIndex={state.index}
 			onSelect={(index) => navigation.navigate(state.routeNames[index])}
 		>
-			<BottomNavigationTab icon={ManagerIcon} />
 			<BottomNavigationTab icon={TimerIcon} />
+			<BottomNavigationTab icon={ModulesIcon} />
 			<BottomNavigationTab icon={CalendarIcon} />
+			<BottomNavigationTab icon={ManagerIcon} />
 		</BottomNavigation> //</SafeAreaView>
 	);
 };
 
-const StudyFlowNavigator = ({ managerIconRef }) => {
-	const colorThemeIndex = useSelector((state) => state.product.colorTheme)
+const StudyFlowNavigatorTab = ({ managerIconRef }) => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
 	return (
 		<StudyFlowTabNavigator.Navigator
 			initialRouteName="StartFlowStack"
@@ -443,71 +531,21 @@ const StudyFlowNavigator = ({ managerIconRef }) => {
 				tabBarShowLabel: false,
 			})}
 		>
-			{/* <StudyFlowTabNavigator.Screen
-				name="MetricsStack"
-				component={MetricsNavigator}
-				options={{
-					tabBarActiveTintColor: customTheme["color-primary-500"],
-					tabBarIcon: ({ size, focused, color }) => {
-						return (
-							<Ionicons name="stats-chart-outline" color={color} size={size} />
-						);
-					},
-				}}
-			/> */}
-			<StudyFlowTabNavigator.Screen
-				name="ManagerStack"
-				component={ManagerNavigator}
-				options={{
-					tabBarActiveTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
-					tabBarIcon: ({ size, focused, color }) => {
-						return <Ionicons name="create-outline" color={color} size={size} />;
-					},
-				}}
-			/>
 			<StudyFlowTabNavigator.Screen
 				name="StartFlowStack"
 				component={StartFlowNavigator}
-				// options={{
-				// 	tabBarIcon: ({ size, focused, color }) => {
-				// 		return (
-				// 			<View
-				// 				style={{
-				// 					position: "absolute",
-				// 					bottom: 15, // space from bottombar
-				// 					height: 58,
-				// 					width: 58,
-				// 					borderRadius: 58,
-				// 					backgroundColor: "white",
-				// 					borderColor: color,
-				// 					borderWidth: 0.4,
-				// 					justifyContent: "center",
-				// 					alignItems: "center",
-				// 				}}
-				// 			>
-				// 				<Ionicons name="hourglass-outline" color={color} size={38} />
-				// 			</View>
-				// 		);
-				// 	},
-				// }}
 			/>
-			{/* <StudyFlowTabNavigator.Screen
-				name="GoalsStack"
-				component={GoalsNavigator}
-				options={{
-					tabBarActiveTintColor: customTheme["color-primary-500"],
-					tabBarIcon: ({ size, focused, color }) => {
-						return (
-							<Ionicons name="trail-sign-outline" color={color} size={size} />
-						);
-					},
-				}}
-			/> */}
+			<StudyFlowTabNavigator.Screen
+				name="ModulesStack"
+				component={ModulesNavigator}
+			/>
+
 			<StudyFlowTabNavigator.Screen
 				name="ScheduleStack"
 				component={ScheduleNavigator}
 				options={{
-					tabBarActiveTintColor: colorTheme[colorThemeIndex].source["color-primary-500"],
+					tabBarActiveTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
 					tabBarIcon: ({ size, focused, color }) => {
 						return (
 							<Ionicons name="calendar-outline" color={color} size={size} />
@@ -515,7 +553,66 @@ const StudyFlowNavigator = ({ managerIconRef }) => {
 					},
 				}}
 			/>
+			<StudyFlowTabNavigator.Screen
+				name="ManagerStack"
+				component={ManagerNavigator}
+				options={{
+					tabBarActiveTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					tabBarIcon: ({ size, focused, color }) => {
+						return <Ionicons name="create-outline" color={color} size={size} />;
+					},
+				}}
+			/>
 		</StudyFlowTabNavigator.Navigator>
+	);
+};
+
+const StudyFlowMainNavigator = createStackNavigator();
+const StudyFlowNavigator = () => {
+	const colorThemeIndex = useSelector((state) => state.product.colorTheme);
+
+	return (
+		<StudyFlowMainNavigator.Navigator>
+			<StudyFlowMainNavigator.Screen
+				name="TabNavigator"
+				component={StudyFlowNavigatorTab}
+				options={{headerShown: false}}
+			/>
+			<StudyFlowMainNavigator.Screen
+				name="PracticeQuestionsConfig"
+				component={PracticeQuestionsConfig}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Practice Questions",
+					headerBackTitle: " ",
+				}}
+			/>
+			<StudyFlowMainNavigator.Screen
+				name="CreateQuestion"
+				component={CreateQuestion}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Create Question",
+					headerBackTitle: " ",
+				}}
+			/>
+			<StudyFlowMainNavigator.Screen
+				name="QuestionCards"
+				component={QuestionCards}
+				options={{
+					presentation: "modal",
+					headerTintColor:
+						colorTheme[colorThemeIndex].source["color-primary-500"],
+					headerTitle: "Questions",
+					headerBackTitle: " ",
+				}}
+			/>
+		</StudyFlowMainNavigator.Navigator>
 	);
 };
 

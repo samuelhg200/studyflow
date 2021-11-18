@@ -10,7 +10,7 @@ import {
 	Alert,
 	SafeAreaView,
 } from "react-native";
-import { Text, Layout, Divider, TopNavigation } from "@ui-kitten/components";
+import { Text, Layout, Divider, TopNavigation, Button } from "@ui-kitten/components";
 import LabelsList from "../../components/LabelsList";
 import { useSelector, useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
@@ -112,7 +112,7 @@ const TimerScreen = (props) => {
 	const [studyLog, setStudyLog] = useState([]);
 
 	//pausing functionality
-	const [paused, setPaused] = useState(false);
+	
 
 
 	//console.log(studyTimerSelected)
@@ -342,6 +342,10 @@ const TimerScreen = (props) => {
 	const appState = useRef(AppState.currentState);
 	const [elapsed, setElapsed] = useState(0);
 	const [countdown, setCountdown] = useState(0);
+	//pausing functionality
+	// const [pausedId, setPausedId] = useState()
+	// const [timePaused, setTimePaused] = useState(0)
+	// const [paused, setPaused] = useState(false);
 
 	const getElapsedTime = async () => {
 		try {
@@ -378,6 +382,7 @@ const TimerScreen = (props) => {
 			timeConfig.breakTime,
 			currentEvent.date
 		);
+		//console.log(timeline)
 		//console.log(timeline[timeline.length - 1])
 		const miniSessions = timeline.map((miniSession, index) => {
 			if (miniSession.eventType !== "feedback") {
@@ -394,6 +399,7 @@ const TimerScreen = (props) => {
 				};
 			}
 		});
+		//console.log(miniSessions)
 		const cleanMiniSessions = miniSessions.filter(
 			(session) => session !== undefined
 		);
@@ -401,9 +407,12 @@ const TimerScreen = (props) => {
 			const startTime = await AsyncStorage.getItem("@start_time");
 			return startTime;
 		};
+		
 		const doAll = async () => {
 			const time = await getTime();
 			const elapsed = await getElapsedTime();
+			
+		//console.log(time)
 			const activityToUpdate = new Activity(
 				currentEvent.id,
 				time,
@@ -411,12 +420,13 @@ const TimerScreen = (props) => {
 				cleanMiniSessions,
 				studyLog
 			);
+			//console.log(cleanMiniSessions)
 			dispatch(eventsActions.updateActivity(activityToUpdate));
 			setTimeline(convertActivityToTimeline(activityToUpdate));
 		};
 		doAll();
 	}
-
+	//console.log(elapsed)
 	useEffect(() => {
 		if (selectedSubjects.length > 0) {
 			//hide lower module
@@ -567,20 +577,31 @@ const TimerScreen = (props) => {
 		});
 	}
 
-	function stopTimer(){
-		//console.log()
-	}
+	// function stopTimer(){
+	// 	setPausedId(setInterval(() => {
+	// 		setTimePaused((prev) => {
+	// 			return (prev + 1)
+	// 		});
+	// 	}, 1000))
+	// 	//return () => clearInterval(interval);
+	// }
 
-	function toggleTimer(){
-		console.log(paused);
-		if(paused){
-		  paused = false;
-		  startTimer();
-		} else {
-		  paused = true;
-		  stopTimer();
-		}
-	  }
+	// function startTimer(){
+	// 	clearInterval(clearInterval(pausedId))
+	// }
+
+	// function toggleTimer(){
+	// 	console.log(paused);
+	// 	if(paused){
+	// 		setPaused(false);
+	// 	  	startTimer();
+	// 	} else {
+	// 	  setPaused(true)
+	// 	  stopTimer();
+	// 	}
+	//   }
+
+	//   console.log(timePaused)
 
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
@@ -684,9 +705,15 @@ const TimerScreen = (props) => {
 									currentMiniSession.minuteStart * 60 +
 									currentMiniSession.duration * 60 -
 									currentActivity.secondStamp;
-								props.navigation.navigate("StudyTips", {
+								// props.navigation.navigate("StudyTips", {
+								// 	timeLeft: timeRemaining,
+								// });
+								props.navigation.navigate("CreateQuestion", {
 									timeLeft: timeRemaining,
-								});
+									eventSubjects: currentEvent.subjects,
+									selectedSubjects: selectedSubjects
+
+								})
 							}}
 						>
 							<Ionicons
@@ -824,7 +851,8 @@ const TimerScreen = (props) => {
 						}
 					/>
 					<ScrollView
-						contentContainerStyle={styles.screen}
+						contentContainerStyle={{alignItems: "center",
+						justifyContent: "flex-start",}}
 						style={{ opacity: blurBackground ? 0.1 : 1 }}
 					>
 						{/* <View style={{ width: "100%", paddingLeft: 10, paddingTop: 6 }}>
@@ -1093,57 +1121,7 @@ const TimerScreen = (props) => {
 									</View>
 								</TouchableCmp>
 							)}
-						{/* <View style={styles.timeConfigContainer}>
-							<TouchableCmp
-								onPress={handleStudyFlowPress}
-								style={{ ...styles.iconContainer }}
-							>
-								<Ionicons
-									name="glasses-outline"
-									color={theme === "dark" ? "white" : "black"}
-									size={28}
-								/>
-								<Text
-									style={{
-										fontSize: 22,
-										color: theme === "dark" ? "white" : "black",
-									}}
-								>
-									{" "}
-									{studyTimeRepresentation}{" "}
-								</Text>
-							</TouchableCmp>
-							<TouchableCmp
-								onPress={handleStudyFlowPress}
-								style={{ ...styles.iconContainer }}
-							>
-								<Ionicons
-									name="cafe-outline"
-									color={theme === "dark" ? "white" : "black"}
-									style={{ fontSize: 22 }}
-								>
-									{" "}
-									{breakTimeRepresentation}{" "}
-								</Ionicons>
-							</TouchableCmp>
-							<TouchableCmp
-								onPress={handleStudyFlowPress}
-								style={{
-									...styles.iconContainer,
-									backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
-								}}
-							>
-								<Text
-									style={{
-										fontSize: 18,
-										paddingHorizontal: 12,
-										color: "white",
-									}}
-								>
-									Edit
-								</Text>
-							</TouchableCmp>
-						</View> */}
+						
 
 						<Divider
 							style={
@@ -1152,38 +1130,6 @@ const TimerScreen = (props) => {
 									: themeStylesLight.divider
 							}
 						/>
-						{/* <View
-						style={{
-							...styles.shadow,
-							shadowColor:
-								theme === "dark" ? colorTheme[colorThemeIndex].source["color-primary-600"] : "#bbb",
-							flex: 1,
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<TouchableCmp
-							style={{
-								padding: 5,
-								borderRadius: 10,
-								alignItems: "center",
-								justifyContent: "center",
-								backgroundColor: colorTheme[colorThemeIndex].source["color-primary-500"],
-								marginVertical: Dimensions.get("window").height / 40,
-							}}
-						>
-							<Text
-								style={{
-									fontSize: 26,
-									paddingHorizontal: 12,
-									paddingVertical: 3,
-									color: "white",
-								}}
-							>
-								Pause {""}
-							</Text>
-						</TouchableCmp>
-					</View> */}
 					</ScrollView>
 				</TouchableWithoutFeedback>
 

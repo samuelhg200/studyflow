@@ -126,7 +126,7 @@ const TagsView = (props) => {
 				<BackgroundButton
 					backgroundColor={tag.color}
 					textColor={"white"}
-					borderColor={"white"}
+					borderColor={theme === 'dark' ? "white" : colorTheme[colorThemeIndex].source['color-primary-200']}
 					onPress={() => {
 						onPress(tag);
 					}}

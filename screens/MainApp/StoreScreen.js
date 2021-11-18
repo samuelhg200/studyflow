@@ -10,7 +10,7 @@ import {
 	Dimensions,
 	Modal,
 } from "react-native";
-import { Card, Text, Divider, Layout } from "@ui-kitten/components";
+import { Card, Text, Divider, Layout, Button, Toggle } from "@ui-kitten/components";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import LottieView from "lottie-react-native";
@@ -19,6 +19,7 @@ import CustomTheme from "../../assets/UIkitten/custom-theme.json";
 import { timerSkins, themeProd, colorTheme } from "../../data/products";
 import * as walletActions from "../../store/actions/wallet";
 import * as productActions from "../../store/actions/product";
+import * as themeActions from '../../store/actions/theme'
 
 let TouchableCmp = TouchableOpacity;
 if (Platform.OS === "android") {
@@ -302,6 +303,7 @@ const StoreScreen = (props) => {
 	const dispatch7 = useDispatch();
 	const dispatch8 = useDispatch();
 	const dispatch9 = useDispatch();
+	const dispatch10 = useDispatch()
 
 	const theme = useSelector((state) => state.theme.theme);
 	const balance = useSelector((state) => state.wallet.amount);
@@ -373,6 +375,10 @@ const StoreScreen = (props) => {
 		dispatch9(productActions.setColorTheme(index));
 	};
 
+	const onToggleTheme = () => {
+		dispatch10(themeActions.toggleTheme());
+	};
+
 	useEffect(() => {
 		props.navigation.setOptions({
 			headerRight: () => (
@@ -391,7 +397,7 @@ const StoreScreen = (props) => {
 					}}
 				>
 					<Ionicons
-						name="cash"
+						name="wallet-outline"
 						color={theme === "dark" ? "white" : "black"}
 						size={15}
 					/>
@@ -399,7 +405,7 @@ const StoreScreen = (props) => {
 				</Layout>
 			),
 		});
-	}, [balance, colorThemeIndex]);
+	}, [balance, colorThemeIndex, theme]);
 
 	return (
 		<Layout level="2" style={styles.screen}>
@@ -552,12 +558,65 @@ const StoreScreen = (props) => {
 					style={{
 						width: "100%",
 						paddingVertical: 10,
-
 						justifyContent: "center",
 						paddingHorizontal: 20,
 					}}
 				>
-					{!themeBought && (
+					<View
+						style={{
+							...styles.coinProduct,
+							borderColor:
+								colorTheme[colorThemeIndex].source["color-primary-500"],
+						}}
+					>
+						<LottieView
+							style={{
+								width: Dimensions.get("window").width / 2.8,
+							}}
+							source={require("../../assets/lottie/ShopChest.json")}
+							autoPlay={true}
+							loop={true}
+							speed={0.5}
+						/>
+						<View
+							style={{
+								alignItems: "flex-start",
+								justifyContent: "space-between",
+								height: "100%",
+								width: Dimensions.get("window").width / 3,
+							}}
+						>
+							<Text
+								style={{
+									padding: 5,
+									fontFamily: "yellow-tail",
+									fontSize: 22,
+								}}
+							>
+								Daily Coins
+							</Text>
+							<Button appearance="outline">Claim</Button>
+							{/* <TouchableCmp onPress={() => {console.log('show video')}}>
+								<View
+									style={{
+										flexDirection: "row",
+										borderWidth: 1.5,
+										padding: 8,
+										borderRadius: 50,
+										borderColor:
+											colorTheme[colorThemeIndex].source["color-primary-500"],
+										backgroundColor: "white",
+										marginBottom: 10,
+									}}
+								>
+									<Ionicons name="wallet-outline" color="black" size={16} />
+									<Text style={{ color: "black" }}> {Show Video}</Text>
+								</View>
+							</TouchableCmp> */}
+						</View>
+					</View>
+					{!themeBought ? (
+						
 						<View
 							style={{
 								...styles.coinProduct,
@@ -607,6 +666,60 @@ const StoreScreen = (props) => {
 										<Text style={{ color: "black" }}> {themeProd.price}</Text>
 									</View>
 								</TouchableCmp>
+							</View>
+						</View>
+					) : (
+						<View>
+							<Divider
+						style={{
+							backgroundColor:
+								theme === "dark"
+									? "white"
+									: colorTheme[colorThemeIndex].source["color-primary-500"],
+							height: 1,
+							alignSelf: "stretch",
+							marginBottom: Dimensions.get("window").height / 40,
+						}}
+					/>
+							<View
+								style={{
+									flexDirection: "row",
+									alignItems: "center",
+									justifyContent: "space-between",
+									paddingBottom: 30,
+									paddingTop: 5,
+									width: "100%",
+								}}
+							>
+								<View
+									style={{
+										flexDirection: "row",
+										alignItems: "center",
+									}}
+								>
+									<Ionicons
+										name={theme === 'dark' ? "cloudy-night-outline" : 'partly-sunny-outline'}
+										color={theme === "dark" ? "white" : "black"}
+										size={20}
+									/>
+									<Text
+										style={{
+											fontSize: 22,
+											fontFamily: "roboto-bold",
+										}}
+									>
+										{" "}
+										Dark Theme
+									</Text>
+								</View>
+								<View>
+								<Toggle
+									checked={theme === "dark"}
+									onChange={onToggleTheme}
+									style={{}}
+									disabled={!themeBought}
+								></Toggle>
+								</View>
 							</View>
 						</View>
 					)}

@@ -11,6 +11,7 @@ import {
 	Platform,
 	SafeAreaView,
 	Dimensions,
+	ScrollView,
 } from "react-native";
 import {
 	Card,
@@ -104,31 +105,30 @@ const ManagerScreen = (props) => {
 					// accessoryLeft={renderBackAction}
 					// accessoryRight={renderRightActions}
 				/>
-				<Layout level={"2"} style={styles.screen}>
-					<TouchableCmp
-						style={{ ...colorsModule, ...styles.module }}
-						onPress={onClickSubjects}
-					>
-						<View
-							style={
-								Platform.OS === "android"
-									? { flexDirection: "row", ...colorsModule, ...styles.module }
-									: { flexDirection: "row" }
-							}
+				<ScrollView
+					contentContainerStyle={{}}
+					showsVerticalScrollIndicator={false}
+				>
+					<Layout level={"2"} style={styles.screen}>
+						<TouchableCmp
+							style={{ ...colorsModule, ...styles.module }}
+							onPress={onClickSubjects}
 						>
 							<View
-								style={{
-									...styles.leftColumn,
-									borderColor:
-										theme === "dark"
-											? "white"
-											: colorTheme[colorThemeIndex].source["color-primary-500"],
-								}}
+								style={
+									Platform.OS === "android"
+										? {
+												flexDirection: "row",
+												...colorsModule,
+												...styles.module,
+										  }
+										: { flexDirection: "row" }
+								}
 							>
-								<Text
+								<View
 									style={{
-										...styles.title,
-										color:
+										...styles.leftColumn,
+										borderColor:
 											theme === "dark"
 												? "white"
 												: colorTheme[colorThemeIndex].source[
@@ -136,70 +136,217 @@ const ManagerScreen = (props) => {
 												  ],
 									}}
 								>
-									Subjects
-								</Text>
-								<LottieView
-									style={styles.booksAnimation}
-									source={require("../../assets/lottie/bookAnimationRed.json")}
-									autoPlay={true}
-									loop={true}
-									speed={1}
-								/>
-							</View>
-							<View
-								style={{
-									//flexDirection: "row",
-									//flexWrap: "wrap",
-									margin: 1,
-									flex: 1,
-									padding: 14,
-								}}
-							>
-								{subjects.length > 0 ? (
-									// 	<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-									// 	<Text style={{fontFamily: 'yellow-tail', fontSize: 110, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500'], textAlign: 'center', paddingHorizontal: 22}}>{subjects.length}</Text>
-									// </View>
-									subjects.slice(0, 6).map((subject) => {
-										return (
-											<View
-												key={subject.id}
-												style={{
-													padding: 3,
-													margin: 2,
-													//backgroundColor: 'black',
-													borderRadius: 10,
-													alignContent: "center",
-													alignItems: "center",
-													backgroundColor:
-														theme === "dark"
-															? "#224"
-															: colorTheme[colorThemeIndex].source[
-																	"color-primary-200"
-															  ],
-													borderRightWidth: 5,
-													borderLeftWidth: 5,
-													// borderTopWidth:1,
-													// borderBottomWidth: 1,
-													borderColor: subject.color,
-												}}
-											>
-												<Text
+									<Text
+										style={{
+											...styles.title,
+											color:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ],
+										}}
+									>
+										Subjects
+									</Text>
+									<LottieView
+										style={styles.booksAnimation}
+										source={require("../../assets/lottie/bookAnimationRed.json")}
+										autoPlay={true}
+										loop={true}
+										speed={1}
+									/>
+								</View>
+								<View
+									style={{
+										//flexDirection: "row",
+										//flexWrap: "wrap",
+										margin: 1,
+										flex: 1,
+										padding: 14,
+									}}
+								>
+									{subjects.length > 0 ? (
+										// 	<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+										// 	<Text style={{fontFamily: 'yellow-tail', fontSize: 110, color: theme === 'dark' ? 'white' : CustomTheme['color-primary-500'], textAlign: 'center', paddingHorizontal: 22}}>{subjects.length}</Text>
+										// </View>
+										subjects.slice(0, 6).map((subject) => {
+											return (
+												<View
+													key={subject.id}
 													style={{
-														...styles.subjectText,
-														color:
+														padding: 3,
+														margin: 2,
+														//backgroundColor: 'black',
+														borderRadius: 10,
+														alignContent: "center",
+														alignItems: "center",
+														backgroundColor:
 															theme === "dark"
-																? "white"
+																? "#224"
 																: colorTheme[colorThemeIndex].source[
-																		"color-primary-700"
+																		"color-primary-200"
 																  ],
+														borderRightWidth: 5,
+														borderLeftWidth: 5,
+														// borderTopWidth:1,
+														// borderBottomWidth: 1,
+														borderColor: subject.color,
 													}}
 												>
-													{subject.title}
-												</Text>
-											</View>
-										);
-									})
-								) : (
+													<Text
+														style={{
+															...styles.subjectText,
+															color:
+																theme === "dark"
+																	? "white"
+																	: colorTheme[colorThemeIndex].source[
+																			"color-primary-700"
+																	  ],
+														}}
+													>
+														{subject.title}
+													</Text>
+												</View>
+											);
+										})
+									) : (
+										<View
+											style={{
+												flex: 1,
+												alignItems: "center",
+												justifyContent: "center",
+											}}
+										>
+											<Text
+												style={{
+													fontFamily: "yellow-tail",
+													fontSize: 26,
+													color: "white",
+													textAlign: "center",
+													paddingHorizontal: 4,
+												}}
+											>
+												Click to start adding your subjects!
+											</Text>
+										</View>
+									)}
+								</View>
+							</View>
+						</TouchableCmp>
+						<TouchableCmp
+							onPress={() => {
+								props.navigation.navigate("EditStudyFlow");
+							}}
+							style={{
+								...styles.modulePomodoro,
+								...colorsModule,
+							}}
+						>
+							<View style={{}}>
+								<View style={{ alignItems: "center" }}>
+									<Text
+										style={{
+											...styles.title,
+											color:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ],
+										}}
+									>
+										StudyFlow
+									</Text>
+									<Divider
+										style={{
+											alignSelf: "stretch",
+											backgroundColor:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-600"
+													  ],
+											margin: 5,
+											marginBottom: 20,
+										}}
+									/>
+									<View
+										style={{
+											height: 55,
+											alignItems: "center",
+											justifyContent: "space-between",
+										}}
+									>
+										<Ionicons
+											name="glasses-outline"
+											color={
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ]
+											}
+											size={18}
+										>
+											{" "}
+											{studyTimeRepresentation}
+										</Ionicons>
+										<Ionicons
+											name="cafe-outline"
+											size={18}
+											color={
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ]
+											}
+										>
+											{" "}
+											{breakTimeRepresentation}
+										</Ionicons>
+									</View>
+									<LottieView
+										style={styles.settingsAnimation}
+										source={require("../../assets/lottie/handPressing.json")}
+										autoPlay={true}
+										loop={true}
+										speed={1}
+										resizeMode="contain"
+									/>
+								</View>
+							</View>
+						</TouchableCmp>
+						<View style={{ ...styles.modulePomodoro, ...colorsModule }}>
+							<View style={{flex: 1}}>
+								<View style={{ alignItems: "center", justifyContent: 'center', flex: 1 }}>
+									<Text
+										style={{
+											...styles.title,
+											color:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ],
+										}}
+									>
+										Dark Theme
+									</Text>
+									<Divider
+										style={{
+											alignSelf: "stretch",
+											backgroundColor:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-600"
+													  ],
+											margin: 5,
+											marginBottom: 15,
+										}}
+									/>
 									<View
 										style={{
 											flex: 1,
@@ -207,147 +354,81 @@ const ManagerScreen = (props) => {
 											justifyContent: "center",
 										}}
 									>
-										<Text
-											style={{
-												fontFamily: "yellow-tail",
-												fontSize: 26,
-												color: "white",
-												textAlign: "center",
-												paddingHorizontal: 4,
-											}}
-										>
-											Click to start adding your subjects!
-										</Text>
+										<Toggle
+											checked={theme === "dark"}
+											onChange={onToggleTheme}
+											style={styles.checkbox}
+											disabled={!themeBought}
+										></Toggle>
 									</View>
-								)}
+								</View>
 							</View>
 						</View>
-					</TouchableCmp>
-					<TouchableCmp
-						onPress={() => {
-							props.navigation.navigate("EditStudyFlow");
-						}}
-						style={{
-							...styles.modulePomodoro,
-							...colorsModule,
-							
-						}}
-					>
-						<View style={{}}>
-							<View style={{ alignItems: "center" }}>
-								<Text
-									style={{
-										...styles.title,
-										color:
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-500"
-												  ],
-									}}
-								>
-									StudyFlow
-								</Text>
-								<Divider
-									style={{
-										alignSelf: "stretch",
-										backgroundColor:
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-600"
-												  ],
-										margin: 5,
-										marginBottom: 20,
-									}}
-								/>
+						
+						<View
+							style={{
+								...styles.module,
+								borderLeftWidth: 0,
+								borderRightWidth: 5,
+								...colorsModule,
+							}}
+						><TouchableCmp style={{flex: 1}} onPress={() => {props.navigation.navigate('PracticeQuestionsConfig')}}>
+							<View style={{ flexDirection: "row", flex: 1 }}>
 								<View
 									style={{
-										height: 55,
 										alignItems: "center",
-										justifyContent: "space-between",
+										justifyContent: "center",
+										flex: 1,
 									}}
 								>
-									<Ionicons
-										name="glasses-outline"
-										color={
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-500"
-												  ]
-										}
-										size={18}
+									<Text
+										style={{
+											...styles.title,
+											color:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-500"
+													  ],
+										}}
 									>
-										{" "}
-										{studyTimeRepresentation}
-									</Ionicons>
-									<Ionicons
-										name="cafe-outline"
-										size={18}
-										color={
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-500"
-												  ]
-										}
-									>
-										{" "}
-										{breakTimeRepresentation}
-									</Ionicons>
+										Practice Questions
+									</Text>
+									{/* <Divider
+										style={{
+											alignSelf: "stretch",
+											backgroundColor:
+												theme === "dark"
+													? "white"
+													: colorTheme[colorThemeIndex].source[
+															"color-primary-600"
+													  ],
+											margin: 5,
+											marginBottom: 15,
+										}}
+									/> */}
 								</View>
-								<LottieView
-									style={styles.settingsAnimation}
-									source={require("../../assets/lottie/handPressing.json")}
-									autoPlay={true}
-									loop={true}
-									speed={1}
-									resizeMode="contain"
-								/>
-							</View>
-						</View>
-					</TouchableCmp>
-					<View style={{ ...styles.modulePomodoro, ...colorsModule }}>
-						<View style={{}}>
-							<View style={{ alignItems: "center" }}>
-								<Text
+								<View
 									style={{
-										...styles.title,
-										color:
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-500"
-												  ],
+										flex: 1,
+										alignItems: "center",
+										justifyContent: "center",
+										padding: 10,
 									}}
 								>
-									Dark Theme
-								</Text>
-								<Divider
-									style={{
-										alignSelf: "stretch",
-										backgroundColor:
-											theme === "dark"
-												? "white"
-												: colorTheme[colorThemeIndex].source[
-														"color-primary-600"
-												  ],
-										margin: 5,
-										marginBottom: 15,
-									}}
-								/>
-
-								<Toggle
-									checked={theme === "dark"}
-									onChange={onToggleTheme}
-									style={styles.checkbox}
-									disabled={!themeBought}
-								></Toggle>
-							</View>
+									<LottieView
+										source={require("../../assets/lottie/Questions.json")}
+										style={{ width: "80%" }}
+										loop
+										autoPlay
+										speed={0.7}
+									/>
+								</View>
+							</View></TouchableCmp>
 						</View>
-					</View>
-				</Layout>
+					</Layout>
+					
+				</ScrollView>
 			</SafeAreaView>
 		</Layout>
 	);
@@ -396,7 +477,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 5,
 		elevation: 4,
 		padding: 6,
-		
+
 		borderLeftWidth: 3,
 		borderRightWidth: 3,
 		marginBottom: 25,
@@ -424,5 +505,6 @@ const styles = StyleSheet.create({
 	},
 	checkbox: {
 		padding: 10,
+		marginBottom: Dimensions.get('window').height / 40
 	},
 });

@@ -3,8 +3,6 @@ import * as eva from "@eva-design/eva";
 import {
 	ApplicationProvider,
 	IconRegistry,
-	Layout,
-	Text,
 } from "@ui-kitten/components";
 import ReduxThunk from "redux-thunk";
 import { createStore, combineReducers, applyMiddleware } from "redux";
@@ -26,6 +24,7 @@ import eventHistoryReducer from "./store/reducers/eventHistory";
 import currentEventRepeatReducer from "./store/reducers/currentEventRepeat";
 import walletReducer from './store/reducers/wallet'
 import productReducer from './store/reducers/product'
+import questionReducer from './store/reducers/question'
 
 import { colorTheme } from "./data/products";
 
@@ -39,7 +38,8 @@ const rootReducer = combineReducers({
 	eventHistory: eventHistoryReducer,
 	currentEventRepeat: currentEventRepeatReducer,
 	wallet: walletReducer,
-	product: productReducer
+	product: productReducer,
+	question: questionReducer
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

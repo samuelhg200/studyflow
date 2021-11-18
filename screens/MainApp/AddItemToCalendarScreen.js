@@ -6,6 +6,7 @@ import {
 	Keyboard,
 	Alert,
 	TouchableOpacity,
+	TouchableNativeFeedback
 } from "react-native";
 import {
 	Layout,

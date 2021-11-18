@@ -336,7 +336,6 @@ const StartFlowScreen = (props) => {
 									marginTop: -38,
 								}}
 							>
-								
 								{colorThemeIndex === 0 && (
 									<LottieView
 										style={styles.buttonAnimationLottie}
@@ -458,6 +457,7 @@ const StartFlowScreen = (props) => {
 					<View style={styles.listContainer}>
 						<FlatList
 							style={{ width: "90%" }}
+							showsVerticalScrollIndicator={false}
 							data={eventsToday}
 							keyExtractor={(item) => item.id.toString()}
 							renderItem={(itemData) => {
@@ -545,12 +545,13 @@ const StartFlowScreen = (props) => {
 							style={{ marginTop: 30 }}
 							size="giant"
 							onPress={() => {
-								props.navigation.navigate("Timer", {
-									eventId: selectedEventId.toString(),
-								});
+								// props.navigation.navigate("Timer", {
+								// 	eventId: selectedEventId.toString(),
+								// });
+								props.navigation.navigate("ChooseEventType");
 							}}
 						>
-							{"Start Session "} {" >"}
+							{"Create Session"} {" >"}
 						</Button>
 					</View>
 				</Layout>

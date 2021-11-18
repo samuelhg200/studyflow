@@ -10,6 +10,8 @@ import {
 	ActivityIndicator,
 	Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { Card, Layout, Button, Text } from "@ui-kitten/components";
 import moment from "moment";
 import { FloatingAction } from "react-native-floating-action";
@@ -478,37 +480,16 @@ const ScheduleScreen = (props) => {
 		setScrollingEnabled(true);
 	}
 
-	// useEffect(() => {
-	// 	props.navigation.setOptions({
-	// 		headerTitle: moment(monthDisplayed['currentMonth']).format("MMMM YYYY"),
-	// 	});
-	// }, [monthDisplayed, props.navigation]);
 
-	//console.log(monthDisplayed)
-
-	// const onViewableItemsChanged = useCallback(({ viewableItems, changed }) => {
-	// 	//console.log(viewableItems[0])
-	// 	console.log(monthDisplayed)
-	// 	const currentDateAtTop = new Date(Object.keys(viewableItems[0]["item"])[0]);
-	// 	if (
-	// 		currentDateAtTop.getMonth() !== monthDisplayed['currentMonth'].getMonth()
-	// 	) {
-	// 		//.log('not same month')
-	// 		//console.log(currentDateAtTop.getMonth())
-	// 		//console.log(monthDisplayed['currentMonth'].getMonth())
-	// 		monthDisplayed = { 'currentMonth': currentDateAtTop };
-	// 	}
-	// 	//console.log("Visible items are", viewableItems);
-	// 	//console.log("Changed in this iteration", changed);
-	// }, []);
-
-	// if(loading){
-	// 	return <ActivityIndicator
-	// 	animating={true}
-	// 	style={styles.indicator}
-	// 	size="large"
-	// 	/>
-	// }
+	const recordStartTime = async () => {
+		try {
+			const now = new Date();
+			await AsyncStorage.setItem("@start_time", now.toISOString());
+		} catch (err) {
+			// TODO: handle errors from setItem properly
+			console.warn(err);
+		}
+	};
 
 	const EventItem = (itemData) => {
 		//console.log(itemData)
@@ -682,8 +663,9 @@ const ScheduleScreen = (props) => {
 												)}
 											>
 												<View
-													style={{ flexDirection: "row", alignItems: "center" }}
+													style={{ flexDirection: "row", alignItems: 'center', justifyContent: "space-between" }}
 												>
+													<View style={{ flexDirection: "row", alignItems: "center" }}>
 													<Ionicons
 														name={iconName}
 														color={colorTheme[colorThemeIndex].source["color-primary-600"]}
@@ -700,6 +682,27 @@ const ScheduleScreen = (props) => {
 													>
 														{" " + itemData.item.title}
 													</Text>
+													</View>
+													<TouchableCmp
+													onPress={() => {
+														recordStartTime().then(
+															props.navigation.navigate("Timer", {
+																eventId: itemData.item.id.toString(),
+															})
+														);
+														//console.log(itemData.item.id.toISOString())
+													}}
+												>
+													<Ionicons
+														name="play-circle-outline"
+														size={40}
+														color={
+															colorTheme[colorThemeIndex].source[
+																"color-primary-500"
+															]
+														}
+													/>
+												</TouchableCmp>
 												</View>
 											</Card>
 										</TouchableCmp>
